@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — try the WhatsApp demo</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD;
+    --green: #425442;
+    --whatsapp: #128C7E;
+    --whatsapp-dark: #075E54;
+    --whatsapp-bubble: #DCF8C6;
+    --whatsapp-chat-bg: #ECE5DD;
+    --sage: #8A9682;
+    --ink: #1A1A1A;
+    --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  /* Nav (matches the rest of the site) */
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+
+  /* Header */
+  header {
+    padding: 32px 48px 24px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0;
+  }
+  .lede { margin-top: 12px; font-size: 14px; max-width: 64ch; color: rgba(26,26,26,0.85); }
+
+  /* Main split layout: phone on left, explainer on right */
+  main {
+    padding: 36px 48px 80px;
+    display: grid;
+    grid-template-columns: minmax(360px, 480px) 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* Phone — styled to match WhatsApp on Android */
+  .wa-phone {
+    background: #0A0A0A;
+    border-radius: 28px;
+    padding: 14px 12px;
+    width: 100%;
+    box-shadow: 0 22px 60px rgba(26,26,26,0.18);
+    position: sticky; top: 24px;
+  }
+  .wa-status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 14px 8px;
+    color: rgba(255,255,255,0.6);
+    font-size: 10px; letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .wa-status-bar .icons { display: inline-flex; gap: 6px; }
+  .wa-status-bar .icons span {
+    display: inline-block; width: 12px; text-align: center;
+    opacity: 0.7;
+  }
+
+  .wa-header {
+    background: var(--whatsapp-dark);
+    color: #FFFFFF;
+    padding: 12px 14px;
+    border-radius: 8px 8px 0 0;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .wa-header .back { color: rgba(255,255,255,0.7); font-size: 18px; line-height: 1; }
+  .wa-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; letter-spacing: -0.02em;
+    flex-shrink: 0;
+  }
+  .wa-id { flex: 1; min-width: 0; }
+  .wa-id .name {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 14px; font-weight: 600;
+  }
+  .wa-id .name .verified {
+    color: #25D366;
+    font-size: 12px;
+  }
+  .wa-id .status {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+  }
+  .wa-id .status .dot {
+    color: #25D366;
+    animation: lumaPulse 2s ease-out infinite;
+    display: inline-block;
+  }
+  .wa-header .icons {
+    display: inline-flex; gap: 14px; align-items: center;
+    color: rgba(255,255,255,0.85);
+    font-size: 16px;
+  }
+
+  .wa-meta-row {
+    background: rgba(7, 94, 84, 0.85);
+    color: rgba(255,255,255,0.85);
+    padding: 6px 14px;
+    font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+  }
+  .wa-meta-row .num {
+    font-variant-numeric: tabular-nums; font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  /* Chat body — WhatsApp-style with subtle pattern */
+  .wa-body {
+    background: var(--whatsapp-chat-bg);
+    background-image:
+      radial-gradient(circle at 30% 20%, rgba(7,94,84,0.04) 1px, transparent 1px),
+      radial-gradient(circle at 70% 80%, rgba(7,94,84,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    border-radius: 0 0 8px 8px;
+    padding: 14px 12px 14px;
+    min-height: 460px;
+    max-height: 520px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 4px;
+    scroll-behavior: smooth;
+  }
+
+  /* WhatsApp-style messages */
+  .wa-msg {
+    max-width: 86%;
+    padding: 6px 9px 6px 11px;
+    font-size: 13.5px; line-height: 1.4;
+    color: #303030;
+    border-radius: 7px;
+    position: relative;
+    opacity: 0; animation: msgIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    margin-bottom: 2px;
+    word-wrap: break-word;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* User (CHW) — sent message, right side, pale green */
+  .wa-msg.out {
+    background: var(--whatsapp-bubble);
+    align-self: flex-end;
+    border-bottom-right-radius: 1px;
+  }
+  /* luma reply — incoming, left side, white */
+  .wa-msg.in {
+    background: #FFFFFF;
+    align-self: flex-start;
+    border-bottom-left-radius: 1px;
+  }
+  .wa-msg .time {
+    display: inline-block;
+    font-size: 10px;
+    color: rgba(0,0,0,0.45);
+    margin-left: 8px;
+    float: right;
+    margin-top: 4px;
+    margin-right: -3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .wa-msg .check {
+    color: #4FC3F7;
+    font-size: 11px;
+    margin-left: 2px;
+    letter-spacing: -2px;
+  }
+  .wa-msg.system {
+    align-self: center;
+    background: rgba(255, 255, 255, 0.92);
+    color: #555;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    text-align: center;
+    margin: 6px 0;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    max-width: 92%;
+    font-style: italic;
+  }
+  .wa-msg .src-pill {
+    display: block;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-size: 10.5px;
+    color: var(--whatsapp);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .wa-msg .latency-tag {
+    display: block; margin-top: 3px;
+    font-size: 9.5px;
+    color: rgba(0,0,0,0.4);
+    letter-spacing: 0.04em;
+  }
+
+  /* Typing indicator */
+  .wa-typing {
+    align-self: flex-start;
+    background: #FFFFFF;
+    padding: 10px 14px;
+    border-radius: 7px;
+    border-bottom-left-radius: 1px;
+    display: inline-flex;
+    gap: 4px;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+  }
+  .wa-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(0,0,0,0.35);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .wa-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .wa-typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Input bar at bottom — WhatsApp style */
+  .wa-input-row {
+    display: flex; gap: 6px; align-items: center;
+    padding: 8px 6px 6px;
+    background: transparent;
+  }
+  .wa-input-bar {
+    flex: 1;
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .wa-input-bar .emoji { color: rgba(0,0,0,0.45); font-size: 14px; }
+  .wa-input-bar input {
+    flex: 1;
+    background: transparent; border: 0; outline: none;
+    color: #1A1A1A;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .wa-input-bar input::placeholder { color: rgba(0,0,0,0.4); }
+  .wa-input-bar .clip { color: rgba(0,0,0,0.45); font-size: 14px; }
+
+  .wa-send-btn {
+    background: var(--whatsapp); color: #FFFFFF;
+    border: 0; cursor: pointer;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.18s cubic-bezier(0.22,1,0.36,1), background 0.15s ease;
+    flex-shrink: 0;
+  }
+  .wa-send-btn:hover { background: var(--whatsapp-dark); }
+  .wa-send-btn:active { transform: scale(0.92); }
+  .wa-send-btn:disabled { opacity: 0.5; cursor: wait; }
+
+  /* Suggestion chips above the phone */
+  .wa-suggest {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 14px;
+  }
+  .wa-suggest .label {
+    font-size: 9px; letter-spacing: 0.20em; color: rgba(26,26,26,0.5);
+    margin-right: 6px; align-self: center;
+  }
+  .wa-suggest button {
+    font-family: inherit;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(26,26,26,0.20);
+    color: var(--ink);
+    font-size: 11px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+  }
+  .wa-suggest button:hover {
+    background: var(--green); color: var(--paper);
+    border-color: var(--green);
+    transform: translateY(-1px);
+  }
+  .wa-suggest button:active { transform: translateY(0) scale(0.98); }
+
+  /* Side panel — production explainer */
+  .info-panel { padding-top: 4px; }
+  .info-panel h2 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6);
+    margin: 0 0 12px;
+  }
+  .info-panel h3 {
+    font-size: 24px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+    margin: 0 0 14px; max-width: 28ch;
+  }
+  .info-panel p {
+    font-size: 14px; line-height: 1.55; color: rgba(26,26,26,0.85);
+    margin: 0 0 16px; max-width: 56ch;
+  }
+  .info-panel p strong { color: var(--ink); font-weight: 700; }
+  .info-panel a { color: var(--green); }
+
+  .info-rows {
+    margin-top: 28px;
+    border-top: 1px solid rgba(26,26,26,0.18);
+  }
+  .info-row {
+    display: grid; grid-template-columns: 130px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.12);
+  }
+  .info-row .label {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.5);
+    font-weight: 700;
+  }
+  .info-row .body {
+    font-size: 13px; line-height: 1.55; color: rgba(26,26,26,0.85);
+  }
+  .info-row .body strong { color: var(--ink); font-weight: 700; }
+  .info-row .body code {
+    font-family: "Menlo", monospace;
+    font-size: 12px;
+    background: rgba(26,26,26,0.06);
+    padding: 1px 6px;
+    border-radius: 1px;
+  }
+
+  /* What just happened panel — collapsible */
+  .happened {
+    margin-top: 28px;
+    background: rgba(66,84,66,0.04);
+    border-left: 3px solid var(--green);
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+  .happened strong {
+    display: block;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+    font-weight: 800;
+  }
+  .happened ol {
+    margin: 0; padding-left: 18px;
+    line-height: 1.65;
+  }
+  .happened ol li { margin-bottom: 4px; }
+  .happened ol li code {
+    font-family: "Menlo", monospace;
+    font-size: 12px;
+    background: rgba(26,26,26,0.06);
+    padding: 1px 6px;
+    border-radius: 1px;
+  }
+
+  footer {
+    padding: 20px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  footer a { color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/try" class="active">TRY IT</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY →</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · WHATSAPP DEMO</span>
+    <span class="luma-live"><span class="age">synced 0s ago</span></span>
+  </div>
+  <h1>TALK TO LUMA.</h1>
+  <p class="lede">
+    In Lesotho, community health workers text a ministry-licensed WhatsApp
+    number from their phones — voice memo or text, in Sesotho or English. luma
+    grounds every answer in the official protocols and logs the conversation to
+    the dashboards. This page is the same backend, exposed through the browser
+    so you can try it without a phone.
+  </p>
+</header>
+
+<main>
+
+  <div>
+    <!-- Suggestion chips -->
+    <div class="wa-suggest">
+      <span class="label">TRY:</span>
+      <button data-q="My ART patient missed her refill last month — what's the protocol?">ART defaulter</button>
+      <button data-q="Pregnant woman with severe headache and blurred vision — what should I do?">Pre-eclampsia</button>
+      <button data-q="A family member of a TB patient is coughing. What's the next step?">TB contact</button>
+      <button data-q="What dose of bedaquiline for a 45kg patient?">Dose request</button>
+      <button data-q="How do I test someone for HIV in our clinic?">HIV testing</button>
+    </div>
+
+    <!-- WhatsApp-styled phone -->
+    <div class="wa-phone">
+      <div class="wa-status-bar">
+        <span id="clock-time">9:41</span>
+        <span class="icons"><span>📶</span><span>5G</span><span>🔋</span></span>
+      </div>
+      <div class="wa-header">
+        <span class="back">←</span>
+        <div class="wa-avatar">L</div>
+        <div class="wa-id">
+          <div class="name">luma · MoH Lesotho <span class="verified">✓</span></div>
+          <div class="status"><span class="dot">●</span> online · replies in Sesotho, English</div>
+        </div>
+        <div class="icons"><span>📞</span><span>📷</span><span>⋮</span></div>
+      </div>
+      <div class="wa-meta-row">
+        <span>WhatsApp Business · Ministry-licensed</span>
+        <span class="num">+266 5544 7811</span>
+      </div>
+      <div class="wa-body" id="wa-body">
+        <div class="wa-msg system">
+          Today
+        </div>
+        <div class="wa-msg in">
+          Lumela 👋 — I'm luma, the WhatsApp assistant the Lesotho Ministry of Health uses to support CHWs in the field. Send me a question or pick one above.
+          <span class="time">9:41<span class="check">✓✓</span></span>
+        </div>
+      </div>
+      <div class="wa-input-row">
+        <div class="wa-input-bar">
+          <span class="emoji">🙂</span>
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Message"
+            autocomplete="off"
+            maxlength="500"
+          />
+          <span class="clip">📎</span>
+        </div>
+        <button class="wa-send-btn" id="chat-send" aria-label="Send">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side info panel -->
+  <div class="info-panel">
+    <h2>WHAT YOU'RE LOOKING AT</h2>
+    <h3>This is the same backend that powers a real CHW's WhatsApp.</h3>
+    <p>
+      Every message you send hits the same pipeline as a real worker texting from
+      a clinic in Maseru: <strong>safety filter → RAG retrieval over ministry
+      protocols → Claude → post-LLM safety check → ministry log</strong>. The only
+      thing missing is Twilio — you're going through HTTP, they go through WhatsApp
+      Business API.
+    </p>
+    <p>
+      Watch the <a href="/log">Audit Log</a> while you chat — your conversations show
+      up there in real time, tagged as demo entries. Open the
+      <a href="/insights/ministry">Ministry view</a> to see how those interactions
+      aggregate into operational dashboards. Or hit the
+      <a href="/api/docs">API</a> directly if you'd rather skip the browser.
+    </p>
+
+    <div class="info-rows">
+      <div class="info-row">
+        <div class="label">CHANNEL</div>
+        <div class="body">
+          WhatsApp Business API, routed through <strong>Twilio</strong>. In production
+          the number is registered to the partner ministry's account, not luma's.
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">CORPUS</div>
+        <div class="body">
+          11 ministry protocol documents indexed via <strong>OpenAI text-embedding-3-small</strong>,
+          retrieved by cosine similarity. ART, TB, MNCH, PrEP, PMTCT, HIV testing,
+          family planning, immunization, malnutrition, STI screening.
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">MODEL</div>
+        <div class="body">
+          <strong>Claude Sonnet 4.6</strong> with a system prompt that grounds responses
+          in retrieved chunks and refuses dosing / diagnostic / prescription requests
+          regardless of phrasing.
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">VOICE</div>
+        <div class="body">
+          Real CHWs send voice memos in Sesotho. <strong>OpenAI Whisper</strong>
+          transcribes; the rest of the pipeline is identical. (This demo is text-only.)
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">SAFETY</div>
+        <div class="body">
+          Two-layer filter: regex pre-check refuses anything that looks like a dosing
+          or diagnostic request before the LLM is invoked; a post-LLM scrubber catches
+          anything the model may have slipped through.
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">LOGGING</div>
+        <div class="body">
+          Every conversation lands in <code>conversations</code> + <code>case_tags</code>
+          tables. Severity, district, topic, condition extracted by a second
+          Claude call (Haiku) and shown in the <a href="/insights/ministry">Ministry</a>
+          and <a href="/insights/public-health">Public Health</a> views.
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="label">RATE LIMIT</div>
+        <div class="body">
+          Demo capped at <strong>8 messages per minute per IP</strong> so the page
+          stays cheap to run. Real CHWs aren't rate-limited.
+        </div>
+      </div>
+    </div>
+
+    <div class="happened">
+      <strong>What happens between send and reply</strong>
+      <ol>
+        <li><code>POST /api/demo-chat</code> — your message hits Express</li>
+        <li>Pre-LLM safety filter checks for dosing/diagnostic patterns</li>
+        <li>OpenAI embeds your query, cosine-similarity over the corpus</li>
+        <li>Top-3 chunks bundled into Claude's context</li>
+        <li>Claude answers, grounded — or routes to a "general knowledge" fallback if the corpus didn't cover it</li>
+        <li>Post-LLM scrubber catches any unsafe output</li>
+        <li>Response logged with sources, severity tags extracted async</li>
+      </ol>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a href="/api/docs">/API</a> · <a href="/health">/HEALTH</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js"></script>
+<script>
+  // Live clock in the WhatsApp status bar — updates every minute
+  function updateClock() {
+    const d = new Date();
+    const h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, "0");
+    const el = document.getElementById("clock-time");
+    if (el) el.textContent = `${h}:${m}`;
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"]/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+    })[c]);
+  }
+  function nowLabel() {
+    const d = new Date();
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  const body = document.getElementById("wa-body");
+  const chatInput = document.getElementById("chat-input");
+  const chatSend = document.getElementById("chat-send");
+
+  function addUserMsg(text) {
+    const el = document.createElement("div");
+    el.className = "wa-msg out";
+    el.innerHTML = `${escapeHtml(text)}<span class="time">${nowLabel()}<span class="check">✓✓</span></span>`;
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function addBotMsg(text, sources, latencyMs, mode) {
+    const el = document.createElement("div");
+    el.className = "wa-msg in";
+    const lines = text.split("\n").map(escapeHtml).join("<br>");
+    let html = lines;
+    html += `<span class="time">${nowLabel()}</span>`;
+    if (sources && sources.length > 0) {
+      const first = sources[0];
+      html += `<span class="src-pill">📋 ${escapeHtml(first.source)} · ${escapeHtml(first.section)}</span>`;
+    }
+    if (typeof latencyMs === "number") {
+      const tag = mode === "fallback" ? "general knowledge" : (sources && sources.length ? "grounded" : "answered");
+      html += `<span class="latency-tag">${tag} · ${latencyMs} ms</span>`;
+    }
+    el.innerHTML = html;
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function addSystemMsg(text) {
+    const el = document.createElement("div");
+    el.className = "wa-msg system";
+    el.textContent = text;
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  let isPending = false;
+  async function sendChat(message) {
+    if (isPending) return;
+    const text = (message || chatInput.value || "").trim();
+    if (!text) return;
+
+    isPending = true;
+    chatSend.disabled = true;
+    chatInput.value = "";
+
+    addUserMsg(text);
+
+    // Typing indicator
+    const typingEl = document.createElement("div");
+    typingEl.className = "wa-typing";
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    body.appendChild(typingEl);
+    body.scrollTop = body.scrollHeight;
+
+    try {
+      const r = await fetch("/api/demo-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      typingEl.remove();
+      if (r.status === 429) {
+        const j = await r.json().catch(() => ({}));
+        addSystemMsg(j.error || "Slow down — too many requests.");
+        return;
+      }
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        addSystemMsg(j.error || `Error ${r.status}`);
+        return;
+      }
+      const data = await r.json();
+      addBotMsg(data.response, data.sources, data.latencyMs, data.mode);
+      if (window.lumaFx) window.lumaFx.markSync();
+    } catch (err) {
+      typingEl.remove();
+      addSystemMsg("Network hiccup — try again.");
+    } finally {
+      isPending = false;
+      chatSend.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  chatSend.addEventListener("click", () => sendChat());
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendChat();
+    }
+  });
+
+  // Suggestion chips
+  document.querySelectorAll(".wa-suggest button").forEach((b) => {
+    b.addEventListener("click", () => {
+      const q = b.dataset.q || b.textContent.trim();
+      sendChat(q);
+    });
+  });
+
+  // Auto-focus input on desktop
+  if (window.matchMedia && window.matchMedia("(hover: hover)").matches) {
+    setTimeout(() => chatInput && chatInput.focus(), 400);
+  }
+</script>
+
+</body>
+</html>

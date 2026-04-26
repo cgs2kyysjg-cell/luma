@@ -131,96 +131,35 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  /* Live chat input — appears at bottom of phone */
-  .phone .input-bar {
-    margin-top: 10px;
-    display: flex; gap: 6px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    padding: 6px;
+  /* CTA button under phone — points to interactive /try page */
+  .try-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-top: 18px;
+    padding: 12px 20px;
+    background: var(--paper);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase;
+    font-weight: 800;
+    border: 1px solid var(--ink);
+    transition:
+      background 0.18s ease, color 0.18s ease,
+      transform 0.22s cubic-bezier(0.22,1,0.36,1),
+      box-shadow 0.22s cubic-bezier(0.22,1,0.36,1);
   }
-  .phone .input-bar input {
-    flex: 1;
-    background: transparent; border: 0; outline: none;
-    color: #F0F0E8; font-size: 13px;
-    padding: 8px 10px;
-    font-family: inherit;
+  .try-cta:hover {
+    background: var(--green);
+    color: var(--paper);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(66,84,66,0.30);
   }
-  .phone .input-bar input::placeholder {
-    color: rgba(255,255,255,0.4);
-  }
-  .phone .input-bar button {
-    background: var(--green); color: #FFFFFF;
-    border: 0; cursor: pointer;
-    width: 38px; height: 36px;
-    border-radius: 8px;
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
-  }
-  .phone .input-bar button:hover { background: #4A8E3F; }
-  .phone .input-bar button:active { transform: scale(0.92); }
-  .phone .input-bar button:disabled {
-    opacity: 0.5; cursor: wait;
-    background: rgba(255,255,255,0.1);
-  }
-  .phone .input-bar button .arrow {
-    transform: translateY(-1px);
-  }
-
-  /* Suggestion chips above the input */
-  .phone .suggest-row {
-    display: flex; gap: 4px; flex-wrap: wrap;
-    margin-top: 8px;
-  }
-  .phone .suggest {
-    font-family: inherit;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.10);
-    color: rgba(255,255,255,0.78);
-    font-size: 10.5px;
-    padding: 5px 9px;
-    border-radius: 14px;
-    cursor: pointer;
-    line-height: 1.2;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
-  }
-  .phone .suggest:hover {
-    background: rgba(74,142,63,0.20); color: #FFFFFF;
-    border-color: rgba(74,142,63,0.45);
-  }
-  .phone .suggest:active { transform: scale(0.96); }
-
-  /* Hint when interactive mode hasn't started yet */
-  .phone .interactive-hint {
-    text-align: center;
-    margin-top: 8px;
-    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
-  }
-  .phone .interactive-hint .pulse-pip {
-    display: inline-block; width: 5px; height: 5px;
-    border-radius: 50%; background: #6CC85B;
-    margin-right: 6px; vertical-align: middle;
+  .try-cta:active { transform: translateY(0); }
+  .try-cta-pip {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #6CC85B;
+    box-shadow: 0 0 0 0 rgba(108,200,91,0.5);
     animation: lumaPulse 2s ease-out infinite;
-  }
-
-  /* Source pill on response messages */
-  .msg.out .src-pill {
-    display: inline-flex; align-items: center;
-    margin-top: 8px;
-    font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(108,200,91,0.85);
-    background: rgba(108,200,91,0.10);
-    padding: 3px 8px;
-    border-radius: 1px;
-    font-style: normal;
-  }
-  .msg.out .latency-tag {
-    display: block; margin-top: 6px;
-    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
+    flex-shrink: 0;
   }
 
   /* Sections below */
@@ -787,6 +726,7 @@
   <a href="/insights/ministry">MINISTRY</a>
   <a href="/log">AUDIT LOG</a>
   <a href="/pharma">PHARMA</a>
+  <a href="/try">TRY IT</a>
   <a href="/api/docs" class="right-link">API DOCS</a>
   <a href="/methodology" class="right-link">METHODOLOGY →</a>
 </div>
@@ -824,26 +764,11 @@
         <div class="body" id="demo-body">
           <!-- messages injected by JS -->
         </div>
-        <div class="suggest-row" id="suggest-row">
-          <button class="suggest" data-q="My ART patient missed her refill last month — what's the protocol?">ART defaulter</button>
-          <button class="suggest" data-q="Pregnant woman with severe headache and blurred vision — what should I do?">Pre-eclampsia signs</button>
-          <button class="suggest" data-q="A family member of a TB patient is coughing. What's the next step?">TB contact</button>
-          <button class="suggest" data-q="What dose of bedaquiline for a 45kg patient?">Dose request (refused)</button>
-        </div>
-        <div class="input-bar">
-          <input
-            type="text"
-            id="chat-input"
-            placeholder="Ask luma a real question…"
-            autocomplete="off"
-            maxlength="500"
-          />
-          <button id="chat-send" aria-label="Send"><span class="arrow">→</span></button>
-        </div>
-        <div class="interactive-hint" id="chat-hint">
-          <span class="pulse-pip"></span>LIVE · TYPE TO TALK TO LUMA
-        </div>
       </div>
+      <a href="/try" class="try-cta">
+        <span class="try-cta-pip"></span>
+        TRY IT YOURSELF · TALK TO LUMA →
+      </a>
     </div>
   </div>
 
@@ -1100,18 +1025,13 @@
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   let sceneIdx = 0;
-  let interactive = false; // flips to true the moment the user types/clicks
-  let loopAlive = true;
 
   async function runScene() {
-    if (interactive) return;
     body.innerHTML = "";
     const scene = SCENES[sceneIdx];
     sceneIdx = (sceneIdx + 1) % SCENES.length;
     for (const step of scene) {
-      if (interactive) return;
       await sleep(step.delay);
-      if (interactive) return;
       if (step.type === "typing") {
         addMsg(step);
         await sleep(1500);
@@ -1120,150 +1040,11 @@
         addMsg(step);
       }
     }
-    if (interactive) return;
     await sleep(4000);
-    if (loopAlive && !interactive) runScene();
+    runScene();
   }
 
   runScene();
-
-  // ----- Live chatbot demo (hits POST /api/demo-chat) -----
-  const chatInput = document.getElementById("chat-input");
-  const chatSend  = document.getElementById("chat-send");
-  const chatHint  = document.getElementById("chat-hint");
-  const suggestRow = document.getElementById("suggest-row");
-
-  function enterInteractive() {
-    if (interactive) return;
-    interactive = true;
-    loopAlive = false;
-    // Clear the looping pre-recorded conversation
-    body.innerHTML = "";
-    if (chatHint) {
-      chatHint.innerHTML = '<span class="pulse-pip"></span>LIVE · CONNECTED TO RAG + CLAUDE';
-    }
-    // Greeter so the body isn't empty on first message
-    addMsg({ type: "system", text: "Real conversation — answers grounded in Lesotho ministry protocols." });
-  }
-
-  function escapeHtmlSafe(s) {
-    return (s || "").toString().replace(/[&<>"]/g, c => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
-    })[c]);
-  }
-
-  function addUserMsg(text) {
-    const el = document.createElement("div");
-    el.className = "msg in"; // user input renders on the left as the worker
-    el.textContent = text;
-    body.appendChild(el);
-    void el.offsetHeight;
-    body.scrollTop = body.scrollHeight;
-  }
-
-  function addBotMsg(text, sources, latencyMs, mode) {
-    const el = document.createElement("div");
-    el.className = "msg out"; // bot reply on the right (luma)
-    // Preserve newlines — Claude responses are formatted prose
-    const lines = text.split("\n").map(escapeHtmlSafe).join("<br>");
-    el.innerHTML = lines;
-
-    if (sources && sources.length > 0) {
-      const pill = document.createElement("span");
-      pill.className = "src-pill";
-      const first = sources[0];
-      pill.textContent = `${first.source} · ${first.section}`;
-      el.appendChild(pill);
-    }
-    if (typeof latencyMs === "number") {
-      const tag = document.createElement("span");
-      tag.className = "latency-tag";
-      const tagText = mode === "fallback" ? "general knowledge" : (sources && sources.length ? "grounded · " : "");
-      tag.textContent = `${tagText}${latencyMs} ms`;
-      el.appendChild(tag);
-    }
-    body.appendChild(el);
-    void el.offsetHeight;
-    body.scrollTop = body.scrollHeight;
-  }
-
-  function addErrorMsg(text) {
-    const el = document.createElement("div");
-    el.className = "msg system";
-    el.textContent = text;
-    body.appendChild(el);
-    body.scrollTop = body.scrollHeight;
-  }
-
-  let isPending = false;
-  async function sendChat(message) {
-    if (isPending) return;
-    const text = (message || chatInput.value || "").trim();
-    if (!text) return;
-
-    enterInteractive();
-    isPending = true;
-    chatSend.disabled = true;
-    chatInput.value = "";
-
-    addUserMsg(text);
-
-    // Typing indicator while waiting
-    const typingEl = document.createElement("div");
-    typingEl.className = "typing";
-    typingEl.innerHTML = '<span></span><span></span><span></span>';
-    body.appendChild(typingEl);
-    body.scrollTop = body.scrollHeight;
-
-    try {
-      const r = await fetch("/api/demo-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
-      });
-      typingEl.remove();
-
-      if (r.status === 429) {
-        const j = await r.json().catch(() => ({}));
-        addErrorMsg(j.error || "Slow down — too many requests.");
-        return;
-      }
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        addErrorMsg(j.error || `Error ${r.status}`);
-        return;
-      }
-      const data = await r.json();
-      addBotMsg(data.response, data.sources, data.latencyMs, data.mode);
-    } catch (err) {
-      typingEl.remove();
-      addErrorMsg("Network hiccup — try again.");
-    } finally {
-      isPending = false;
-      chatSend.disabled = false;
-      chatInput.focus();
-    }
-  }
-
-  if (chatSend) chatSend.addEventListener("click", () => sendChat());
-  if (chatInput) {
-    chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendChat();
-      }
-    });
-    // Don't enterInteractive on every keystroke — only when they actually send.
-  }
-  if (suggestRow) {
-    suggestRow.querySelectorAll(".suggest").forEach((b) => {
-      b.addEventListener("click", () => {
-        const q = b.dataset.q || b.textContent.trim();
-        chatInput.value = q;
-        sendChat(q);
-      });
-    });
-  }
 
   // ----- Tagline word-by-word stagger -----
   function staggerWords(el, baseDelay) {

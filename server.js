@@ -459,6 +459,11 @@ app.get("/pharma", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "pharma.html"));
 });
 
+// /try — interactive demo of the WhatsApp chat experience
+app.get("/try", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "try.html"));
+});
+
 // /api/docs — formal API reference for pharma + public-health consumers
 app.get("/api/docs", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "api-docs.html"));

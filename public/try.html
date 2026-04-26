@@ -42,11 +42,23 @@
   .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
   .nav a.right-link + .right-link { margin-left: 0; }
 
-  /* Header */
+  /* Header — split layout with phone on the right (mirrors PH side-map pattern) */
   header {
-    padding: 32px 48px 24px;
+    padding: 32px 48px 28px;
     border-bottom: 1px solid var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 48px;
+    align-items: start;
   }
+  @media (max-width: 1100px) {
+    header { grid-template-columns: 1fr 400px; gap: 32px; }
+  }
+  @media (max-width: 900px) {
+    header { grid-template-columns: 1fr; gap: 28px; }
+    header .header-side { max-width: 480px; }
+  }
+  .header-content { min-width: 0; }
   .top-bar {
     display: flex; justify-content: space-between;
     font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -57,17 +69,11 @@
     margin: 0;
   }
   .lede { margin-top: 12px; font-size: 14px; max-width: 64ch; color: rgba(26,26,26,0.85); }
+  .header-side { position: relative; }
 
-  /* Main split layout: phone on left, explainer on right */
+  /* Main: explainer takes full width below */
   main {
     padding: 36px 48px 80px;
-    display: grid;
-    grid-template-columns: minmax(360px, 480px) 1fr;
-    gap: 56px;
-    align-items: start;
-  }
-  @media (max-width: 1000px) {
-    main { grid-template-columns: 1fr; }
   }
 
   /* Phone — styled to match WhatsApp on Android */
@@ -422,24 +428,20 @@
 </div>
 
 <header>
-  <div class="top-bar">
-    <span>LUMA · WHATSAPP DEMO</span>
-    <span class="luma-live"><span class="age">synced 0s ago</span></span>
-  </div>
-  <h1>TALK TO LUMA.</h1>
-  <p class="lede">
-    In Lesotho, community health workers text a ministry-licensed WhatsApp
-    number from their phones — voice memo or text, in Sesotho or English. luma
-    grounds every answer in the official protocols and logs the conversation to
-    the dashboards. This page is the same backend, exposed through the browser
-    so you can try it without a phone.
-  </p>
-</header>
-
-<main>
-
-  <div>
-    <!-- Suggestion chips -->
+  <div class="header-content">
+    <div class="top-bar">
+      <span>LUMA · WHATSAPP DEMO</span>
+      <span class="luma-live"><span class="age">synced 0s ago</span></span>
+    </div>
+    <h1>TALK TO LUMA.</h1>
+    <p class="lede">
+      In Lesotho, community health workers text a ministry-licensed WhatsApp
+      number from their phones — voice memo or text, in Sesotho or English. luma
+      grounds every answer in the official protocols and logs the conversation to
+      the dashboards. This page is the same backend, exposed through the browser
+      so you can try it without a phone.
+    </p>
+    <!-- Suggestion chips sit below the lede so the user reads → clicks → watches the chat answer on the right -->
     <div class="wa-suggest">
       <span class="label">TRY:</span>
       <button data-q="My ART patient missed her refill last month — what's the protocol?">ART defaulter</button>
@@ -448,8 +450,10 @@
       <button data-q="What dose of bedaquiline for a 45kg patient?">Dose request</button>
       <button data-q="How do I test someone for HIV in our clinic?">HIV testing</button>
     </div>
+  </div>
 
-    <!-- WhatsApp-styled phone -->
+  <div class="header-side">
+    <!-- WhatsApp-styled phone — top-right, mirroring the public-health map placement -->
     <div class="wa-phone">
       <div class="wa-status-bar">
         <span id="clock-time">9:41</span>
@@ -493,8 +497,11 @@
       </div>
     </div>
   </div>
+</header>
 
-  <!-- Side info panel -->
+<main>
+
+  <!-- Info panel takes full width below, no longer side-panel -->
   <div class="info-panel">
     <h2>WHAT YOU'RE LOOKING AT</h2>
     <h3>This is the same backend that powers a real CHW's WhatsApp.</h3>

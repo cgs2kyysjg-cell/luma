@@ -1,0 +1,23 @@
+node_modules/
+node_modules_broken/
+node_modules_*/
+.env
+.env.local
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/*.json
+.DS_Store
+*.log
+.vscode/
+
+# Local tunnel binary (download per-machine, not portable)
+cloudflared
+
+# macOS Finder duplicates
+*\ 2.json
+*\ 3.json
+*\ 4.json
+*\ 2.toml
+*\ 3.toml
+*\ 4.toml

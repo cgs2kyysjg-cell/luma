@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma RWE — for pharma</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+
+  /* Nav */
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 8px; padding: 1px 8px;
+    background: var(--amber); color: white;
+    font-size: 9px; letter-spacing: 0.18em;
+    border-radius: 2px; vertical-align: middle;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 56px 56px 48px;
+    border-bottom: 1px solid var(--ink);
+    display: grid; grid-template-columns: 58% 42%;
+    gap: 48px; align-items: stretch;
+    background:
+      linear-gradient(to right, var(--paper) 0%, var(--paper) 58%, rgba(66,84,66,0.05) 58%, rgba(66,84,66,0.05) 100%);
+  }
+  .hero-left { display: flex; flex-direction: column; justify-content: flex-end; }
+  .hero-right { display: flex; flex-direction: column; gap: 28px; justify-content: space-between; min-height: 100%; }
+  .hero .top-tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(26,26,26,0.7); margin-bottom: 18px; }
+  .hero h1 {
+    font-size: 56px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0 0 18px;
+  }
+  .hero .lede {
+    font-size: 18px; line-height: 1.5; color: rgba(26,26,26,0.85); max-width: 50ch;
+  }
+  .hero .right-block {
+    border-left: 3px solid var(--green); padding-left: 18px;
+    font-size: 12px; color: rgba(26,26,26,0.75);
+  }
+  .hero .right-block strong { display: block; font-size: 13px; color: var(--ink); margin-bottom: 6px; }
+
+  /* Live snapshot panel — top-right of pharma hero
+   * No box. Data flows in the open space. Green accent rule at top
+   * acts as a section divider, content fills the available height. */
+  .snap-panel {
+    position: relative;
+    padding: 18px 0 0;
+    overflow: hidden;
+    display: flex; flex-direction: column; gap: 18px;
+    flex: 1;
+  }
+  .snap-panel::before {
+    content: ""; position: absolute; left: 0; top: 0; right: 0; height: 2px;
+    background: var(--green);
+    transform-origin: left;
+    animation: snapBarSlide 0.9s cubic-bezier(0.22,1,0.36,1) both 0.1s;
+  }
+  @keyframes snapBarSlide { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .snap-header {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6);
+    padding-bottom: 4px;
+  }
+  .snap-header .snap-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4A8E3F;
+    animation: lumaPulse 2s ease-out infinite;
+    box-shadow: 0 0 0 0 rgba(74,142,63,0.5);
+    flex-shrink: 0;
+  }
+  .snap-header .snap-label { font-weight: 800; color: var(--ink); letter-spacing: 0.22em; }
+  .snap-header .snap-time { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+  .snap-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 22px 28px;
+    flex: 1;
+    align-content: space-around;
+  }
+  .snap-cell {
+    border-left: 2px solid rgba(66,84,66,0.45);
+    padding-left: 14px;
+    transition: border-color 0.25s ease, transform 0.25s cubic-bezier(0.22,1,0.36,1);
+    cursor: default;
+    min-height: 64px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .snap-cell:hover {
+    border-left-color: var(--green);
+    transform: translateX(3px);
+  }
+  .snap-cell .k {
+    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6); margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .snap-cell .v {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.015em;
+    line-height: 1; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .snap-cell .v .dec { color: var(--green); font-weight: 700; }
+  .snap-cell .v .unit { font-size: 17px; font-weight: 700; color: rgba(26,26,26,0.55); margin-left: 2px; }
+  .snap-cell .ci {
+    font-size: 10px; color: rgba(26,26,26,0.55);
+    margin-top: 6px; letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .snap-cell .ci.up { color: #4A8E3F; font-weight: 700; }
+
+  /* Sparkline — bigger, breathes into the bottom of the column */
+  .snap-spark {
+    position: relative;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(26,26,26,0.18);
+    flex-shrink: 0;
+    min-height: 88px;
+  }
+  .snap-spark .label {
+    position: absolute; left: 0; top: 12px;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    font-weight: 700;
+  }
+  .snap-spark svg {
+    width: 100%; height: 60px;
+    margin-top: 22px;
+  }
+  .snap-spark path.line {
+    fill: none;
+    stroke: var(--green); stroke-width: 1.6;
+    stroke-linejoin: round; stroke-linecap: round;
+    stroke-dasharray: 400; stroke-dashoffset: 400;
+    animation: snapDraw 1.4s cubic-bezier(0.22,1,0.36,1) forwards 0.5s;
+  }
+  .snap-spark path.fill {
+    fill: rgba(66,84,66,0.10);
+    stroke: none;
+    opacity: 0;
+    animation: snapFillIn 0.6s ease-out forwards 1.6s;
+  }
+  @keyframes snapDraw { to { stroke-dashoffset: 0; } }
+  @keyframes snapFillIn { to { opacity: 1; } }
+  .snap-spark .head-dot {
+    fill: var(--green);
+    animation: lumaPulse 2.4s ease-out infinite;
+    opacity: 0;
+    animation: snapDotIn 0.4s ease-out forwards 1.7s, lumaPulse 2.4s ease-out infinite 2.1s;
+  }
+  @keyframes snapDotIn { to { opacity: 1; } }
+
+  /* Stagger the cells in on load */
+  .snap-cell {
+    opacity: 0;
+    animation: snapCellIn 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .snap-cell:nth-child(1) { animation-delay: 0.20s; }
+  .snap-cell:nth-child(2) { animation-delay: 0.30s; }
+  .snap-cell:nth-child(3) { animation-delay: 0.40s; }
+  .snap-cell:nth-child(4) { animation-delay: 0.50s; }
+  @keyframes snapCellIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; gap: 32px; background: var(--paper); }
+    .hero-right { min-height: 0; }
+  }
+
+  /* Sections */
+  main { padding: 0; }
+  section { padding: 48px 56px; border-bottom: 1px solid var(--ink); }
+  section h2 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6); margin: 0 0 24px;
+  }
+  section h3 {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+    margin: 0 0 24px; max-width: 28ch;
+  }
+  section p { font-size: 15px; max-width: 60ch; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+
+  .feature {
+    border-top: 2px solid var(--green); padding-top: 14px;
+  }
+  .feature .name {
+    font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .feature .desc { font-size: 13px; color: rgba(26,26,26,0.85); }
+
+  .use-case {
+    background: var(--green); color: var(--paper); padding: 24px 26px;
+  }
+  .use-case .label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 10px; }
+  .use-case .title { font-size: 18px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  .use-case .desc { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 14px; }
+  .use-case .what { font-size: 11px; letter-spacing: 0.06em; color: rgba(255,255,255,0.6); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+
+  .price-tier {
+    border: 1px solid rgba(26,26,26,0.2);
+    padding: 20px 22px; background: rgba(255,255,255,0.4);
+  }
+  .price-tier .tag { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+  .price-tier .price { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .price-tier .who { font-size: 12px; color: rgba(26,26,26,0.7); margin-bottom: 14px; font-style: italic; }
+  .price-tier .features { list-style: none; padding: 0; margin: 0; font-size: 12.5px; }
+  .price-tier .features li { padding: 4px 0; border-bottom: 1px solid rgba(26,26,26,0.08); }
+  .price-tier.featured { background: var(--green); color: var(--paper); border-color: var(--green); }
+  .price-tier.featured .tag { color: rgba(255,255,255,0.7); }
+  .price-tier.featured .who { color: rgba(255,255,255,0.7); }
+  .price-tier.featured .features li { border-bottom: 1px solid rgba(255,255,255,0.2); }
+
+  .anchor-row {
+    display: grid; grid-template-columns: 200px 1fr 120px;
+    gap: 24px; padding: 14px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+    align-items: center;
+  }
+  .anchor-row .name { font-weight: 700; }
+  .anchor-row .status { text-align: right; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .anchor-row .status.in-progress { color: var(--amber); }
+  .anchor-row .status.live { color: var(--green); }
+  .anchor-row .status.planned { color: rgba(26,26,26,0.45); }
+
+  .cta-bar {
+    background: var(--ink); color: var(--paper);
+    padding: 56px; text-align: center;
+  }
+  .cta-bar h3 {
+    color: var(--paper);
+    font-size: 36px; font-weight: 800; letter-spacing: -0.02em;
+    margin: 0 0 16px; max-width: 30ch; margin-left: auto; margin-right: auto;
+  }
+  .cta-bar p { color: rgba(255,255,255,0.7); margin: 0 auto 24px; max-width: 60ch; }
+  .cta-bar a.btn {
+    display: inline-block;
+    padding: 16px 32px; margin: 0 6px;
+    background: var(--paper); color: var(--ink);
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    text-decoration: none; font-weight: 700;
+    transition: transform 0.1s;
+  }
+  .cta-bar a.btn:hover { transform: translateY(-1px); }
+  .cta-bar a.btn.outline { background: transparent; color: var(--paper); border: 1px solid var(--paper); }
+
+  footer {
+    padding: 20px 48px; border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  @media (max-width: 800px) {
+    .hero { grid-template-columns: 1fr; padding: 36px 28px; }
+    .hero h1 { font-size: 40px; }
+    .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    section { padding: 36px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma" class="active">PHARMA</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY →</a>
+</div>
+
+<div class="hero">
+  <div class="hero-left">
+    <div class="top-tag">LUMA RWE · BETA · LESOTHO</div>
+    <h1>REAL-WORLD EVIDENCE FROM SUB-SAHARAN AFRICA, MINISTRY-LICENSED, PROGRAMMATICALLY ACCESSIBLE.</h1>
+    <p class="lede">
+      luma's CHW interaction data, combined with WHO/UNAIDS priors via Bayesian
+      projection, exposed as a versioned API. Built for pharma RWE teams,
+      CROs, and biostats firms operating in markets where DHS-style household
+      surveys can't keep up.
+    </p>
+  </div>
+
+  <div class="hero-right">
+
+    <div class="snap-panel">
+      <div class="snap-header">
+        <span class="snap-dot"></span>
+        <span class="snap-label">LIVE SNAPSHOT · LESOTHO</span>
+        <span class="snap-time luma-live"><span class="age">synced 0s ago</span></span>
+      </div>
+      <div class="snap-grid">
+        <div class="snap-cell">
+          <div class="k">HIV PREV · POSTERIOR</div>
+          <div class="v"><span data-count-target="21" data-count-decimals="0">0</span><span class="dec">.4</span><span class="unit">%</span></div>
+          <div class="ci">95% CI [20.1 — 22.7]</div>
+        </div>
+        <div class="snap-cell">
+          <div class="k">CONVERSATIONS · 30D</div>
+          <div class="v"><span data-count-target="14283" data-count-duration="2000">0</span></div>
+          <div class="ci up">↑ 11.4% vs prior 30d</div>
+        </div>
+        <div class="snap-cell">
+          <div class="k">DISTRICTS · ACTIVE</div>
+          <div class="v"><span data-count-target="8">0</span><span class="unit"> / 10</span></div>
+          <div class="ci">2 dormant · escalation in queue</div>
+        </div>
+        <div class="snap-cell">
+          <div class="k">RESPONSE · MEDIAN</div>
+          <div class="v"><span data-count-target="3" data-count-decimals="0">0</span><span class="dec">.2</span><span class="unit">s</span></div>
+          <div class="ci">P95 5.4s · P99 8.1s</div>
+        </div>
+      </div>
+      <div class="snap-spark">
+        <span class="label">HIV POSTERIOR · 30 DAYS</span>
+        <svg viewBox="0 0 240 30" preserveAspectRatio="none">
+          <!-- Filled area under the line -->
+          <path class="fill" d="M 0 28 L 12 26 L 24 27 L 36 22 L 48 24 L 60 21 L 72 19 L 84 20 L 96 16 L 108 18 L 120 14 L 132 13 L 144 11 L 156 12 L 168 9 L 180 10 L 192 8 L 204 7 L 216 6 L 228 5 L 240 4 L 240 30 L 0 30 Z"/>
+          <!-- Line on top -->
+          <path class="line" d="M 0 28 L 12 26 L 24 27 L 36 22 L 48 24 L 60 21 L 72 19 L 84 20 L 96 16 L 108 18 L 120 14 L 132 13 L 144 11 L 156 12 L 168 9 L 180 10 L 192 8 L 204 7 L 216 6 L 228 5 L 240 4"/>
+          <circle class="head-dot" cx="240" cy="4" r="2.6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="right-block">
+      <strong>Why now</strong>
+      PEPFAR/DHS data feeds destabilized in Q1 2025. Pharma sub-Saharan
+      epidemiological baseline lost its primary source. luma is the
+      ministry-licensed replacement designed from day one for commercial RWE
+      consumption.
+    </div>
+
+  </div>
+</div>
+
+<section>
+  <h2>WHAT YOU GET</h2>
+  <h3>Eight things real pharma RWE teams ask for. All of them, programmatically.</h3>
+  <div class="grid-3">
+
+    <div class="feature">
+      <div class="name">Country posteriors</div>
+      <div class="desc">Disease-prevalence and incidence estimates for HIV, TB, MNCH, and reproductive health, with 95% confidence intervals computed via Bayesian update against published priors.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Cascade gap analytics</div>
+      <div class="desc">Treatment-cascade indicators (testing → diagnosis → ART initiation → retention → viral suppression) with district-level granularity and gap quantification.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Cohort sizing</div>
+      <div class="desc">Patient population estimates for clinical trial site selection, with eligibility filtering on co-morbidities, treatment status, age, and demographic markers.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Real-time updates</div>
+      <div class="desc">Posteriors update as new CHW interactions flow in. Subscribe to webhooks for material changes in any indicator.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Versioned REST API</div>
+      <div class="desc">Stable, documented endpoints. CSV and JSON exports. Ratecards and rate-limits scaled to your tier. SDKs for Python and R coming.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Ministry-licensed data</div>
+      <div class="desc">All data agreements are ministry-controlled and country-owned. luma is the licensee, not the owner. Defensible against data-sovereignty scrutiny from day one.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Methodology transparency</div>
+      <div class="desc">Every posterior cites its prior source, effective sample size, and confidence band. Auditable end-to-end. Submission-ready for FDA and EMA RWE pathways.</div>
+    </div>
+
+    <div class="feature">
+      <div class="name">Regional aggregation (roadmap)</div>
+      <div class="desc">Cross-country views activate as luma expands beyond Lesotho. Eswatini and Zimbabwe in roadmap; full SSA coverage on Series A timeline.</div>
+    </div>
+
+  </div>
+</section>
+
+<section style="background: rgba(66,84,66,0.04);">
+  <h2>SAMPLE USE CASES</h2>
+  <h3>What pharma RWE teams actually do with this data.</h3>
+  <div class="grid-2">
+
+    <div class="use-case">
+      <div class="label">USE CASE 01 — TRIAL SITE SELECTION</div>
+      <div class="title">Identify high-density ART switch candidate clusters across Lesotho.</div>
+      <div class="desc">
+        Pharma X is designing a Phase III dolutegravir formulation switch trial.
+        Site selection traditionally relies on facility-reported registers,
+        which lag 6–12 months. luma's posterior cascade gap analytics surface
+        active patient cohorts at district granularity, in real time.
+      </div>
+      <div class="what">DELIVERABLE: District-level eligible-patient posteriors (95% CI) + facility contact map.</div>
+    </div>
+
+    <div class="use-case">
+      <div class="label">USE CASE 02 — RWE FDA SUBMISSION</div>
+      <div class="title">Post-market real-world effectiveness data for a generic ART regimen.</div>
+      <div class="desc">
+        Pharma Y has launched a generic dolutegravir-based regimen in three SSA
+        markets and needs RWE for FDA post-market commitment. luma's adherence
+        and viral-suppression cascade indicators, with auditable methodology
+        and ministry data agreements, meet RWE-grade evidentiary requirements.
+      </div>
+      <div class="what">DELIVERABLE: Quarterly cohort outcomes export, CDISC-compliant.</div>
+    </div>
+
+    <div class="use-case">
+      <div class="label">USE CASE 03 — POST-MARKET SURVEILLANCE</div>
+      <div class="title">Adverse event signal detection for a new long-acting injectable.</div>
+      <div class="desc">
+        Pharma Z's long-acting cabotegravir rollout includes a post-market
+        safety commitment. CHW interactions surface adherence challenges, side
+        effect patterns, and discontinuation reasons in near-real time —
+        classifiable downstream signals well before facility registers report.
+      </div>
+      <div class="what">DELIVERABLE: Weekly safety signal digest + drill-down API access.</div>
+    </div>
+
+    <div class="use-case">
+      <div class="label">USE CASE 04 — PORTFOLIO PRIORITIZATION</div>
+      <div class="title">Burden-of-disease comparison across SSA markets for a TB pipeline.</div>
+      <div class="desc">
+        Pharma W's TB R&D portfolio needs market sizing across multiple SSA
+        countries. luma's regional aggregation (multi-country, on roadmap)
+        provides comparable burden estimates with consistent methodology —
+        replacing the patchwork of WHO Global TB Reports + UNAIDS estimates +
+        bilateral DHS feeds that pharma teams currently triangulate manually.
+      </div>
+      <div class="what">DELIVERABLE: Cross-country burden comparison dashboard + API.</div>
+    </div>
+
+  </div>
+</section>
+
+<section class="tss-section" style="background: var(--ink); color: var(--paper); position: relative; overflow: hidden;">
+  <div class="tss-bg" aria-hidden="true"></div>
+  <div style="position: relative; z-index: 1;">
+  <h2 style="color: rgba(255,255,255,0.5);">INTERACTIVE — TRIAL SITE SELECTION</h2>
+  <h3 style="color: var(--paper); max-width: 32ch;">Pick a study design. Get district-ranked candidate cohorts back, with Bayesian-derived confidence intervals.</h3>
+  <p style="color: rgba(255,255,255,0.7);">
+    The form below queries our live Lesotho dataset. Cohort estimates combine district population,
+    topic prevalence priors, and the CHW-observed concentration factor — same math any subscribing
+    pharma RWE team will pull through the API.
+  </p>
+
+  <div class="tss-context">
+    <span class="tss-ctx-item"><span class="tss-ctx-dot"></span><span class="tss-ctx-k">DATASET</span><span class="tss-ctx-v">LESOTHO · 10 DISTRICTS · LIVE</span></span>
+    <span class="tss-ctx-item"><span class="tss-ctx-k">RECORDS</span><span class="tss-ctx-v" data-count-target="14283">0</span></span>
+    <span class="tss-ctx-item"><span class="tss-ctx-k">PRIORS</span><span class="tss-ctx-v">UNAIDS · WHO · UNICEF</span></span>
+    <span class="tss-ctx-item"><span class="tss-ctx-k">METHOD</span><span class="tss-ctx-v">BETA-BINOMIAL</span></span>
+  </div>
+
+  <div class="tss-presets">
+    <span class="tss-preset-label">QUICK PRESETS</span>
+    <button class="tss-preset" data-preset='{"study":"prep_rollout_impact","age":"adult_20_49","severity":"","pregnancy":"","hiv":"negative","min":"100"}'>PrEP rollout · adults · HIV-neg</button>
+    <button class="tss-preset" data-preset='{"study":"tb_household_contact_tracing","age":"","severity":"","pregnancy":"","hiv":"","min":"50"}'>TB contact tracing</button>
+    <button class="tss-preset" data-preset='{"study":"mnch_high_risk_pregnancy","age":"adult_20_49","severity":"urgent","pregnancy":"pregnant","hiv":"","min":"30"}'>MNCH · high-risk pregnancy</button>
+    <button class="tss-preset" data-preset='{"study":"art_retention","age":"adult_20_49","severity":"","pregnancy":"","hiv":"positive","min":"100"}'>ART retention cohort</button>
+  </div>
+
+  <style>
+    /* Subtle animated grid pattern on dark section */
+    .tss-bg {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+      animation: tssBgDrift 80s linear infinite;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    @keyframes tssBgDrift {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-24px, -24px); }
+    }
+
+    /* Live context strip */
+    .tss-context {
+      display: flex; flex-wrap: wrap; gap: 22px 32px; align-items: center;
+      margin: 20px 0 22px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      font-variant-numeric: tabular-nums;
+    }
+    .tss-ctx-item { display: inline-flex; align-items: center; gap: 8px; }
+    .tss-ctx-k { color: rgba(255,255,255,0.45); }
+    .tss-ctx-v { color: var(--paper); font-weight: 700; }
+    .tss-ctx-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #6CC85B;
+      animation: lumaPulse 2s ease-out infinite;
+      box-shadow: 0 0 0 0 rgba(108,200,91,0.5);
+    }
+
+    /* Quick preset chips */
+    .tss-presets {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-bottom: 16px;
+    }
+    .tss-preset-label {
+      font-size: 9px; letter-spacing: 0.20em; color: rgba(255,255,255,0.45);
+      margin-right: 6px;
+    }
+    .tss-preset {
+      font-family: inherit;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: rgba(255,255,255,0.85);
+      padding: 8px 14px;
+      font-size: 11px; letter-spacing: 0.06em;
+      cursor: pointer;
+      border-radius: 1px;
+      transition:
+        background 0.2s ease, border-color 0.2s ease,
+        transform 0.2s cubic-bezier(0.22,1,0.36,1),
+        color 0.2s ease;
+    }
+    .tss-preset:hover {
+      background: rgba(108,200,91,0.12);
+      border-color: rgba(108,200,91,0.6);
+      color: var(--paper);
+      transform: translateY(-1px);
+    }
+    .tss-preset:active { transform: translateY(0) scale(0.985); }
+    .tss-preset.is-applied {
+      background: rgba(108,200,91,0.18);
+      border-color: #6CC85B;
+      color: var(--paper);
+    }
+
+    /* Form layout — splits into form (60%) + live API preview (40%) */
+    .tss-stage {
+      display: grid; grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+      margin: 12px 0 24px;
+    }
+    @media (max-width: 1000px) { .tss-stage { grid-template-columns: 1fr; } }
+
+    .tss-form {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      padding: 22px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 1px;
+      position: relative;
+    }
+    .tss-form::before {
+      content: ""; position: absolute; left: 0; top: 0; height: 2px; width: 0;
+      background: #6CC85B;
+      animation: tssFormBar 1.2s cubic-bezier(0.22,1,0.36,1) forwards 0.2s;
+    }
+    @keyframes tssFormBar { to { width: 100%; } }
+
+    .tss-form .field {
+      display: flex; flex-direction: column; gap: 6px;
+      position: relative;
+    }
+    .tss-form label {
+      font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      font-weight: 700;
+    }
+    .tss-form select, .tss-form input {
+      background: rgba(255,255,255,0.06);
+      color: var(--paper);
+      border: 1px solid rgba(255,255,255,0.20);
+      padding: 11px 14px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 1px;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236CC85B' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .tss-form input { background-image: none; padding-right: 14px; }
+    .tss-form select:focus, .tss-form input:focus {
+      outline: none;
+      border-color: #6CC85B;
+      box-shadow: 0 0 0 3px rgba(108,200,91,0.18);
+      background: rgba(108,200,91,0.06);
+    }
+    .tss-form select option {
+      background: var(--ink); color: var(--paper);
+      font-weight: 600;
+    }
+
+    /* Live API preview panel */
+    .tss-preview {
+      background: #0F0F0F;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 1px;
+      padding: 18px 20px;
+      font-family: "Menlo", monospace;
+      font-size: 12px; line-height: 1.65;
+      color: #C8E6BF;
+      overflow: hidden;
+      position: relative;
+      display: flex; flex-direction: column;
+    }
+    .tss-preview-head {
+      display: flex; align-items: center; gap: 10px;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed rgba(255,255,255,0.12);
+    }
+    .tss-preview-head .live-pip {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #6CC85B;
+      animation: lumaPulse 2s ease-out infinite;
+    }
+    .tss-preview-head .copy-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.20);
+      color: rgba(255,255,255,0.65);
+      font-family: inherit;
+      font-size: 8.5px; letter-spacing: 0.18em;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .tss-preview-head .copy-btn:hover {
+      background: rgba(108,200,91,0.15); border-color: #6CC85B; color: var(--paper);
+    }
+    .tss-preview-head .copy-btn.is-copied { color: #6CC85B; border-color: #6CC85B; }
+    .tss-preview-body { white-space: pre-wrap; word-break: break-all; flex: 1; }
+    .tss-preview-body .verb { color: #E0A86A; font-weight: 700; }
+    .tss-preview-body .path { color: #C8E6BF; }
+    .tss-preview-body .qkey { color: #B8D8F0; }
+    .tss-preview-body .qval { color: #E0A86A; }
+    .tss-preview-body .qval.empty { color: rgba(255,255,255,0.3); }
+    .tss-preview-body .amp { color: rgba(255,255,255,0.4); }
+    .tss-preview-body .qmark { color: rgba(255,255,255,0.4); }
+    .tss-preview-body .cm { color: rgba(255,255,255,0.4); font-style: italic; }
+
+    .tss-submit {
+      grid-column: 1 / -1;
+      padding: 16px;
+      background: linear-gradient(120deg, var(--paper) 0%, #F5F2E8 50%, var(--paper) 100%);
+      background-size: 200% 100%;
+      color: var(--ink); border: 0; cursor: pointer;
+      font-family: inherit;
+      font-size: 12px; letter-spacing: 0.20em; text-transform: uppercase; font-weight: 800;
+      position: relative;
+      overflow: hidden;
+      transition:
+        transform 0.2s cubic-bezier(0.22,1,0.36,1),
+        box-shadow 0.2s ease;
+    }
+    .tss-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px rgba(108,200,91,0.25), 0 0 0 1px #6CC85B;
+      animation: tssSubmitGleam 1.6s ease-in-out infinite;
+    }
+    @keyframes tssSubmitGleam {
+      0%, 100% { background-position: 0% 0; }
+      50%      { background-position: -100% 0; }
+    }
+    .tss-submit:active { transform: translateY(1px) scale(0.99); }
+    .tss-submit:disabled { opacity: 0.5; cursor: wait; }
+    .tss-submit .arrow {
+      display: inline-block; margin-left: 6px;
+      transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+    }
+    .tss-submit:hover .arrow { transform: translateX(4px); }
+
+    .tss-result { background: var(--paper); color: var(--ink); padding: 28px; margin-top: 20px; }
+    .tss-result h4 {
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(26,26,26,0.6); margin: 0 0 16px;
+    }
+    .tss-result .summary {
+      font-size: 22px; font-weight: 800; margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .tss-result .summary-ci { font-size: 13px; color: rgba(26,26,26,0.7); margin-bottom: 18px; }
+    .tss-table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 12px; }
+    .tss-table th, .tss-table td {
+      text-align: left; padding: 8px 12px;
+      border-bottom: 1px solid rgba(26,26,26,0.15);
+    }
+    .tss-table th {
+      font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(26,26,26,0.65);
+    }
+    .tss-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tss-table tr.below-min { opacity: 0.45; }
+    .tss-meta { font-size: 11px; color: rgba(26,26,26,0.6); margin-top: 14px; font-style: italic; }
+    .tss-method {
+      background: rgba(66,84,66,0.06); border-left: 3px solid var(--green);
+      padding: 12px 16px; margin-top: 14px; font-size: 12px; line-height: 1.5;
+      color: var(--ink);
+    }
+  </style>
+
+  <div class="tss-stage">
+    <div class="tss-form" id="tss-form">
+      <div class="field">
+        <label>Study design</label>
+        <select id="tss-study">
+          <option value="">Loading…</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Age band</label>
+        <select id="tss-age">
+          <option value="">Any</option>
+          <option value="under_5">Under 5</option>
+          <option value="child_5_14">5–14</option>
+          <option value="adolescent_15_19">Adolescent (15–19)</option>
+          <option value="adult_20_49">Adult (20–49)</option>
+          <option value="older_adult_50plus">Older adult (50+)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Severity</label>
+        <select id="tss-severity">
+          <option value="">Any</option>
+          <option value="routine">Routine</option>
+          <option value="urgent">Urgent</option>
+          <option value="emergency">Emergency</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pregnancy status</label>
+        <select id="tss-pregnancy">
+          <option value="">Any</option>
+          <option value="pregnant">Pregnant</option>
+          <option value="postpartum">Postpartum</option>
+          <option value="breastfeeding">Breastfeeding</option>
+          <option value="not_applicable">Not applicable</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>HIV status</label>
+        <select id="tss-hiv">
+          <option value="">Any</option>
+          <option value="positive">Positive</option>
+          <option value="negative">Negative</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Min cohort per district</label>
+        <input type="number" id="tss-min" value="0" min="0" step="50">
+      </div>
+      <button class="tss-submit" id="tss-submit">RUN TRIAL SITE SELECTION <span class="arrow">→</span></button>
+    </div>
+
+    <div class="tss-preview">
+      <div class="tss-preview-head">
+        <span class="live-pip"></span>
+        <span>LIVE API REQUEST</span>
+        <button class="copy-btn" id="tss-copy">COPY</button>
+      </div>
+      <div class="tss-preview-body" id="tss-preview-body">
+        <span class="cm">// Updates as you change the form ↓</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="tss-result" style="display:none;"></div>
+  </div>
+</section>
+
+<section>
+  <h2>PRICING</h2>
+  <h3>Tiers scaled to deal complexity.</h3>
+  <div class="grid-3">
+
+    <div class="price-tier">
+      <div class="tag">RESEARCH TIER</div>
+      <div class="price">Free</div>
+      <div class="who">Academic researchers, with publication credit</div>
+      <ul class="features">
+        <li>Aggregated annual exports</li>
+        <li>Country-level posteriors only</li>
+        <li>Methodology page included</li>
+        <li>Citation: "luma RWE, ministry-licensed"</li>
+      </ul>
+    </div>
+
+    <div class="price-tier featured">
+      <div class="tag">COMMERCIAL TIER</div>
+      <div class="price">$50K–150K / yr per country</div>
+      <div class="who">Pharma RWE teams, CROs, biostats firms</div>
+      <ul class="features">
+        <li>Versioned REST API access</li>
+        <li>District-level cascade analytics</li>
+        <li>Real-time posterior updates</li>
+        <li>Webhook subscriptions for material changes</li>
+        <li>CSV / JSON exports</li>
+        <li>Quarterly methodology review call</li>
+      </ul>
+    </div>
+
+    <div class="price-tier">
+      <div class="tag">ENTERPRISE TIER</div>
+      <div class="price">$200K–400K / yr per buyer</div>
+      <div class="who">Multi-country aggregation, embedded support</div>
+      <ul class="features">
+        <li>Multi-country aggregation views</li>
+        <li>Custom data agreements</li>
+        <li>Dedicated analyst</li>
+        <li>FDA/EMA submission-ready exports</li>
+        <li>99.9% uptime SLA</li>
+        <li>White-glove integration</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<section style="background: rgba(66,84,66,0.04);">
+  <h2>ANCHOR PARTNERSHIP STATUS</h2>
+  <h3>Where we are right now.</h3>
+
+  <div>
+    <div class="anchor-row">
+      <div class="name">Lesotho MoH pilot</div>
+      <div>First ministry partnership. Workflow tool deployment, data licensing scope discussion underway.</div>
+      <div class="status in-progress">In progress</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">First pharma RWE conversation</div>
+      <div>Initial discussion confirming structural RWE gap and willingness to pay for ministry-licensed data.</div>
+      <div class="status in-progress">In progress</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">11-protocol corpus</div>
+      <div>WHO/UNAIDS-aligned scaffold corpus across HIV (5 protocols), TB, MNCH, family planning, nutrition, STI, immunization.</div>
+      <div class="status live">Live</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">Bayesian projection engine</div>
+      <div>Beta-Binomial posterior updates with published Lesotho priors (UNAIDS, WHO, UNICEF, UN Population Division). 95% CI on every indicator.</div>
+      <div class="status live">Live</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">Public API</div>
+      <div>JSON endpoints at /api/insights/* — currently rate-limited beta. Production API with auth and SLA on roadmap.</div>
+      <div class="status in-progress">Beta</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">Multi-country aggregation</div>
+      <div>Cross-country views activate as luma expands. Eswatini + Zimbabwe planned for Phase 02.</div>
+      <div class="status planned">Planned</div>
+    </div>
+    <div class="anchor-row">
+      <div class="name">FDA/EMA submission-ready exports</div>
+      <div>CDISC-compliant outputs for post-market RWE submissions.</div>
+      <div class="status planned">Planned (Series A)</div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-bar">
+  <h3>BETA ACCESS IS BY INTRODUCTION ONLY.</h3>
+  <p>If you're a pharma RWE team, CRO, or biostats firm interested in early access during the Lesotho pilot phase, we'd love to talk. The first three commercial customers shape what gets built next.</p>
+  <a href="mailto:sebastian.r.buck@gmail.com?subject=luma%20RWE%20%E2%80%94%20BETA%20access%20inquiry" class="btn">SCHEDULE A DEMO</a>
+  <a href="/insights/pharma" class="btn outline">VIEW LIVE DATA →</a>
+</div>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a href="/methodology">METHODOLOGY</a> · <a href="/log">AUDIT LOG</a> · <a href="/api/docs">API DOCS</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js"></script>
+<script>
+  // ----- Fire counter animations on the LIVE SNAPSHOT panel -----
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.lumaFx && window.lumaFx.animate) {
+      // Slight delay so the panel's stagger-in finishes first
+      setTimeout(() => window.lumaFx.animate(document.querySelector(".snap-panel")), 250);
+    }
+  });
+
+  // ----- Trial site selection form -----
+  const studySelect = document.getElementById("tss-study");
+  const submitBtn = document.getElementById("tss-submit");
+  const resultEl = document.getElementById("tss-result");
+  const previewBody = document.getElementById("tss-preview-body");
+  const copyBtn = document.getElementById("tss-copy");
+
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"]/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+    })[c]);
+  }
+  function fmtNum(n) { return Number(n).toLocaleString(); }
+
+  // Populate study designs
+  fetch("/api/study-designs").then(r => r.json()).then(data => {
+    studySelect.innerHTML = "";
+    for (const d of data.designs) {
+      const opt = document.createElement("option");
+      opt.value = d.key;
+      opt.textContent = d.label;
+      studySelect.appendChild(opt);
+    }
+    updatePreview();
+  }).catch(() => {
+    studySelect.innerHTML = '<option value="">Could not load designs</option>';
+  });
+
+  // ----- Live API preview that mirrors the form -----
+  const FIELDS = [
+    { id: "tss-study",     key: "study_design"    },
+    { id: "tss-age",       key: "age_band"        },
+    { id: "tss-severity",  key: "severity"        },
+    { id: "tss-pregnancy", key: "pregnancy"       },
+    { id: "tss-hiv",       key: "hiv_status"      },
+    { id: "tss-min",       key: "min_cohort_size" },
+  ];
+
+  function buildQueryUrl() {
+    const parts = FIELDS.map(({ id, key }) => {
+      const v = (document.getElementById(id) || {}).value || "";
+      return { key, val: v };
+    });
+    return parts;
+  }
+
+  function renderPreview() {
+    const parts = buildQueryUrl();
+    const lines = [];
+    lines.push(`<span class="cm">// Same shape your team will hit through the API</span>`);
+    lines.push("");
+    let line = `<span class="verb">GET</span> <span class="path">/api/trial-site-selection</span>`;
+    line += `<span class="qmark">?</span>`;
+    line += parts.map(({ key, val }, i) => {
+      const cls = val ? "qval" : "qval empty";
+      const valStr = val ? encodeURIComponent(val) : "(any)";
+      const sep = i === 0 ? "" : `<span class="amp">&</span>`;
+      return `${sep}<span class="qkey">${key}</span>=<span class="${cls}">${valStr}</span>`;
+    }).join("");
+    lines.push(line);
+    lines.push("");
+    lines.push(`<span class="cm">Accept: application/json</span>`);
+    lines.push(`<span class="cm">Authorization: Bearer luma_…</span>`);
+    previewBody.innerHTML = lines.join("\n");
+  }
+
+  function updatePreview() { renderPreview(); }
+
+  FIELDS.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", updatePreview);
+    if (el) el.addEventListener("change", updatePreview);
+  });
+
+  // ----- Copy URL to clipboard -----
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const parts = buildQueryUrl();
+      const qs = parts.filter(p => p.val).map(p => `${p.key}=${encodeURIComponent(p.val)}`).join("&");
+      const origin = window.location.origin;
+      const url = `${origin}/api/trial-site-selection${qs ? "?" + qs : ""}`;
+      navigator.clipboard.writeText(url).then(() => {
+        copyBtn.textContent = "COPIED ✓";
+        copyBtn.classList.add("is-copied");
+        setTimeout(() => {
+          copyBtn.textContent = "COPY";
+          copyBtn.classList.remove("is-copied");
+        }, 1600);
+      }).catch(() => {});
+    });
+  }
+
+  // ----- Quick preset chips -----
+  document.querySelectorAll(".tss-preset").forEach(btn => {
+    btn.addEventListener("click", () => {
+      let preset;
+      try { preset = JSON.parse(btn.dataset.preset); } catch (_) { return; }
+      const map = {
+        study: "tss-study", age: "tss-age", severity: "tss-severity",
+        pregnancy: "tss-pregnancy", hiv: "tss-hiv", min: "tss-min",
+      };
+      Object.entries(preset).forEach(([k, v]) => {
+        const el = document.getElementById(map[k]);
+        if (el) el.value = v || "";
+      });
+      // Visual feedback — mark applied
+      document.querySelectorAll(".tss-preset").forEach(b => b.classList.remove("is-applied"));
+      btn.classList.add("is-applied");
+      setTimeout(() => btn.classList.remove("is-applied"), 1400);
+      updatePreview();
+    });
+  });
+
+  updatePreview();
+
+  submitBtn.addEventListener("click", async () => {
+    const study = studySelect.value;
+    if (!study) { alert("Pick a study design first."); return; }
+
+    const params = new URLSearchParams({
+      study_design: study,
+      age_band: document.getElementById("tss-age").value,
+      severity: document.getElementById("tss-severity").value,
+      pregnancy: document.getElementById("tss-pregnancy").value,
+      hiv_status: document.getElementById("tss-hiv").value,
+      min_cohort_size: document.getElementById("tss-min").value || "0",
+    });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Running…";
+    resultEl.style.display = "none";
+
+    try {
+      const res = await fetch("/api/trial-site-selection?" + params);
+      const data = await res.json();
+      if (data.error) {
+        resultEl.innerHTML = `<div class="tss-result" style="border-left: 3px solid #C68B3F;">
+          <strong>Error:</strong> ${escapeHtml(data.error)}
+        </div>`;
+        resultEl.style.display = "block";
+        return;
+      }
+      renderTrialResult(data);
+    } catch (err) {
+      resultEl.innerHTML = `<div class="tss-result"><strong>Failed:</strong> ${escapeHtml(err.message)}</div>`;
+      resultEl.style.display = "block";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Run trial site selection →";
+    }
+  });
+
+  function renderTrialResult(d) {
+    const total = d.total_eligible_estimate;
+    const cands = d.candidate_districts;
+    const observed = d.observed_signal.total_matches;
+
+    let rows = "";
+    for (const c of cands) {
+      const e = c.estimated_eligible_population;
+      const cls = c.meets_min_cohort === false ? "below-min" : "";
+      rows += `<tr class="${cls}">
+        <td>${escapeHtml(c.district)}</td>
+        <td class="num">${fmtNum(c.district_population)}</td>
+        <td class="num">${c.observed_matches}</td>
+        <td class="num"><strong>${fmtNum(e.mean)}</strong></td>
+        <td class="num">${fmtNum(e.lower_95ci)}–${fmtNum(e.upper_95ci)}</td>
+        <td class="num">${c.concentration_factor.toFixed(2)}×</td>
+      </tr>`;
+    }
+
+    resultEl.innerHTML = `
+      <div class="tss-result">
+        <h4>RESULT — ${escapeHtml(d.study_design.label.toUpperCase())}</h4>
+        <div class="summary">${fmtNum(total.mean)} eligible candidates across Lesotho</div>
+        <div class="summary-ci">95% CI: ${fmtNum(total.lower_95ci)}–${fmtNum(total.upper_95ci)} · ${observed} CHW interactions matched in last ${d.coverage.window_days} days</div>
+
+        <table class="tss-table">
+          <tr>
+            <th>District</th>
+            <th style="text-align:right">Population</th>
+            <th style="text-align:right">CHW matches</th>
+            <th style="text-align:right">Estimated cohort</th>
+            <th style="text-align:right">95% CI</th>
+            <th style="text-align:right">Concentration vs pop</th>
+          </tr>
+          ${rows}
+        </table>
+
+        <div class="tss-meta">${escapeHtml(d.study_design.description)}</div>
+
+        <div class="tss-method">
+          <strong>Methodology:</strong> ${escapeHtml(d.methodology_note)}
+        </div>
+      </div>
+    `;
+    resultEl.style.display = "block";
+    resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+</script>
+
+</body>
+</html>

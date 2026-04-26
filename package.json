@@ -1,0 +1,29 @@
+{
+  "name": "luma",
+  "version": "0.1.0",
+  "description": "luma — Ministry-licensed workflow infrastructure for community health, with pharma RWE as the data layer.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "start:prod": "node scripts/seed-demo-data.js && node server.js",
+    "dev": "node --watch server.js",
+    "ingest": "node src/ingest.js",
+    "seed": "node scripts/seed-demo-data.js",
+    "test:claude": "node scripts/test-claude.js",
+    "test:adversarial": "node scripts/test-adversarial.js",
+    "setup": "bash scripts/setup.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "openai": "^4.67.0",
+    "twilio": "^5.3.5"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — audit log</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD;
+    --green: #425442;
+    --sage: #8A9682;
+    --ink: #1A1A1A;
+    --rule: #1A1A1A;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  header {
+    padding: 32px 48px 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: #C68B3F; color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .lede {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--ink);
+    max-width: 70ch;
+  }
+  .summary {
+    display: flex;
+    gap: 32px;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .summary .stat {
+    border-left: 3px solid var(--green);
+    padding-left: 12px;
+  }
+  .summary .stat .num {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .summary .stat .label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  main { padding: 24px 40px 80px; }
+  .convo {
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+    padding: 18px 0;
+    display: grid;
+    grid-template-columns: 130px 1fr 220px;
+    gap: 24px;
+    align-items: start;
+  }
+  .convo .meta {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+  }
+  .convo .meta .ts { display: block; margin-bottom: 6px; font-weight: 700; color: var(--ink); letter-spacing: 0; text-transform: none; }
+  .convo .meta .from { display: block; }
+  .convo .meta .type { display: block; }
+  .convo .body .q {
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .convo .body .a {
+    color: rgba(26,26,26,0.85);
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+  }
+  .convo .body .sources {
+    font-size: 11px;
+    color: rgba(26,26,26,0.6);
+    font-style: italic;
+  }
+  .convo .right {
+    text-align: right;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+  }
+  .pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    margin-bottom: 6px;
+  }
+  .pill.allowed { background: var(--green); color: white; }
+  .pill.refused { background: var(--ink); color: white; }
+  .pill.warning { background: var(--sage); color: var(--ink); }
+  .pill.fallback { background: #C68B3F; color: white; }
+  .empty {
+    padding: 80px 40px;
+    text-align: center;
+    color: rgba(26,26,26,0.5);
+    font-style: italic;
+  }
+  footer {
+    padding: 20px 40px;
+    border-top: 1px solid var(--rule);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+  a { color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log" class="active">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY →</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · SYSTEM AUDIT</span>
+    <span id="now"></span>
+  </div>
+  <h1>SYSTEM AUDIT TRAIL.</h1>
+  <p class="lede">
+    Every interaction the agent has handled — input type, retrieved sources, safety outcome,
+    response latency. Phone numbers are anonymized to last-4-digit identifiers; transcripts
+    are sample/demo content unless stated otherwise. Auditability is a safety requirement,
+    not a feature: any reviewer can see exactly which queries the system grounded, which it
+    refused, and why.
+  </p>
+</header>
+
+<section class="summary" id="summary">
+  <div class="stat"><div class="num" id="s-total">—</div><div class="label">Total interactions</div></div>
+  <div class="stat"><div class="num" id="s-24h">—</div><div class="label">Last 24 hours</div></div>
+  <div class="stat"><div class="num" id="s-fallback">—</div><div class="label">Fallback (general knowledge)</div></div>
+  <div class="stat"><div class="num" id="s-refused">—</div><div class="label">Refused (out of scope or unsafe)</div></div>
+</section>
+
+<main id="log"></main>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a href="/health">/health</a> · <a href="/log.json">/log.json</a></span>
+</footer>
+
+<script>
+  function fmtDate(iso) {
+    const d = new Date(iso + "Z"); // SQLite returns UTC
+    return d.toLocaleString(undefined, {
+      year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit"
+    });
+  }
+
+  function pillClass(outcome) {
+    if (!outcome || outcome === "allowed") return "allowed";
+    if (outcome === "allowed_with_warning") return "warning";
+    if (outcome === "fallback_general_knowledge" || outcome === "fallback_with_warning") return "fallback";
+    return "refused";
+  }
+
+  async function load() {
+    const res = await fetch("/log.json?limit=100");
+    const data = await res.json();
+
+    document.getElementById("s-total").textContent = data.summary.total;
+    document.getElementById("s-24h").textContent = data.summary.last24h;
+    document.getElementById("s-fallback").textContent = data.summary.fallback ?? 0;
+    document.getElementById("s-refused").textContent = data.summary.refused;
+
+    const root = document.getElementById("log");
+    if (!data.conversations || data.conversations.length === 0) {
+      root.innerHTML = '<div class="empty">No conversations yet. Be the first.</div>';
+      return;
+    }
+
+    // Track which IDs were already shown so the slide-in only fires for
+    // brand-new rows on subsequent refreshes (not for every refresh).
+    if (!window._seenLogIds) window._seenLogIds = new Set();
+    const isFirstRender = window._seenLogIds.size === 0;
+
+    root.innerHTML = data.conversations.map(c => {
+      const sources = (c.retrieved_sources || []).map(s =>
+        typeof s === "string" ? s : `${s.source} ${s.section}`
+      ).join("  ·  ");
+      const seen = window._seenLogIds.has(String(c.id));
+      const animFlag = (isFirstRender || !seen) ? "" : " data-row-anim=\"1\"";
+      window._seenLogIds.add(String(c.id));
+
+      return `
+        <div class="convo"${animFlag} data-cid="${c.id}">
+          <div class="meta">
+            <span class="ts">${fmtDate(c.created_at)}</span>
+            <span class="from">${c.from_number || "—"}</span>
+            <span class="type">${(c.input_type || "text").toUpperCase()}</span>
+          </div>
+          <div class="body">
+            <div class="q">${escapeHtml(c.transcribed_text || "(no text)")}</div>
+            <div class="a">${escapeHtml(c.response_text || "")}</div>
+            ${sources ? `<div class="sources">Retrieved: ${escapeHtml(sources)}</div>` : ""}
+          </div>
+          <div class="right">
+            <div class="pill ${pillClass(c.safety_outcome)}">${(c.safety_outcome || "allowed").replace(/_/g, " ")}</div>
+            <div>${c.latency_ms ? c.latency_ms + " ms" : ""}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    if (window.lumaFx) {
+      window.lumaFx.animateRows(root, ".convo");
+      window.lumaFx.markSync();
+    }
+  }
+
+  function escapeHtml(s) {
+    return (s || "").replace(/[&<>"]/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+    })[c]);
+  }
+
+  document.getElementById("now").textContent = new Date().toLocaleString();
+  load();
+  setInterval(load, 30000);
+</script>
+<script src="/assets/luma-fx.js"></script>
+
+</body>
+</html>

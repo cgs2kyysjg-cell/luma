@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — methodology</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  header {
+    padding: 32px 48px 20px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .top-bar { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 18px; }
+  h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0; margin: 0; }
+  .lede { margin-top: 12px; font-size: 14px; max-width: 60ch; }
+  main {
+    padding: 28px 48px 80px; max-width: 800px;
+  }
+  h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin: 36px 0 12px; }
+  h3 { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; margin: 24px 0 10px; color: var(--green); }
+  p { margin: 0 0 14px; }
+  code {
+    background: rgba(26,26,26,0.06);
+    padding: 1px 6px; border-radius: 2px;
+    font-family: "Menlo", monospace; font-size: 12.5px;
+  }
+  pre {
+    background: var(--ink); color: var(--paper);
+    padding: 16px; border-radius: 0; overflow-x: auto;
+    font-family: "Menlo", monospace; font-size: 12.5px;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  .callout {
+    border-left: 3px solid var(--green); padding: 12px 16px; margin: 16px 0;
+    background: rgba(66,84,66,0.06);
+  }
+  table {
+    border-collapse: collapse; width: 100%; margin: 12px 0;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(26,26,26,0.15);
+    vertical-align: top;
+  }
+  th { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  footer { padding: 20px 48px; border-top: 1px solid var(--ink); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  a { color: var(--green); }
+</style>
+</head>
+<body>
+
+<style>
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: #C68B3F; color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+</style>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link active">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · METHODOLOGY</span>
+    <span></span>
+  </div>
+  <h1>HOW THE PROJECTIONS WORK.</h1>
+  <p class="lede">
+    luma's customer-facing dashboards report district- and country-level health
+    burden estimates. This page documents the math, the priors, and the honest
+    limits of what the current build can claim.
+  </p>
+</header>
+
+<main>
+
+<h2>What we do</h2>
+
+<p>
+luma's CHW interactions generate <strong>primary data</strong>: real questions, real
+referrals, real protocol matches. That data is sparse on its own. To produce
+useful district- and country-level estimates, we combine it with
+<strong>published priors</strong> — UNAIDS/WHO/PEPFAR estimates for Lesotho —
+using a Bayesian update.
+</p>
+
+<p>
+The result is a posterior estimate that:
+</p>
+
+<ul>
+<li>Uses the prior when primary data is scarce</li>
+<li>Updates toward the observed signal as primary data accumulates</li>
+<li>Reports a 95% confidence interval that reflects the actual sample size</li>
+</ul>
+
+<div class="callout">
+<strong>Honest caveat.</strong> At current scale — early Lesotho deployment, a
+modest number of weekly CHW interactions — the posteriors are dominated by the
+priors. The customer dashboards display this transparently via the "confidence"
+indicator on every projection card. The framework is real; the indicators
+become operationally tight as the CHW network expands toward national coverage.
+</div>
+
+<h2>The math (Beta-Binomial)</h2>
+
+<p>
+For a proportion (e.g., HIV prevalence among adults), we use a
+<strong>Beta-Binomial</strong> conjugate update. This is the standard
+Bayesian textbook approach.
+</p>
+
+<h3>Prior</h3>
+
+<p>
+The published Lesotho HIV prevalence is 22.8% (UNAIDS 2024). We turn this into
+a <code>Beta(α, β)</code> prior with a chosen "effective sample size" that
+controls how strongly the prior anchors the posterior:
+</p>
+
+<pre><code>α_prior = prior_mean × effective_n
+β_prior = (1 - prior_mean) × effective_n</code></pre>
+
+<p>
+For HIV we use <code>effective_n = 200</code> — a strong prior, since UNAIDS
+estimates are based on census-scale household surveys. We don't want one CHW
+conversation to swing a country-level estimate.
+</p>
+
+<h3>Likelihood</h3>
+
+<p>
+Each CHW interaction gets tagged with a topic (HIV, TB, MNCH, etc.) by an
+LLM-based extractor. We treat the count of HIV-related interactions
+(<code>k</code>) over total interactions (<code>n</code>) as a Binomial
+sample.
+</p>
+
+<h3>Posterior</h3>
+
+<pre><code>α_post = α_prior + k
+β_post = β_prior + (n - k)
+posterior_mean = α_post / (α_post + β_post)
+variance = (α_post × β_post) / ((α_post + β_post)² × (α_post + β_post + 1))
+sd = √variance
+95% CI ≈ posterior_mean ± 1.96 × sd</code></pre>
+
+<p>
+We use a normal approximation to the Beta CI, which is good for moderate
+sample sizes. For very small posteriors we widen the interval intentionally.
+</p>
+
+<h2>For incidence rates (e.g., TB)</h2>
+
+<p>
+Rates per 100,000 don't fit cleanly into a Beta-Binomial. We use a simpler
+weighted average:
+</p>
+
+<pre><code>posterior_rate = (1 - λ) × prior_rate + λ × observed_rate
+λ = function of sample size (small n → λ near 0)</code></pre>
+
+<p>
+Currently we fix <code>λ = 0.3</code>. This becomes sample-size-adaptive
+as primary data accumulates from active districts.
+</p>
+
+<h2>Priors used</h2>
+
+<p>Source years documented in <code>src/projections.js</code>. Replace with current values as new data is published.</p>
+
+<table>
+<tr><th>Topic</th><th>Prior</th><th>Source</th></tr>
+<tr><td>HIV adult prevalence</td><td>22.8%</td><td>UNAIDS 2024</td></tr>
+<tr><td>TB incidence</td><td>650 / 100k / yr</td><td>WHO Global TB Report 2024</td></tr>
+<tr><td>Maternal mortality</td><td>540 / 100k live births</td><td>WHO GHO 2024</td></tr>
+<tr><td>Under-5 mortality</td><td>91 / 1000</td><td>WHO GHO 2024</td></tr>
+<tr><td>Stunting (under-5)</td><td>32%</td><td>UNICEF JME 2024</td></tr>
+<tr><td>Wasting (under-5)</td><td>2.7%</td><td>UNICEF JME 2024</td></tr>
+<tr><td>Modern contraceptive use</td><td>62%</td><td>UN Population Division 2024</td></tr>
+</table>
+
+<h2>What the current build CAN and CANNOT support</h2>
+
+<h3>Can</h3>
+<ul>
+<li>Show the framework end-to-end: ingestion → tagging → aggregation → projection → customer view</li>
+<li>Produce posteriors that update in real time as new CHW interactions arrive</li>
+<li>Distinguish prior-dominated estimates from data-dominated ones via the confidence indicator</li>
+<li>Provide an API endpoint pharma RWE / WHO can consume programmatically</li>
+</ul>
+
+<h3>Cannot (yet)</h3>
+<ul>
+<li>Produce statistically meaningful district-level estimates from a few conversations</li>
+<li>Detect outbreak clusters — needs historical baseline data luma doesn't have yet</li>
+<li>Replace household survey methodology — DHS-style data remains complementary, not redundant</li>
+<li>Produce demographic stratification beyond what the extractor tags</li>
+</ul>
+
+<h2>Where this goes (production scale)</h2>
+
+<p>
+Once luma reaches full operational scale (national CHW coverage across
+multiple districts), the same framework produces:
+</p>
+
+<ul>
+<li>District-level prevalence posteriors for HIV/TB/SAM with meaningful CIs</li>
+<li>Real-time incidence trend lines for outbreak detection</li>
+<li>Treatment cascade indicators (initiation, retention, viral suppression) for pharma RWE</li>
+<li>Patient population sizing for clinical trial site selection — luma's commercial wedge</li>
+</ul>
+
+<p>
+None of those rely on the current build's small dataset. They rely on
+the <em>framework</em> being correct.
+</p>
+
+</main>
+
+<script src="/assets/luma-fx.js"></script>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a href="/log">AUDIT LOG</a> · <a href="/health">HEALTH</a></span>
+</footer>
+
+</body>
+</html>

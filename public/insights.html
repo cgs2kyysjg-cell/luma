@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — insights</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  header {
+    padding: 32px 48px 20px;
+    border-bottom: 1px solid var(--ink);
+  }
+  header.has-side-map {
+    display: grid; grid-template-columns: 1fr 720px;
+    gap: 40px; align-items: start;
+    padding-bottom: 24px;
+  }
+  @media (max-width: 1300px) {
+    header.has-side-map { grid-template-columns: 1fr 520px; gap: 28px; }
+  }
+  @media (max-width: 1000px) {
+    header.has-side-map { grid-template-columns: 1fr; gap: 18px; }
+    header.has-side-map .header-side { max-width: 720px; }
+  }
+  .header-side { position: relative; }
+  .header-side .ph-mini-map {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+  .header-side .ph-mini-map .map-stage {
+    overflow: visible;
+    background: transparent;
+    border: none;
+    cursor: default;
+  }
+  .header-side .ph-mini-map svg {
+    width: 100%; height: auto;
+    max-height: 480px;
+    display: block;
+  }
+  .header-side .map-district {
+    transition: filter 0.15s ease;
+  }
+  .header-side .map-district-label { font-size: 11px; }
+  .header-side .map-district-count { font-size: 15px; }
+  /* Self-explanatory legend, sits above the map */
+  .ph-map-legend {
+    margin-bottom: 8px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px;
+  }
+  .ph-map-legend .phl-title {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7);
+    font-weight: 700;
+  }
+  .ph-map-legend .phl-scale {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .ph-map-legend .phl-step {
+    display: inline-flex; align-items: center; gap: 7px;
+    letter-spacing: 0.04em;
+  }
+  .ph-map-legend .phl-sw {
+    display: inline-block; width: 16px; height: 12px;
+    border: 1px solid rgba(26,26,26,0.4);
+  }
+  .ph-map-legend .phl-0 .phl-sw { background: rgba(26,26,26,0.05); }
+  .ph-map-legend .phl-1 .phl-sw { background: rgba(66,84,66,0.18); }
+  .ph-map-legend .phl-2 .phl-sw { background: rgba(66,84,66,0.30); }
+  .ph-map-legend .phl-3 .phl-sw { background: rgba(66,84,66,0.45); }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0;
+  }
+  .lede { margin-top: 12px; font-size: 14px; max-width: 70ch; color: rgba(26,26,26,0.85); }
+
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: var(--amber); color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+
+  main { padding: 24px 48px 80px; }
+
+  .section { margin-bottom: 36px; }
+  .section h2 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6);
+    margin: 0 0 16px;
+  }
+  .section .subgroup-h {
+    font-size: 14px; font-weight: 800; letter-spacing: -0.01em;
+    text-transform: uppercase; margin: 24px 0 12px;
+  }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 24px; margin-bottom: 32px;
+  }
+  .stat { border-left: 3px solid var(--green); padding-left: 14px; }
+  .stat .num { font-size: 28px; font-weight: 800; letter-spacing: -0.01em; line-height: 1; }
+  .stat .num.small { font-size: 22px; }
+  .stat .label {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    margin-top: 6px; color: rgba(26,26,26,0.65);
+  }
+  .stat .ci { font-size: 11px; color: rgba(26,26,26,0.55); font-style: italic; margin-top: 4px; }
+
+  /* ==================  Projection cards  ================== */
+  .proj-card {
+    border: 1px solid rgba(26,26,26,0.18);
+    padding: 18px 22px 20px;
+    margin-bottom: 14px;
+    background: rgba(255,255,255,0.5);
+  }
+  .proj-card .label {
+    font-size: 13px; font-weight: 700; margin-bottom: 8px;
+  }
+  .proj-card .source {
+    font-size: 11px; color: rgba(26,26,26,0.6); font-style: italic;
+    margin-bottom: 14px;
+  }
+
+  .bars {
+    display: grid; grid-template-columns: 100px 1fr 110px;
+    gap: 6px 14px; align-items: center;
+    font-size: 12px;
+  }
+  .bars .row-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+  }
+  .bars .bar-track {
+    position: relative; height: 16px; background: rgba(26,26,26,0.08);
+  }
+  .bars .bar-fill {
+    position: absolute; top: 0; bottom: 0; left: 0;
+  }
+  .bars .bar-fill.prior    { background: rgba(138,150,130,0.65); } /* sage */
+  .bars .bar-fill.observed { background: rgba(198,139,63,0.75); }  /* amber */
+  .bars .bar-fill.posterior { background: var(--green); }
+  .bars .bar-ci {
+    position: absolute; top: 4px; bottom: 4px;
+    border-left: 1px solid var(--ink); border-right: 1px solid var(--ink);
+    background: rgba(66,84,66,0.18);
+  }
+  .bars .row-value {
+    font-size: 12px; text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .bars .row-value strong { font-weight: 800; }
+  .proj-meta {
+    display: flex; gap: 24px; margin-top: 14px;
+    font-size: 11px;
+  }
+  .proj-meta .meta-item {
+    border-left: 2px solid rgba(26,26,26,0.2); padding-left: 10px;
+  }
+  .proj-meta .meta-item .k { color: rgba(26,26,26,0.55); text-transform: uppercase; letter-spacing: 0.14em; font-size: 9px; }
+  .proj-meta .meta-item .v { font-weight: 700; }
+  .conf-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 2px;
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  }
+  .conf-pill.no_observed_data,
+  .conf-pill.very_small_sample { background: var(--amber); color: white; }
+  .conf-pill.small_sample      { background: var(--sage); color: var(--ink); }
+  .conf-pill.moderate_sample   { background: var(--green); color: white; }
+  .conf-pill.large_sample      { background: var(--ink); color: var(--paper); }
+
+  /* ==================  Lesotho district map  ================== */
+  .map-wrap {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(26,26,26,0.18);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .map-wrap svg { display: block; max-width: 100%; height: auto; }
+
+  .map-wrap .legend {
+    display: flex; gap: 18px; align-items: center;
+    margin-top: 10px; font-size: 11px;
+    color: rgba(26,26,26,0.65);
+  }
+  .map-wrap .legend .swatch {
+    display: inline-block; width: 16px; height: 12px; vertical-align: middle;
+    margin-right: 6px; border: 1px solid rgba(26,26,26,0.3);
+  }
+  .map-district {
+    cursor: default;
+    transition: filter 0.15s ease, stroke-width 0.15s ease;
+  }
+  .map-district:hover {
+    filter: brightness(1.08);
+    stroke-width: 2;
+  }
+  .map-district-label {
+    font-size: 11px; font-weight: 700; pointer-events: none;
+    fill: #1A1A1A;
+  }
+  .map-district-count {
+    font-size: 16px; font-weight: 800; pointer-events: none;
+    fill: #1A1A1A;
+  }
+  @keyframes mapDrawIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .map-district {
+    transform-box: fill-box; transform-origin: center;
+    animation: mapDrawIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* ==================  Standard tables  ================== */
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td {
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+  }
+  th { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .countbar {
+    display: inline-block; height: 8px; background: var(--green);
+    vertical-align: middle; margin-right: 8px;
+  }
+
+  .confidence-banner {
+    background: rgba(198,139,63,0.15);
+    border-left: 3px solid var(--amber);
+    padding: 12px 16px; margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .confidence-banner strong { color: #8a5e2c; }
+
+  pre {
+    background: var(--ink); color: var(--paper);
+    padding: 14px; font-family: "Menlo", monospace; font-size: 11.5px;
+    overflow-x: auto; margin: 0; max-height: 280px;
+  }
+  details summary { cursor: pointer; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(26,26,26,0.65); margin-bottom: 8px; }
+  details[open] summary { margin-bottom: 12px; }
+
+  footer {
+    padding: 20px 48px; border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  .empty {
+    padding: 40px 0; color: rgba(26,26,26,0.5); font-style: italic; text-align: center;
+  }
+
+  /* ============================================================
+   * MINISTRY VIEW — operational widgets (escalations, dbars,
+   * topic cards, activity feed)
+   * ============================================================ */
+
+  /* Escalation cards */
+  .esc-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 14px;
+  }
+  .esc-card {
+    position: relative;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(26,26,26,0.18);
+    border-left-width: 4px;
+    padding: 14px 16px 14px;
+    opacity: 0;
+    animation: escIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease, opacity 0.3s;
+  }
+  @keyframes escIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .esc-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(26,26,26,0.10); }
+  .esc-card.esc-emergency { border-left-color: #B14A3F; background: rgba(177,74,63,0.05); }
+  .esc-card.esc-urgent    { border-left-color: var(--amber); background: rgba(198,139,63,0.05); }
+  .esc-card.is-acknowledged { opacity: 0.55; transform: scale(0.985); }
+  .esc-card.is-acknowledged::after {
+    content: "✓ ACK";
+    position: absolute; top: 14px; right: 16px;
+    font-size: 9px; letter-spacing: 0.18em; color: #4A8E3F; font-weight: 800;
+  }
+  .esc-top {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .esc-pill {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 1px;
+    font-weight: 800;
+  }
+  .esc-pill.emergency { background: #B14A3F; color: #FFF; }
+  .esc-pill.urgent { background: var(--amber); color: #FFF; }
+  .esc-time { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,26,26,0.55); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .esc-q {
+    font-size: 13.5px; line-height: 1.45; color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 12px;
+    /* Clamp to 3 lines */
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .esc-meta {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+    padding-bottom: 12px; margin-bottom: 12px;
+    border-bottom: 1px solid rgba(26,26,26,0.10);
+  }
+  .esc-meta .esc-tag { font-weight: 700; color: var(--ink); }
+  .esc-meta .esc-sep { color: rgba(26,26,26,0.3); }
+  .esc-meta .esc-from { margin-left: auto; font-weight: 700; color: rgba(26,26,26,0.55); }
+  .esc-actions {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .btn-ghost {
+    font-family: inherit;
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    background: transparent; border: 1px solid rgba(26,26,26,0.25);
+    color: var(--ink);
+    padding: 6px 10px; cursor: pointer;
+    font-weight: 700;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s cubic-bezier(0.22,1,0.36,1);
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn-ghost:active { transform: scale(0.95); }
+
+  /* District horizontal bars */
+  .dbars {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 32px;
+  }
+  @media (max-width: 900px) { .dbars { grid-template-columns: 1fr; } }
+  .dbar {
+    display: grid; grid-template-columns: 130px 1fr 150px;
+    align-items: center; gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.08);
+    cursor: default;
+    transition: background 0.15s ease;
+  }
+  .dbar:hover { background: rgba(66,84,66,0.04); }
+  .dbar.is-dormant { opacity: 0.55; }
+  .dbar.has-emerg .dbar-fill { background: linear-gradient(to right, var(--green) 0%, var(--green) 70%, #B14A3F 100%); }
+  .dbar-name {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .is-dormant .dbar-name { color: rgba(26,26,26,0.5); }
+  .dbar-track {
+    position: relative;
+    height: 12px; background: rgba(26,26,26,0.06);
+    overflow: hidden;
+  }
+  .dbar-fill {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: var(--green);
+    width: 0;
+    animation: dbarFill 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+    animation-delay: var(--delay, 0ms);
+  }
+  @keyframes dbarFill { to { width: var(--w); } }
+  .dbar-emerg {
+    display: inline-flex; align-items: center;
+    background: #B14A3F; color: #FFF;
+    font-size: 9px; padding: 2px 7px; letter-spacing: 0.10em;
+    font-weight: 800; border-radius: 1px;
+    line-height: 1;
+    animation: lumaPulse 2s ease-out infinite;
+    box-shadow: 0 0 0 0 rgba(177,74,63,0.5);
+    flex-shrink: 0;
+  }
+  .dbar-stats {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-variant-numeric: tabular-nums;
+  }
+  .dbar-count { font-weight: 800; font-size: 14px; color: var(--ink); }
+  .dbar-top {
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .dbar-top.dormant { color: var(--amber); font-style: italic; }
+
+  /* Topic cards */
+  .topic-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .topic-card {
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(26,26,26,0.16);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition:
+      transform 0.28s cubic-bezier(0.22,1,0.36,1),
+      box-shadow 0.28s cubic-bezier(0.22,1,0.36,1),
+      border-color 0.18s ease,
+      background 0.18s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(26,26,26,0.10);
+    border-color: rgba(66,84,66,0.5);
+    background: rgba(255,255,255,0.85);
+  }
+  .topic-card.is-active {
+    border-color: var(--green);
+    background: rgba(66,84,66,0.08);
+    box-shadow: 0 8px 20px rgba(66,84,66,0.20);
+  }
+  .topic-card.is-active::before {
+    content: "✓"; position: absolute; top: 8px; right: 10px;
+    color: var(--green); font-weight: 800; font-size: 14px;
+  }
+  .topic-name {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 700; color: rgba(26,26,26,0.65);
+    margin-bottom: 6px;
+  }
+  .topic-count {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .topic-bar {
+    height: 4px; background: rgba(26,26,26,0.06);
+    margin-top: 10px; overflow: hidden;
+  }
+  .topic-fill {
+    height: 100%; background: var(--green);
+    width: 0;
+    animation: dbarFill 0.9s cubic-bezier(0.22,1,0.36,1) forwards 0.2s;
+  }
+  .topic-share {
+    font-size: 8.5px; letter-spacing: 0.16em;
+    color: rgba(26,26,26,0.55); margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .topic-legend {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .leg-pill {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 1px; font-weight: 800;
+    color: #FFF;
+  }
+  .leg-emerg { background: #B14A3F; }
+  .leg-urgent { background: var(--amber); }
+  .leg-routine { background: var(--sage); color: var(--ink); }
+  .topic-hint {
+    margin-left: auto;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(26,26,26,0.45); font-style: italic;
+  }
+
+  /* Activity feed */
+  .feed {
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(26,26,26,0.12);
+  }
+  .feed-row {
+    display: grid;
+    grid-template-columns: 70px 80px 110px 1fr 110px;
+    gap: 14px; align-items: center;
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(26,26,26,0.08);
+    font-size: 12px;
+    opacity: 0;
+    animation: feedRowIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
+    transition: opacity 0.25s ease, background 0.15s ease;
+  }
+  @keyframes feedRowIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .feed-row:last-child { border-bottom: none; }
+  .feed-row.dim { opacity: 0.25; }
+  .feed-row:hover { background: rgba(66,84,66,0.04); }
+  .feed-time { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,26,26,0.55); font-variant-numeric: tabular-nums; }
+  .feed-sev {
+    font-size: 9px; letter-spacing: 0.16em; padding: 2px 7px; font-weight: 800;
+    text-align: center; border-radius: 1px;
+  }
+  .feed-sev.sev-emergency { background: #B14A3F; color: #FFF; }
+  .feed-sev.sev-urgent    { background: var(--amber); color: #FFF; }
+  .feed-sev.sev-routine   { background: rgba(138,150,130,0.4); color: var(--ink); }
+  .feed-place { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); }
+  .feed-q { color: rgba(26,26,26,0.85); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .feed-topic {
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    text-align: right;
+  }
+
+  @media (max-width: 800px) {
+    .feed-row { grid-template-columns: 1fr; gap: 4px; }
+    .feed-q { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health" id="nav-public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry" id="nav-ministry">MINISTRY</a>
+  <a href="/log" id="nav-log">AUDIT LOG</a>
+  <a href="/pharma" id="nav-pharma">PHARMA</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY →</a>
+</div>
+
+<header id="page-header">
+  <div class="header-content">
+    <div class="top-bar">
+      <span id="view-tag">LUMA · INSIGHTS</span>
+      <span class="luma-live"><span class="age">synced 0s ago</span></span>
+    </div>
+    <h1 id="page-title">LOADING…</h1>
+    <p class="lede" id="page-lede"></p>
+  </div>
+  <div class="header-side" id="header-side"></div>
+</header>
+
+<main id="main">
+  <div class="empty">Loading…</div>
+</main>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a id="api-link" href="#">/API</a> · <a href="/health">/HEALTH</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js"></script>
+<script>
+  // Determine view from URL path: /insights/pharma → pharma
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
+  let view = pathParts[1] || "pharma";
+
+  // Backward-compat: "who" is the old name for "public-health"
+  if (view === "who") view = "public-health";
+
+  // Auto-highlight nav for matching view. The PHARMA tab in the simplified
+  // nav links to /pharma (pitch page), not /insights/pharma, so we skip
+  // the active state when the user is on /insights/pharma.
+  if (view !== "pharma") {
+    document.getElementById("nav-" + view)?.classList.add("active");
+  }
+  document.getElementById("api-link").href = "/api/insights/" + view;
+
+  function escapeHtml(s) {
+    return (s || "").toString().replace(/[&<>"]/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+    })[c]);
+  }
+  function fmtPct(p, digits = 2) { return (p * 100).toFixed(digits) + "%"; }
+  function fmtNum(n) {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + "M";
+    if (n >= 1_000) return (n / 1_000).toFixed(1) + "K";
+    return n.toString();
+  }
+  function maxOf(arr, key) { return Math.max(1, ...arr.map(r => r[key])); }
+
+  // ========================  Projection card renderer  ========================
+  // Renders a 3-bar visual: Prior, Observed CHW signal, Posterior + 95% CI whisker.
+  // All bars share a 0–MAX axis where MAX is dynamic (whichever is highest x 1.2).
+  function renderProjectionCard(p) {
+    const priorPct = p.prior.mean * 100;
+    const observedPct = p.observed.share * 100;
+    const postPct = p.posterior.mean * 100;
+    const lowerPct = p.posterior.lower_95ci * 100;
+    const upperPct = p.posterior.upper_95ci * 100;
+
+    // Scale axis so the highest of the three values (or upper CI) fits with headroom
+    const axisMax = Math.max(priorPct, observedPct, upperPct, 1) * 1.25;
+    const w = pct => Math.min(100, (pct / axisMax) * 100) + "%";
+    const left = pct => (pct / axisMax) * 100 + "%";
+    const wid = (a, b) => (((b - a) / axisMax) * 100) + "%";
+
+    const confLabels = {
+      no_observed_data: "no data observed",
+      very_small_sample: "very small sample",
+      small_sample: "small sample",
+      moderate_sample: "moderate sample",
+      large_sample: "large sample",
+    };
+
+    return `
+      <div class="proj-card">
+        <div class="label">${escapeHtml(p.label)}</div>
+        <div class="source">Prior: ${fmtPct(p.prior.mean, 1)} — ${escapeHtml(p.prior.source)}</div>
+        <div class="bars">
+          <div class="row-label">Prior</div>
+          <div class="bar-track"><div class="bar-fill prior" style="width:${w(priorPct)}"></div></div>
+          <div class="row-value">${fmtPct(p.prior.mean, 1)}</div>
+
+          <div class="row-label">Observed</div>
+          <div class="bar-track"><div class="bar-fill observed" style="width:${w(observedPct)}"></div></div>
+          <div class="row-value">${fmtPct(p.observed.share, 1)} <span style="color:rgba(26,26,26,0.55)">(${p.observed.successes}/${p.observed.trials})</span></div>
+
+          <div class="row-label">Posterior</div>
+          <div class="bar-track">
+            <div class="bar-ci" style="left:${left(lowerPct)}; width:${wid(lowerPct, upperPct)}"></div>
+            <div class="bar-fill posterior" style="width:${w(postPct)}"></div>
+          </div>
+          <div class="row-value"><strong>${fmtPct(p.posterior.mean, 1)}</strong> [${fmtPct(p.posterior.lower_95ci, 1)}–${fmtPct(p.posterior.upper_95ci, 1)}]</div>
+        </div>
+        <div class="proj-meta">
+          <div class="meta-item">
+            <div class="k">Data weight</div>
+            <div class="v">${p.data_weight_pct.toFixed(1)}%</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Eff. sample size</div>
+            <div class="v">${p.posterior.effective_sample_size}</div>
+          </div>
+          <div class="meta-item">
+            <div class="k">Confidence</div>
+            <div class="v"><span class="conf-pill ${p.confidence}">${escapeHtml(confLabels[p.confidence] || p.confidence)}</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ========================  Lesotho district map  ========================
+  // Real geographic district boundaries from geoBoundaries (LSO ADM1, 2017),
+  // simplified via Ramer-Douglas-Peucker. 10 districts. Loaded once from
+  // /assets/lesotho-districts.json and rendered with live activity heat.
+  let _districtPaths = null;
+  let _districtPathsLoading = null;
+
+  async function loadDistrictPaths() {
+    if (_districtPaths) return _districtPaths;
+    if (_districtPathsLoading) return _districtPathsLoading;
+    _districtPathsLoading = fetch("/assets/lesotho-districts.json")
+      .then((r) => r.json())
+      .then((d) => { _districtPaths = d; return d; });
+    return _districtPathsLoading;
+  }
+
+  function renderLesothoMap(districtRows, drillDown) {
+    // Placeholder while paths load
+    const placeholderHtml = `
+      <div class="map-wrap" id="map-placeholder">
+        <div style="height: 360px; display: flex; align-items: center; justify-content: center;">
+          <span class="luma-skeleton" style="width: 280px; height: 18px;"></span>
+        </div>
+      </div>`;
+
+    // Load paths async, then upgrade
+    loadDistrictPaths().then((data) => {
+      const target = document.getElementById("map-placeholder");
+      if (target) target.outerHTML = renderLesothoMapSync(districtRows, drillDown, data);
+      // Reattach tooltips to the new SVG and make it interactive
+      const wrap = document.querySelector(".map-wrap");
+      if (window.lumaFx && wrap) {
+        window.lumaFx.animate(wrap);
+        window.lumaFx.makeMapInteractive(wrap);
+      }
+    }).catch((e) => {
+      console.error("[map] load failed:", e);
+    });
+
+    return placeholderHtml;
+  }
+
+  function renderLesothoMapSync(districtRows, drillDown, geo) {
+    const counts = {};
+    for (const r of districtRows || []) counts[r.district] = r.count;
+
+    // Index drill-down for hover tooltips
+    const drillIdx = {};
+    for (const d of drillDown || []) drillIdx[d.district] = d;
+
+    const maxCount = Math.max(1, ...Object.values(counts));
+
+    let pieces = "";
+    geo.districts.forEach((d, i) => {
+      const count = counts[d.name] || 0;
+      const intensity = count / maxCount;
+      const fillOpacity = 0.15 + intensity * 0.78;
+      const fill = count > 0
+        ? `rgba(66,84,66,${fillOpacity.toFixed(2)})`
+        : "rgba(26,26,26,0.05)";
+      const labelColor = intensity > 0.55 ? "#FFFFFF" : "#1A1A1A";
+
+      const drill = drillIdx[d.name] || {};
+      const sharePct = drill.share_of_network ? (drill.share_of_network * 100).toFixed(1) + "%" : "—";
+      const topSeverity = drill.top_severity ? drill.top_severity.severity.toUpperCase() : "";
+      const topTopic = drill.top_topic ? drill.top_topic.topic : "";
+      const topCondition = drill.top_condition ? drill.top_condition.condition : "";
+      const emergencies = drill.emergency_count || 0;
+
+      // Stagger animation per district
+      const delay = (i * 60) + "ms";
+
+      pieces += `
+        <path class="map-district map-hex"
+          d="${d.path}"
+          fill="${fill}"
+          stroke="#1A1A1A"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+          style="animation-delay: ${delay}"
+          data-district="${escapeHtml(d.name)}"
+          data-count="${count}"
+          data-share="${escapeHtml(sharePct)}"
+          data-top-severity="${escapeHtml(topSeverity)}"
+          data-top-topic="${escapeHtml(topTopic)}"
+          data-top-condition="${escapeHtml(topCondition)}"
+          data-emergencies="${emergencies}"
+        />
+        <text class="map-district-label" x="${d.centroid[0]}" y="${d.centroid[1] - 6}"
+          text-anchor="middle" fill="${labelColor}">
+          ${escapeHtml(d.name.toUpperCase())}
+        </text>
+        <text class="map-district-count" x="${d.centroid[0]}" y="${d.centroid[1] + 14}"
+          text-anchor="middle" fill="${labelColor}">${count}</text>
+      `;
+    });
+
+    const compass = `
+      <g transform="translate(60, 60)">
+        <polygon points="0,-15 6,10 0,5 -6,10" fill="#1A1A1A"/>
+        <text y="26" text-anchor="middle" font-size="11" font-weight="700"
+          letter-spacing="2" fill="#1A1A1A">N</text>
+      </g>
+    `;
+
+    return `
+      <div class="map-wrap">
+        <svg viewBox="${geo.viewBox}" xmlns="http://www.w3.org/2000/svg">
+          ${pieces}
+          ${compass}
+        </svg>
+        <div class="legend">
+          <span><span class="swatch" style="background: rgba(26,26,26,0.05)"></span>0</span>
+          <span><span class="swatch" style="background: rgba(66,84,66,0.30)"></span>low</span>
+          <span><span class="swatch" style="background: rgba(66,84,66,0.55)"></span>moderate</span>
+          <span><span class="swatch" style="background: rgba(66,84,66,0.93)"></span>high</span>
+          <span style="margin-left: auto; font-style: italic;">Hover districts for drill-down · Real boundaries (geoBoundaries ADM1, 2017)</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProjectionGroup(title, cards) {
+    if (!cards || cards.length === 0) return "";
+    return `
+      <div class="subgroup-h">${escapeHtml(title)}</div>
+      ${cards.map(renderProjectionCard).join("")}
+    `;
+  }
+
+  // Build a flat label → projection lookup so the Bayesian slider can
+  // recompute posteriors live. Called from each view renderer.
+  function buildProjLookup(projections) {
+    const map = {};
+    for (const group of Object.values(projections || {})) {
+      if (!Array.isArray(group)) continue;
+      for (const p of group) map[p.label] = p;
+    }
+    return map;
+  }
+  function attachSliders(projections) {
+    if (!window.lumaFx || !window.lumaFx.attachBayesSliders) return;
+    window.lumaFx.attachBayesSliders(document.getElementById("main"), buildProjLookup(projections));
+  }
+
+  function renderCommonHeader(data, view) {
+    const titles = {
+      pharma: {
+        title: "PHARMA RWE — LIVE DATA.",
+        lede: "Disease burden, treatment cascade gaps, and population sizing for pharma RWE consumers. Each indicator combines a published prior with primary CHW data via Beta-Binomial Bayesian update. Posteriors update in real time as new interactions arrive. (See /pharma for the product overview.)",
+      },
+      "public-health": {
+        title: "PUBLIC HEALTH.",
+        lede: "Strategic view for multilateral observers — WHO, Africa CDC, Gates Foundation, bilateral donors. Country-level Bayesian posteriors against published priors, severity distributions, and (when multi-country) regional comparison. Designed to complement, not replace, DHS-style household survey data.",
+      },
+      ministry: {
+        title: "MINISTRY OPERATIONAL VIEW.",
+        lede: "Your CHW network's activity in the last 30 days. Topic distribution, severity flags, district coverage. Operational signals — what's happening, where, and how urgent. (Bayesian projections against priors live in the Public Health tab — those are for strategic observers, not day-to-day operations.)",
+      },
+    };
+    const t = titles[view] || { title: "INSIGHTS.", lede: "" };
+    document.getElementById("page-title").textContent = t.title;
+    document.getElementById("page-lede").textContent = t.lede;
+    document.getElementById("view-tag").textContent = "LUMA · " + view.toUpperCase().replace(/-/g, ' ') + " VIEW";
+    // Reset header layout — only PH gets the side map
+    const header = document.getElementById("page-header");
+    const headerSide = document.getElementById("header-side");
+    if (header && headerSide) {
+      header.classList.remove("has-side-map");
+      headerSide.innerHTML = "";
+    }
+    // Mark a fresh sync so the live indicator resets to 0s
+    if (window.lumaFx) window.lumaFx.markSync();
+  }
+
+  // Render the small Lesotho map alongside the Public Health title
+  function renderPhSideMap(districtRows, drillDown) {
+    const slot = document.getElementById("header-side");
+    const header = document.getElementById("page-header");
+    if (!slot || !header) return;
+    header.classList.add("has-side-map");
+    slot.innerHTML = `
+      <div class="ph-mini-map" id="ph-mini-map">
+        <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+          <span class="luma-skeleton" style="width: 200px; height: 14px;"></span>
+        </div>
+      </div>`;
+
+    loadDistrictPaths().then((geo) => {
+      const wrap = document.getElementById("ph-mini-map");
+      if (!wrap) return;
+      wrap.innerHTML = renderPhSideMapSync(districtRows, drillDown, geo);
+      // Hover tooltips + live pulses, no zoom, no drag, no drill panel.
+      if (window.lumaFx) {
+        window.lumaFx.animate(wrap);
+        window.lumaFx.makeMapInteractive(wrap, {
+          zoom: false, drag: false, drill: false, pulses: true, controls: false, hint: false,
+        });
+      }
+    }).catch((e) => console.error("[ph map]", e));
+  }
+
+  function renderPhSideMapSync(districtRows, drillDown, geo) {
+    const counts = {};
+    for (const r of districtRows || []) counts[r.district] = r.count;
+    const drillIdx = {};
+    for (const x of drillDown || []) drillIdx[x.district] = x;
+    const maxCount = Math.max(1, ...Object.values(counts));
+
+    // Round-up nice bucket cap so the legend reads clean
+    function niceCap(n) {
+      if (n <= 10) return 10;
+      if (n <= 25) return 25;
+      if (n <= 50) return 50;
+      if (n <= 100) return 100;
+      if (n <= 250) return 250;
+      if (n <= 500) return 500;
+      return Math.ceil(n / 100) * 100;
+    }
+    const cap = niceCap(maxCount);
+    // Three buckets above zero — equal width on the cap
+    const b1 = Math.round(cap / 3);
+    const b2 = Math.round((cap * 2) / 3);
+
+    function bucketFor(c) {
+      if (c === 0) return 0;
+      if (c <= b1) return 1;
+      if (c <= b2) return 2;
+      return 3;
+    }
+    const fillByBucket = [
+      "rgba(26,26,26,0.05)",   // 0
+      "rgba(66,84,66,0.18)",   // low
+      "rgba(66,84,66,0.30)",   // moderate
+      "rgba(66,84,66,0.45)",   // high — capped so black text always reads
+    ];
+
+    let pieces = "";
+    geo.districts.forEach((d, i) => {
+      const count = counts[d.name] || 0;
+      const fill = fillByBucket[bucketFor(count)];
+      const drill = drillIdx[d.name] || {};
+      const sharePct = drill.share_of_network ? (drill.share_of_network * 100).toFixed(1) + "%" : "—";
+      const topSeverity = drill.top_severity ? drill.top_severity.severity.toUpperCase() : "";
+      const topTopic = drill.top_topic ? drill.top_topic.topic : "";
+      const topCondition = drill.top_condition ? drill.top_condition.condition : "";
+      const emergencies = drill.emergency_count || 0;
+      const delay = (i * 60) + "ms";
+
+      pieces += `
+        <path class="map-district map-hex"
+          d="${d.path}"
+          fill="${fill}"
+          stroke="#1A1A1A"
+          stroke-width="0.9"
+          stroke-linejoin="round"
+          style="animation-delay: ${delay}"
+          data-district="${escapeHtml(d.name)}"
+          data-count="${count}"
+          data-share="${escapeHtml(sharePct)}"
+          data-top-severity="${escapeHtml(topSeverity)}"
+          data-top-topic="${escapeHtml(topTopic)}"
+          data-top-condition="${escapeHtml(topCondition)}"
+          data-emergencies="${emergencies}"
+        />
+        <text class="map-district-label" x="${d.centroid[0]}" y="${d.centroid[1] - 3}"
+          text-anchor="middle">
+          ${escapeHtml(d.name.toUpperCase())}
+        </text>
+        ${count > 0 ? `<text class="map-district-count" x="${d.centroid[0]}" y="${d.centroid[1] + 13}" text-anchor="middle">${count}</text>` : ""}
+      `;
+    });
+
+    return `
+      <div class="ph-map-legend">
+        <div class="phl-title">CHW Conversations · last 30 days</div>
+        <div class="phl-scale">
+          <span class="phl-step phl-0"><span class="phl-sw"></span>None</span>
+          <span class="phl-step phl-1"><span class="phl-sw"></span>1 – ${b1}</span>
+          <span class="phl-step phl-2"><span class="phl-sw"></span>${b1 + 1} – ${b2}</span>
+          <span class="phl-step phl-3"><span class="phl-sw"></span>${b2 + 1}+</span>
+        </div>
+      </div>
+      <svg viewBox="${geo.viewBox}" xmlns="http://www.w3.org/2000/svg">
+        ${pieces}
+      </svg>
+    `;
+  }
+
+  function confidenceBanner(note) {
+    if (!note) return "";
+    return `<div class="confidence-banner"><strong>Confidence:</strong> ${escapeHtml(note)}</div>`;
+  }
+
+  function statBlock(num, label, ci, small) {
+    return `<div class="stat">
+      <div class="num ${small ? 'small' : ''}">${num}</div>
+      <div class="label">${escapeHtml(label)}</div>
+      ${ci ? `<div class="ci">${escapeHtml(ci)}</div>` : ""}
+    </div>`;
+  }
+
+  function tableRows(rows, valueKey) {
+    if (!rows || rows.length === 0) return '<div class="empty">(no data)</div>';
+    const max = maxOf(rows, valueKey);
+    return `<table>
+      <tr><th>Label</th><th style="text-align:right">Count</th></tr>
+      ${rows.map(r => {
+        const w = (r[valueKey] / max) * 100;
+        const labelKey = r.topic ?? r.condition ?? r.severity ?? r.district ?? r.day ?? "—";
+        return `<tr>
+          <td>${escapeHtml(labelKey)}</td>
+          <td style="text-align:right">
+            <span class="countbar" style="width:${w}px"></span>${r[valueKey]}
+          </td>
+        </tr>`;
+      }).join("")}
+    </table>`;
+  }
+
+  // ========================  View renderers  ========================
+
+  function renderPharma(d) {
+    renderCommonHeader(d, "pharma");
+    const proj = d.burden_projection;
+    const hivPost = proj.by_topic.hiv.projection;
+    let html = "";
+    html += confidenceBanner(d.confidence_note);
+
+    html += `<div class="stats">
+      ${statBlock(fmtNum(d.coverage.population), "Lesotho population")}
+      ${statBlock(d.coverage.observed_cases_window_30d, "CHW interactions (30d)")}
+      ${statBlock(fmtPct(hivPost.posteriorMean), "HIV prevalence (posterior)", `95% CI: ${fmtPct(hivPost.lower)}–${fmtPct(hivPost.upper)}`, true)}
+      ${statBlock(Math.round(proj.by_topic.tb.projection.point_estimate_per_100k), "TB incidence per 100k/yr", "Prior only — needs catchment data", true)}
+    </div>`;
+
+    // Projections — the math, made visible
+    html += `<div class="section">
+      <h2>PROJECTIONS — PRIOR · OBSERVED · POSTERIOR (95% CI)</h2>
+      ${renderProjectionGroup("HIV cascade", d.projections.hiv)}
+      ${renderProjectionGroup("TB cascade", d.projections.tb)}
+      ${renderProjectionGroup("Other (FP / STI / Nutrition / Immunization)", d.projections.other)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>HIV DAILY TREND (30d)</h2>
+      ${tableRows(d.hiv_daily_trend, "count")}
+    </div>`;
+
+    html += `<details class="section"><summary>Raw JSON (for API consumers)</summary>
+      <pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>
+    </details>`;
+
+    document.getElementById("main").innerHTML = html;
+    attachSliders(d.projections);
+  }
+
+  function renderPublicHealth(d) {
+    renderCommonHeader(d, "public-health");
+    const proj = d.burden_projection;
+    let html = "";
+
+    // Render the small map alongside the page title in the header
+    renderPhSideMap(d.by_district, d.district_drill_down);
+
+    html += confidenceBanner(d.confidence_note);
+
+    html += `<div class="stats">
+      ${statBlock(d.coverage.observed_cases_window_30d, "CHW interactions (30d)")}
+      ${statBlock(fmtPct(proj.by_topic.hiv.projection.posteriorMean), "HIV prevalence", `Posterior of ${fmtPct(proj.priors_used.hiv.prevalence_adult_15_49)} prior`, true)}
+      ${statBlock(d.severity_distribution.find(s => s.severity === 'emergency')?.count ?? 0, "Emergency-tagged interactions")}
+      ${statBlock(d.by_district.length, "Districts with activity")}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>PROJECTIONS — PRIOR · OBSERVED · POSTERIOR (95% CI)</h2>
+      ${renderProjectionGroup("HIV cascade", d.projections.hiv)}
+      ${renderProjectionGroup("TB cascade", d.projections.tb)}
+      ${renderProjectionGroup("MNCH cascade", d.projections.mnch)}
+      ${renderProjectionGroup("Other", d.projections.other)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>SEVERITY DISTRIBUTION</h2>
+      ${tableRows(d.severity_distribution, "count")}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>BY DISTRICT (TABLE)</h2>
+      ${tableRows(d.by_district, "count")}
+    </div>`;
+
+    html += `<details class="section"><summary>Raw JSON</summary>
+      <pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>
+    </details>`;
+
+    document.getElementById("main").innerHTML = html;
+    attachSliders(d.projections);
+  }
+
+  function renderMinistry(d) {
+    renderCommonHeader(d, "ministry");
+    let html = "";
+
+    const emergencies = d.severity_distribution.find(s => s.severity === 'emergency')?.count ?? 0;
+    const urgents = d.severity_distribution.find(s => s.severity === 'urgent')?.count ?? 0;
+    const activeDistricts = d.coverage.districts_active ?? d.by_district.length;
+    const totalDistricts = d.coverage.districts_total ?? 10;
+    const dormant = d.coverage.districts_dormant || [];
+
+    html += `<div class="stats">
+      ${statBlock(d.coverage.observed_cases_window_30d, "Interactions · 30d")}
+      ${statBlock(emergencies, "Emergencies flagged", urgents + " urgent · open queue")}
+      ${statBlock(activeDistricts + " / " + totalDistricts, "Districts reporting", dormant.length ? dormant.length + " dormant" : "all reporting")}
+      ${statBlock(d.by_topic.length, "Distinct topics", "Top: " + (d.by_topic[0]?.topic || "—"))}
+    </div>`;
+
+    if (d.illustrative_note) {
+      html += `<div class="confidence-banner" style="background: rgba(66,84,66,0.08); border-left-color: var(--green);">
+        <strong>Illustrative deployment:</strong> ${escapeHtml(d.illustrative_note)}
+      </div>`;
+    }
+
+    html += `<div class="section">
+      <h2>ESCALATIONS — NEEDS FOLLOW-UP</h2>
+      ${renderEscalationCards(d.recent_emergencies, d.recent_urgent)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>DISTRICT ACTIVITY — LAST 30 DAYS</h2>
+      ${renderDistrictBars(d.by_district, d.district_drill_down)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>TOPIC BREAKDOWN</h2>
+      ${renderTopicCards(d.by_topic, d.severity_distribution)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>RECENT ACTIVITY — LAST 7 DAYS</h2>
+      ${renderActivityFeed(d.recent_activity)}
+    </div>`;
+
+    html += `<div class="section">
+      <h2>OPERATIONAL NOTE</h2>
+      <p style="font-size: 13px; color: rgba(26,26,26,0.75); max-width: 60ch;">
+        Bayesian projections against published priors are available in the
+        <a href="/insights/public-health">Public Health</a> tab — those are
+        for strategic observers (WHO, donors, regional partners). This view
+        focuses on what your CHWs are doing right now: where the workload is,
+        where emergencies are flagged, where coverage gaps exist.
+      </p>
+    </div>`;
+
+    html += `<details class="section"><summary>Raw JSON</summary>
+      <pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>
+    </details>`;
+
+    document.getElementById("main").innerHTML = html;
+    if (window.lumaFx) window.lumaFx.animate(document.getElementById("main"));
+    wireMinistryInteractivity();
+  }
+
+  // ========================  Ministry helpers  ========================
+  function fmtRelative(iso) {
+    if (!iso) return "—";
+    const t = new Date(iso.endsWith("Z") ? iso : iso + "Z");
+    const diffSec = Math.max(0, (Date.now() - t.getTime()) / 1000);
+    if (diffSec < 60)    return Math.round(diffSec) + "s ago";
+    if (diffSec < 3600)  return Math.round(diffSec / 60) + "m ago";
+    if (diffSec < 86400) return Math.round(diffSec / 3600) + "h ago";
+    return Math.round(diffSec / 86400) + "d ago";
+  }
+
+  function renderEscalationCards(emergencies, urgents) {
+    const all = [
+      ...(emergencies || []).map(e => ({ ...e, _kind: "emergency" })),
+      ...(urgents || []).slice(0, 4).map(e => ({ ...e, _kind: "urgent" })),
+    ];
+    if (all.length === 0) {
+      return `<div class="empty" style="padding: 32px;">
+        No emergency or urgent flags in the last 30 days. Network is calm.
+      </div>`;
+    }
+    return `<div class="esc-grid">
+      ${all.slice(0, 6).map((e, i) => `
+        <div class="esc-card esc-${e._kind}" style="animation-delay: ${i * 60}ms">
+          <div class="esc-top">
+            <span class="esc-pill ${e._kind}">${e._kind.toUpperCase()}</span>
+            <span class="esc-time">${fmtRelative(e.created_at)}</span>
+          </div>
+          <div class="esc-q">${escapeHtml(e.question || "(no transcript available)")}</div>
+          <div class="esc-meta">
+            <span class="esc-tag">${escapeHtml(e.district || "—")}</span>
+            <span class="esc-sep">·</span>
+            <span class="esc-tag">${escapeHtml(e.topic || "—")}</span>
+            ${e.condition ? '<span class="esc-sep">·</span><span class="esc-tag">' + escapeHtml(e.condition) + '</span>' : ''}
+            <span class="esc-from">CHW · ${escapeHtml(e.from_id || "—")}</span>
+          </div>
+          <div class="esc-actions">
+            <button class="btn-ghost">ACKNOWLEDGE</button>
+            <button class="btn-ghost">ASSIGN COORDINATOR</button>
+            <button class="btn-ghost">VIEW THREAD</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>`;
+  }
+
+  function renderDistrictBars(districts, drill) {
+    const expected = [
+      "Maseru","Berea","Leribe","Mafeteng","Mohale's Hoek",
+      "Quthing","Qacha's Nek","Mokhotlong","Thaba-Tseka","Butha-Buthe",
+    ];
+    const counts = {};
+    for (const r of districts || []) counts[r.district] = r.count;
+    const drillIdx = {};
+    for (const x of drill || []) drillIdx[x.district] = x;
+    const max = Math.max(1, ...Object.values(counts));
+
+    return `<div class="dbars">
+      ${expected.map((name, i) => {
+        const count = counts[name] || 0;
+        const pct = (count / max) * 100;
+        const dx = drillIdx[name] || {};
+        const isDormant = !count;
+        const emerg = dx.emergency_count || 0;
+        return `
+        <div class="dbar ${isDormant ? 'is-dormant' : ''} ${emerg ? 'has-emerg' : ''}" style="--delay: ${i * 35}ms">
+          <div class="dbar-name">${escapeHtml(name)}</div>
+          <div class="dbar-track">
+            <div class="dbar-fill" style="--w: ${pct.toFixed(1)}%; --delay: ${i * 35}ms"></div>
+          </div>
+          <div class="dbar-stats">
+            ${emerg ? `<span class="dbar-emerg" title="${emerg} emergency-flagged">${emerg}!</span>` : ''}
+            <span class="dbar-count">${count}</span>
+            ${dx.top_topic ? `<span class="dbar-top">${escapeHtml(dx.top_topic.topic)}</span>` : (isDormant ? '<span class="dbar-top dormant">no activity</span>' : '')}
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function renderTopicCards(topics, severity) {
+    const sevByCount = severity.reduce((a, s) => { a[s.severity] = s.count; return a; }, {});
+    const total = (topics || []).reduce((a, t) => a + t.count, 0);
+    return `<div class="topic-grid">
+      ${(topics || []).map((t, i) => {
+        const pct = total > 0 ? (t.count / total) * 100 : 0;
+        return `
+        <div class="topic-card" data-topic="${escapeHtml(t.topic)}" style="--i: ${i}">
+          <div class="topic-name">${escapeHtml(t.topic)}</div>
+          <div class="topic-count" data-count-target="${t.count}">0</div>
+          <div class="topic-bar"><div class="topic-fill" style="--w: ${pct.toFixed(1)}%"></div></div>
+          <div class="topic-share">${pct.toFixed(1)}% OF NETWORK</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="topic-legend">
+      <span class="leg-pill leg-emerg">EMERGENCY ${sevByCount.emergency || 0}</span>
+      <span class="leg-pill leg-urgent">URGENT ${sevByCount.urgent || 0}</span>
+      <span class="leg-pill leg-routine">ROUTINE ${sevByCount.routine || 0}</span>
+      <span class="topic-hint">Click a topic to filter the activity feed below.</span>
+    </div>`;
+  }
+
+  function renderActivityFeed(items) {
+    if (!items || items.length === 0) {
+      return `<div class="empty" style="padding: 32px;">No recent activity.</div>`;
+    }
+    return `<div class="feed">
+      ${items.map((e, i) => `
+        <div class="feed-row" style="animation-delay: ${i * 60}ms">
+          <span class="feed-time">${fmtRelative(e.created_at)}</span>
+          <span class="feed-sev sev-${e.severity || 'routine'}">${(e.severity || 'routine').toUpperCase()}</span>
+          <span class="feed-place">${escapeHtml(e.district || '—')}</span>
+          <span class="feed-q">${escapeHtml(e.question || '(no transcript)')}</span>
+          <span class="feed-topic">${escapeHtml(e.topic || '—')}</span>
+        </div>
+      `).join("")}
+    </div>`;
+  }
+
+  function wireMinistryInteractivity() {
+    document.querySelectorAll(".topic-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const topic = card.dataset.topic;
+        const all = document.querySelectorAll(".topic-card");
+        const wasActive = card.classList.contains("is-active");
+        all.forEach((x) => x.classList.remove("is-active"));
+        if (!wasActive) card.classList.add("is-active");
+        document.querySelectorAll(".feed-row").forEach((r) => {
+          const t = r.querySelector(".feed-topic")?.textContent.trim();
+          if (wasActive || t === topic) r.classList.remove("dim");
+          else r.classList.add("dim");
+        });
+      });
+    });
+    // Acknowledge button: ghost effect, mark card as resolved
+    document.querySelectorAll(".esc-card .btn-ghost").forEach((b) => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const card = b.closest(".esc-card");
+        if (b.textContent.trim() === "ACKNOWLEDGE") {
+          card.classList.toggle("is-acknowledged");
+          b.textContent = card.classList.contains("is-acknowledged") ? "ACKNOWLEDGED ✓" : "ACKNOWLEDGE";
+        }
+      });
+    });
+  }
+
+  async function load() {
+    try {
+      const res = await fetch("/api/insights/" + view);
+      if (!res.ok) throw new Error("Fetch failed: " + res.status);
+      const data = await res.json();
+      if (view === "pharma") renderPharma(data);
+      else if (view === "public-health") renderPublicHealth(data);
+      else if (view === "ministry") renderMinistry(data);
+      else document.getElementById("main").innerHTML = '<div class="empty">Unknown view: ' + view + '</div>';
+
+      // Animate everything that just got rendered
+      if (window.lumaFx) window.lumaFx.animate(document.getElementById("main"));
+    } catch (err) {
+      document.getElementById("main").innerHTML =
+        '<div class="empty">Could not load insights: ' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
+  load();
+  setInterval(load, 60000);
+</script>
+
+</body>
+</html>

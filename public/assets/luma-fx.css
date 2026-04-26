@@ -1,0 +1,499 @@
+/* luma-fx.css — shared animation + polish layer
+ * Loaded by every page so the experience is consistent.
+ * Aesthetic: alive, not flashy. Bloomberg Terminal meets Linear.
+ */
+
+:root {
+  /* Spring-y easings used everywhere */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ===== Home button (luma wordmark in nav) ===== */
+.nav .home-link {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  padding: 12px 24px 12px 22px;
+  text-transform: uppercase;
+  color: var(--ink, #1A1A1A) !important;
+  background: var(--paper, #EAE7DD);
+  border-right: 1px solid var(--ink, #1A1A1A);
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.nav .home-link::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4A8E3F;
+  margin-right: 8px;
+  box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.5);
+  animation: lumaPulse 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+.nav .home-link:hover {
+  background: var(--green, #425442) !important;
+  color: var(--paper, #EAE7DD) !important;
+}
+.nav a {
+  transition: background 0.15s ease, color 0.15s ease, transform 0.18s var(--ease-spring);
+}
+.nav a:active { transform: translateY(1px) scale(0.98); }
+
+@keyframes lumaPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.55); transform: scale(1); }
+  60%  { box-shadow: 0 0 0 7px rgba(74, 142, 63, 0); transform: scale(1.15); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 142, 63, 0); transform: scale(1); }
+}
+
+/* ===== Live indicator (small ticker) ===== */
+.luma-live {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink, #1A1A1A);
+  font-variant-numeric: tabular-nums;
+}
+.luma-live .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4A8E3F;
+  box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.55);
+  animation: lumaPulse 2s ease-out infinite;
+}
+.luma-live .age { color: rgba(26,26,26,0.6); }
+
+/* ===== BETA pill — gentle breathing ===== */
+.beta-pill {
+  animation: betaBreathe 3.2s ease-in-out infinite;
+}
+@keyframes betaBreathe {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50%      { opacity: 0.78; transform: translateY(-0.5px); }
+}
+
+/* ===== Card hover lift (universal) ===== */
+.proj-card,
+.feature,
+.price-tier,
+.use-case,
+.stat,
+.tss-result {
+  transition:
+    transform 0.32s var(--ease-spring),
+    box-shadow 0.28s var(--ease-out-quart),
+    border-color 0.18s ease;
+  will-change: transform;
+}
+.proj-card:hover,
+.feature:hover,
+.price-tier:hover:not(.featured),
+.use-case:hover,
+.tss-result:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(26, 26, 26, 0.10);
+  border-color: rgba(26, 26, 26, 0.32);
+}
+
+.price-tier.featured {
+  transition: transform 0.32s var(--ease-spring), box-shadow 0.28s var(--ease-out-quart);
+}
+.price-tier.featured:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(66, 84, 66, 0.38);
+}
+
+/* ===== Bar fill animations (projection cards) ===== */
+@keyframes barFillIn {
+  from { width: 0 !important; }
+  to   { width: var(--target-width); }
+}
+.bars .bar-fill,
+.bars .bar-ci {
+  animation: barFillIn 0.9s var(--ease-out-quint) both;
+}
+
+/* ===== Number count-up — handled by JS, but visual baseline ===== */
+[data-count-target] { font-variant-numeric: tabular-nums; }
+
+/* ===== Section fade-in on scroll ===== */
+.fx-fade-in {
+  opacity: 0; transform: translateY(18px);
+  transition:
+    opacity 0.8s var(--ease-out-quart),
+    transform 0.8s var(--ease-out-quart);
+}
+.fx-fade-in.fx-visible { opacity: 1; transform: translateY(0); }
+
+/* ===== Smooth scroll behavior on every page ===== */
+html { scroll-behavior: smooth; }
+
+/* ===== Stat card subtle border accent on hover ===== */
+.stat { position: relative; }
+.stat::after {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--green, #425442);
+  transform: scaleY(1);
+  transition: width 0.3s var(--ease-spring);
+  transform-origin: top;
+}
+.stat:hover::after { width: 6px; }
+
+/* ===== Map tooltip ===== */
+.luma-tooltip {
+  position: fixed;
+  background: #1A1A1A; color: #EAE7DD;
+  padding: 8px 12px;
+  font-size: 11px; line-height: 1.4;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.12s, transform 0.12s var(--ease-out-quart);
+  transform: translateY(4px);
+  letter-spacing: 0.04em;
+  border-radius: 2px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  max-width: 220px;
+}
+.luma-tooltip.visible { opacity: 1; transform: translateY(0); }
+.luma-tooltip .t-name {
+  font-weight: 700; font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; margin-bottom: 4px;
+  color: #FFFFFF;
+}
+.luma-tooltip .t-row {
+  display: flex; justify-content: space-between; gap: 14px;
+  font-size: 10px; letter-spacing: 0.06em;
+}
+.luma-tooltip .t-row .t-k { color: rgba(255,255,255,0.55); }
+
+.map-hex {
+  cursor: default;
+  transition: transform 0.18s var(--ease-spring), opacity 0.18s ease;
+  transform-box: fill-box; transform-origin: center;
+}
+.map-hex:hover {
+  opacity: 1;
+  transform: scale(1.04);
+}
+
+/* ===== Hero gradient breathing (very subtle) ===== */
+.hero, .left, .cta-bar { position: relative; overflow: hidden; }
+.hero::before,
+.cta-bar::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(circle at 30% 40%,
+    rgba(255,255,255,0.04), transparent 60%);
+  animation: heroBreath 14s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > *, .cta-bar > * { position: relative; z-index: 1; }
+@keyframes heroBreath {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(2%, -1%) rotate(0.5deg); }
+}
+
+/* ===== Form button micro-interactions ===== */
+.tss-submit, .btn {
+  position: relative;
+  transition:
+    transform 0.18s var(--ease-spring),
+    box-shadow 0.18s var(--ease-out-quart),
+    background 0.18s ease;
+}
+.tss-submit:hover:not(:disabled),
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(26, 26, 26, 0.20);
+}
+.tss-submit:active:not(:disabled),
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: 0 2px 6px rgba(26, 26, 26, 0.12);
+  transition-duration: 0.06s;
+}
+
+/* ===== Active table row "wave" ===== */
+@keyframes flashUpdate {
+  0%   { background: rgba(74, 142, 63, 0.18); }
+  100% { background: transparent; }
+}
+.tss-table tr.flash, .convo.flash {
+  animation: flashUpdate 1.2s ease-out;
+}
+
+/* ===== Loading skeleton ===== */
+.luma-skeleton {
+  display: inline-block;
+  height: 14px;
+  background: linear-gradient(90deg,
+    rgba(26,26,26,0.04) 0%,
+    rgba(26,26,26,0.10) 50%,
+    rgba(26,26,26,0.04) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 2px;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== Conversation log entry hover + slide-in ===== */
+.convo {
+  transition: background 0.15s ease, padding 0.15s ease;
+}
+.convo:hover { background: rgba(74, 142, 63, 0.04); }
+.convo.fx-row-in {
+  animation: rowSlideIn 0.55s var(--ease-out-quart) both;
+}
+@keyframes rowSlideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== Phone demo glow on landing page ===== */
+.phone {
+  transition: box-shadow 0.4s var(--ease-out-quart), transform 0.4s var(--ease-spring);
+}
+.phone:hover {
+  box-shadow: 0 22px 70px rgba(26, 26, 26, 0.25);
+  transform: translateY(-3px) rotate(-0.3deg);
+}
+
+/* ===== Marker for typing dots in landing demo ===== */
+.typing span { animation: bounce 1.2s infinite ease-in-out; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== Subtle page-load fade ===== */
+body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
+@keyframes pageIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ============================================================
+ * NEW — interactivity layer (cursor follower, map physics,
+ * Bayesian slider, drill panel, parallax)
+ * ============================================================ */
+
+/* ===== Map: pan/zoom container ===== */
+.map-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.map-stage.is-dragging { cursor: grabbing; }
+.map-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.45s var(--ease-out-quint);
+}
+.map-stage.is-dragging svg {
+  transition: none;
+}
+
+/* Map controls (top-right of map stage) */
+.map-controls {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; flex-direction: column; gap: 4px;
+  z-index: 5;
+}
+.map-controls button {
+  width: 30px; height: 30px;
+  border: 1px solid rgba(26,26,26,0.5);
+  background: rgba(234, 231, 221, 0.92);
+  color: var(--ink, #1A1A1A);
+  font-size: 14px; font-weight: 800; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit;
+  transition:
+    background 0.15s ease, transform 0.18s var(--ease-spring),
+    box-shadow 0.18s var(--ease-out-quart);
+  padding: 0;
+}
+.map-controls button:hover { background: var(--green, #425442); color: var(--paper, #EAE7DD); }
+.map-controls button:active { transform: scale(0.92); }
+
+.map-hint {
+  position: absolute; left: 10px; bottom: 10px;
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(26,26,26,0.55);
+  background: rgba(234, 231, 221, 0.85);
+  padding: 4px 8px;
+  border: 1px solid rgba(26,26,26,0.18);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Map district selected state */
+.map-district.is-selected {
+  stroke: #1A1A1A;
+  stroke-width: 2.5 !important;
+  filter: drop-shadow(0 4px 8px rgba(26,26,26,0.22));
+}
+
+/* Live activity pulses on map (overlay layer) */
+.map-pulse-layer {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.map-pulse {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: rgba(74, 142, 63, 0.55);
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: mapPulse 1.8s var(--ease-out-quart) forwards;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.45);
+}
+@keyframes mapPulse {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.5); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 0 22px rgba(74, 142, 63, 0); }
+}
+
+/* ===== Map district drill-in panel ===== */
+.drill-panel {
+  position: absolute; top: 10px; right: 50px;
+  width: 260px;
+  background: rgba(234, 231, 221, 0.98);
+  border: 1px solid #1A1A1A;
+  padding: 14px 16px 16px;
+  z-index: 6;
+  font-size: 12px;
+  transform: translateX(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-out-quart),
+    transform 0.4s var(--ease-spring);
+  box-shadow: 0 12px 30px rgba(26,26,26,0.18);
+}
+.drill-panel.fx-open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.drill-panel .dp-close {
+  position: absolute; top: 8px; right: 10px;
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; color: rgba(26,26,26,0.6);
+  padding: 4px 6px; line-height: 1;
+}
+.drill-panel .dp-close:hover { color: var(--ink, #1A1A1A); }
+.drill-panel h4 {
+  margin: 0 0 8px;
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 800;
+}
+.drill-panel .dp-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(26,26,26,0.12);
+  font-variant-numeric: tabular-nums;
+}
+.drill-panel .dp-row:last-child { border-bottom: none; }
+.drill-panel .dp-row .k {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(26,26,26,0.6);
+}
+.drill-panel .dp-row .v { font-weight: 700; }
+.drill-panel .dp-emergency .v { color: var(--amber, #C68B3F); }
+
+/* ===== Bayesian slider on projection cards ===== */
+.bayes-slider {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(26,26,26,0.18);
+}
+.bayes-slider .bs-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(26,26,26,0.6);
+  margin-bottom: 6px;
+}
+.bayes-slider .bs-row .bs-val {
+  font-weight: 800; color: var(--ink, #1A1A1A);
+  font-variant-numeric: tabular-nums;
+}
+.bayes-slider input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+.bayes-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px; background: rgba(26,26,26,0.25);
+}
+.bayes-slider input[type="range"]::-moz-range-track {
+  height: 2px; background: rgba(26,26,26,0.25);
+}
+.bayes-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green, #425442);
+  margin-top: -6px;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(26,26,26,0.22);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
+}
+.bayes-slider input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--green, #425442);
+  border: none;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(26,26,26,0.22);
+  transition: transform 0.18s var(--ease-spring);
+}
+.bayes-slider input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  transform: scale(1.3);
+  box-shadow: 0 4px 12px rgba(66,84,66,0.4);
+}
+.bayes-slider .bs-extents {
+  display: flex; justify-content: space-between;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(26,26,26,0.45);
+  margin-top: -2px;
+}
+.proj-card.is-bs-active {
+  border-color: var(--green, #425442);
+  box-shadow: 0 8px 24px rgba(66,84,66,0.16);
+}
+
+/* ===== Landing parallax containers ===== */
+.fx-parallax { will-change: transform; }
+
+/* ============================================================
+ * Reduced-motion users — keep things readable, kill the show.
+ * ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .map-pulse { display: none !important; }
+}

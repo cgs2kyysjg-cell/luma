@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — API documentation</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: var(--amber); color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+
+  header {
+    padding: 36px 56px 24px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .top-bar { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 18px; }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0 0 14px;
+  }
+  .lede { font-size: 15px; max-width: 70ch; color: rgba(26,26,26,0.85); }
+
+  main { padding: 32px 56px 80px; max-width: 1100px; }
+
+  h2 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6); margin: 36px 0 16px;
+    border-top: 1px solid rgba(26,26,26,0.2); padding-top: 24px;
+  }
+  h2:first-child { border-top: 0; padding-top: 0; }
+  h3 {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 16px;
+  }
+  p { max-width: 70ch; margin: 0 0 14px; }
+
+  .endpoint {
+    border: 1px solid rgba(26,26,26,0.2);
+    margin-bottom: 24px;
+    background: rgba(255,255,255,0.4);
+  }
+  .endpoint .head {
+    background: var(--green); color: var(--paper);
+    padding: 14px 20px;
+    font-family: "Menlo", monospace;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .endpoint .method {
+    background: var(--paper); color: var(--green);
+    padding: 2px 10px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+  }
+  .endpoint .body { padding: 18px 20px 22px; }
+  .endpoint .description { margin-bottom: 12px; }
+
+  pre {
+    background: var(--ink); color: var(--paper);
+    padding: 16px 20px; margin: 12px 0;
+    font-family: "Menlo", monospace; font-size: 12px;
+    overflow-x: auto; line-height: 1.5;
+  }
+  code {
+    background: rgba(26,26,26,0.08);
+    padding: 2px 6px; border-radius: 2px;
+    font-family: "Menlo", monospace; font-size: 12.5px;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  .params {
+    border-collapse: collapse; width: 100%; font-size: 13px;
+    margin: 8px 0 12px;
+  }
+  .params th, .params td {
+    text-align: left; padding: 8px 12px;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+    vertical-align: top;
+  }
+  .params th { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .params td.field { font-family: "Menlo", monospace; font-size: 12px; }
+
+  .callout {
+    background: rgba(198,139,63,0.12); border-left: 3px solid var(--amber);
+    padding: 12px 18px; margin: 16px 0;
+  }
+  .callout-green {
+    background: rgba(66,84,66,0.08); border-left: 3px solid var(--green);
+    padding: 12px 18px; margin: 16px 0;
+  }
+
+  .quick-grid { display: grid; grid-template-columns: 200px 1fr; gap: 24px; margin-bottom: 24px; }
+  .quick-grid .item { padding: 14px 18px; background: rgba(255,255,255,0.45); border: 1px solid rgba(26,26,26,0.18); }
+  .quick-grid .item .label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(26,26,26,0.65); margin-bottom: 6px; }
+  .quick-grid .item .val { font-size: 14px; font-weight: 700; }
+
+  footer {
+    padding: 20px 48px; border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/api/docs" class="right-link active">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · API DOCUMENTATION</span>
+    <span>VERSION 0.1 · BETA</span>
+  </div>
+  <h1>API REFERENCE.</h1>
+  <p class="lede">
+    luma exposes Bayesian-updated health intelligence as a JSON API. Every endpoint returns
+    posteriors, confidence intervals, and methodology references inline so consumers
+    (pharma RWE teams, public-health observers, ministries) can pipe results directly into
+    their own analytics without round-tripping to a UI. This page is the canonical reference.
+  </p>
+</header>
+
+<main>
+
+<h2>QUICK FACTS</h2>
+<div class="quick-grid">
+  <div class="item">
+    <div class="label">Base URL</div>
+    <div class="val"><code id="base-url">…</code></div>
+  </div>
+  <div class="item">
+    <div class="label">Format</div>
+    <div class="val">JSON only · UTF-8 · Content-Type <code>application/json</code></div>
+  </div>
+  <div class="item">
+    <div class="label">Auth</div>
+    <div class="val">None during BETA. Production: API key in <code>Authorization: Bearer &lt;key&gt;</code> header.</div>
+  </div>
+  <div class="item">
+    <div class="label">Rate limits</div>
+    <div class="val">BETA: best-effort, no enforced limits. Production: tier-dependent (10–1000 req/min).</div>
+  </div>
+  <div class="item">
+    <div class="label">Versioning</div>
+    <div class="val">v0 (current). Breaking changes will be opt-in via path versioning (<code>/api/v1/…</code>).</div>
+  </div>
+  <div class="item">
+    <div class="label">Errors</div>
+    <div class="val"><code>{ "error": "&lt;message&gt;" }</code> with HTTP 4xx/5xx status.</div>
+  </div>
+</div>
+
+<h2>ENDPOINTS</h2>
+
+<div class="endpoint">
+  <div class="head">
+    <span class="method">GET</span>
+    <span>/api/insights/pharma</span>
+  </div>
+  <div class="body">
+    <p class="description">Pharma RWE view — disease burden posteriors, treatment cascade indicators, daily HIV trend, all combined with published WHO/UNAIDS priors. Recommended polling cadence: hourly.</p>
+    <p><strong>Example request</strong></p>
+    <pre><code>curl <span id="curl-pharma">https://...</span>/api/insights/pharma</code></pre>
+    <p><strong>Sample response (truncated)</strong></p>
+    <pre><code>{
+  "view": "pharma_rwe",
+  "generated_at": "2026-04-26T17:42:11.039Z",
+  "coverage": {
+    "country": "Lesotho",
+    "population": 2100000,
+    "observed_cases_window_30d": 117
+  },
+  "burden_projection": {
+    "by_topic": {
+      "hiv": {
+        "observed": 42,
+        "projection": {
+          "posteriorMean": 0.2295,
+          "lower": 0.1718,
+          "upper": 0.2872,
+          "effectiveSampleSize": 203
+        }
+      },
+      "tb": {
+        "observed": 14,
+        "projection": {
+          "point_estimate_per_100k": 650,
+          "note": "TB rate projection requires CHW-catchment population denominator..."
+        }
+      }
+    }
+  },
+  "projections": {
+    "hiv": [ /* array of cascade indicator cards — see /api/insights/pharma */ ],
+    "tb":  [ /* ... */ ],
+    "other": [ /* ... */ ]
+  },
+  "methodology_url": "/methodology"
+}</code></pre>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="head">
+    <span class="method">GET</span>
+    <span>/api/insights/public-health</span>
+  </div>
+  <div class="body">
+    <p class="description">Strategic view for multilateral observers (WHO, Africa CDC, Gates Foundation, bilateral donors). Country-level posteriors, severity distribution, district signals, and (when multi-country) regional comparison.</p>
+    <p><strong>Example request</strong></p>
+    <pre><code>curl <span id="curl-ph">https://...</span>/api/insights/public-health</code></pre>
+    <p><strong>Sample response shape</strong></p>
+    <pre><code>{
+  "view": "who_surveillance",
+  "generated_at": "...",
+  "coverage": { ... },
+  "severity_distribution": [
+    { "severity": "routine", "count": 75 },
+    { "severity": "urgent", "count": 28 },
+    { "severity": "emergency", "count": 14 }
+  ],
+  "by_district": [ { "district": "Maseru", "count": 32 }, ... ],
+  "burden_projection": { ... },
+  "projections": { "hiv": [...], "tb": [...], "mnch": [...], "other": [...] },
+  "outbreak_signals_note": "...",
+  "methodology_url": "/methodology"
+}</code></pre>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="head">
+    <span class="method">GET</span>
+    <span>/api/insights/ministry</span>
+  </div>
+  <div class="body">
+    <p class="description">Operational view for the licensing ministry — their own CHW network's activity. Topic distribution, severity flags, district coverage. Plus Bayesian projections for cross-reference.</p>
+    <p><strong>Sample response shape</strong></p>
+    <pre><code>{
+  "view": "ministry",
+  "by_topic": [ { "topic": "HIV", "count": 42 }, ... ],
+  "severity_distribution": [ ... ],
+  "by_district": [ ... ],
+  "projections": { ... }
+}</code></pre>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="head">
+    <span class="method">GET</span>
+    <span>/log.json</span>
+  </div>
+  <div class="body">
+    <p class="description">Audit feed. Every interaction logged with anonymized identifiers, retrieved sources, safety outcome, and latency. Useful for compliance, evaluation, and model-behavior monitoring.</p>
+    <table class="params">
+      <tr><th>Param</th><th>Type</th><th>Description</th></tr>
+      <tr><td class="field">limit</td><td>integer</td><td>Max conversations returned. Default 50, max 200.</td></tr>
+    </table>
+    <p><strong>Sample response shape</strong></p>
+    <pre><code>{
+  "summary": { "total": 117, "last24h": 8, "fallback": 12, "refused": 9 },
+  "conversations": [
+    {
+      "id": 117,
+      "created_at": "2026-04-26 17:32:11",
+      "from_number": "***0100",
+      "input_type": "voice",
+      "transcribed_text": "...",
+      "safety_outcome": "allowed",
+      "retrieved_sources": [
+        { "source": "ART Defaulter Pathway", "section": "§ 4", "score": 0.62 }
+      ],
+      "response_text": "...",
+      "latency_ms": 4340
+    }
+  ]
+}</code></pre>
+  </div>
+</div>
+
+<div class="endpoint">
+  <div class="head">
+    <span class="method">GET</span>
+    <span>/health</span>
+  </div>
+  <div class="body">
+    <p class="description">Liveness check. Used by orchestration (Render, Fly.io) and external monitors.</p>
+    <pre><code>{
+  "ok": true,
+  "service": "luma",
+  "version": "0.1.0",
+  "timestamp": "2026-04-26T17:42:11.039Z"
+}</code></pre>
+  </div>
+</div>
+
+<h2>SAFETY OUTCOMES — DECODER</h2>
+
+<p>Every interaction in <code>/log.json</code> carries a <code>safety_outcome</code> tag. Consumers should filter on these for compliance dashboards and content audits.</p>
+
+<table class="params">
+  <tr><th>Outcome</th><th>Meaning</th></tr>
+  <tr><td class="field">allowed</td><td>Query passed safety, retrieval found a high-confidence corpus match (≥0.45), Claude responded with cited protocol section.</td></tr>
+  <tr><td class="field">allowed_with_warning</td><td>Allowed but the post-LLM check noted something to surface — e.g., missing citation pattern in the response.</td></tr>
+  <tr><td class="field">fallback_general_knowledge</td><td>Query passed safety but had no good corpus match. Claude answered from general WHO knowledge with the visible "⚠️ Not from your ministry protocols" disclaimer.</td></tr>
+  <tr><td class="field">clinical_advice_requested</td><td>Hard refusal: query asked for dosing, diagnosis, or drug interactions.</td></tr>
+  <tr><td class="field">out_of_scope_topic</td><td>Hard refusal: topic outside CHW workflow (diabetes, surgery, etc.).</td></tr>
+  <tr><td class="field">trivial_input</td><td>Greeting / acknowledgement; no LLM call made.</td></tr>
+  <tr><td class="field">empty_input</td><td>Empty message body.</td></tr>
+  <tr><td class="field">input_too_long</td><td>Message exceeded length limit (2000 chars).</td></tr>
+  <tr><td class="field">transcription_failed</td><td>Voice memo failed to transcribe; user prompted to retry as text.</td></tr>
+  <tr><td class="field">unsafe_dose_recommendation</td><td>Post-LLM check detected and scrubbed an unsafe dose recommendation. Should never appear in production with current safety design.</td></tr>
+</table>
+
+<h2>POSTERIOR FIELDS — DECODER</h2>
+
+<p>Each projection card returned by the insights endpoints follows the same schema:</p>
+
+<table class="params">
+  <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+  <tr><td class="field">label</td><td>string</td><td>Human-readable indicator name.</td></tr>
+  <tr><td class="field">prior.mean</td><td>number 0–1</td><td>Published prior (e.g., 0.228 for HIV adult prevalence).</td></tr>
+  <tr><td class="field">prior.source</td><td>string</td><td>Citation for the prior.</td></tr>
+  <tr><td class="field">prior.effective_n</td><td>integer</td><td>Effective sample size — controls how strongly the prior anchors the posterior. Higher = stronger.</td></tr>
+  <tr><td class="field">observed.successes</td><td>integer</td><td>Count of CHW interactions matching the indicator's criterion.</td></tr>
+  <tr><td class="field">observed.trials</td><td>integer</td><td>Denominator for the share calculation.</td></tr>
+  <tr><td class="field">observed.share</td><td>number 0–1</td><td>successes / trials.</td></tr>
+  <tr><td class="field">posterior.mean</td><td>number 0–1</td><td>Bayesian posterior estimate.</td></tr>
+  <tr><td class="field">posterior.lower_95ci</td><td>number 0–1</td><td>Lower bound of 95% CI (normal approximation to Beta).</td></tr>
+  <tr><td class="field">posterior.upper_95ci</td><td>number 0–1</td><td>Upper bound of 95% CI.</td></tr>
+  <tr><td class="field">posterior.effective_sample_size</td><td>integer</td><td>Combined α + β of the posterior Beta distribution.</td></tr>
+  <tr><td class="field">data_weight_pct</td><td>number 0–100</td><td>How much the data has shifted the posterior away from the prior. 0 = pure prior, 100 = pure observation.</td></tr>
+  <tr><td class="field">confidence</td><td>string</td><td>One of: <code>no_observed_data</code>, <code>very_small_sample</code>, <code>small_sample</code>, <code>moderate_sample</code>, <code>large_sample</code>.</td></tr>
+</table>
+
+<div class="callout-green">
+  <strong>Methodology.</strong> Beta-Binomial conjugate updates with informative priors derived from
+  UNAIDS, WHO, UNICEF, and UN Population Division. Full derivation, source citations, and limits at
+  <a href="/methodology">/methodology</a>.
+</div>
+
+<h2>CLIENT EXAMPLES</h2>
+
+<h3>Python</h3>
+<pre><code>import requests
+
+BASE = "https://your-luma-deployment.example.com"
+
+# Pull pharma view
+r = requests.get(f"{BASE}/api/insights/pharma")
+data = r.json()
+
+# Iterate cascade indicators
+for indicator in data["projections"]["hiv"]:
+    label = indicator["label"]
+    post = indicator["posterior"]
+    ci = f"{post['lower_95ci']:.1%}–{post['upper_95ci']:.1%}"
+    print(f"{label}: {post['mean']:.2%} (95% CI {ci})")
+</code></pre>
+
+<h3>R</h3>
+<pre><code>library(httr)
+library(jsonlite)
+
+base <- "https://your-luma-deployment.example.com"
+res <- GET(paste0(base, "/api/insights/pharma"))
+data <- content(res, as = "parsed", simplifyVector = TRUE)
+
+# HIV cascade indicators as data.frame
+hiv <- data$projections$hiv
+print(hiv[, c("label", "posterior.mean", "posterior.lower_95ci",
+              "posterior.upper_95ci", "confidence")])
+</code></pre>
+
+<h3>Pipe to a CSV</h3>
+<pre><code>curl -s https://your-luma-deployment.example.com/api/insights/pharma \
+  | jq '.projections.hiv[] | {label, prior: .prior.mean, posterior: .posterior.mean,
+        ci_lower: .posterior.lower_95ci, ci_upper: .posterior.upper_95ci, confidence}' \
+  | jq -s '. | (.[0] | keys_unsorted) as $keys | $keys, map([.[ $keys[] ]])[] | @csv' \
+  -r > hiv_cascade.csv
+</code></pre>
+
+<h2>ROADMAP</h2>
+
+<div class="callout">
+  <p><strong>Production hardening (Series A scope).</strong></p>
+  <ul>
+    <li>API key authentication with per-key rate limits</li>
+    <li>Webhook subscriptions for material posterior changes (e.g., when data weight crosses 25% threshold)</li>
+    <li>Multi-country aggregation endpoints (<code>/api/insights/region/sa</code>)</li>
+    <li>CDISC-compliant exports for FDA/EMA RWE submissions</li>
+    <li>Versioned API at <code>/api/v1/…</code> with stability guarantees</li>
+    <li>Python and R SDKs (auto-generated from OpenAPI spec)</li>
+    <li>99.9% uptime SLA</li>
+  </ul>
+</div>
+
+<h2>STATUS</h2>
+
+<p>luma is in <strong>BETA</strong>. The API surface is stable enough to integrate against, but expect:</p>
+<ul>
+  <li>No SLA. Best-effort uptime via Render or Fly.io infrastructure.</li>
+  <li>Schema additions are non-breaking; field renames will trigger a major version bump.</li>
+  <li>Rate-limits are not enforced but please be courteous (~1 req/sec sustained).</li>
+  <li>Production access requires direct contact via <a href="mailto:sebastian.r.buck@gmail.com">sebastian.r.buck@gmail.com</a>.</li>
+</ul>
+
+</main>
+
+<footer>
+  <span>LUMA · API DOCS · v0.1 · BETA</span>
+  <span><a href="/pharma">← PHARMA</a> · <a href="/methodology">METHODOLOGY</a> · <a href="mailto:sebastian.r.buck@gmail.com">CONTACT</a></span>
+</footer>
+
+<script>
+  const baseUrl = window.location.origin;
+  document.getElementById("base-url").textContent = baseUrl;
+  for (const id of ["curl-pharma", "curl-ph"]) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = baseUrl;
+  }
+</script>
+<script src="/assets/luma-fx.js"></script>
+
+</body>
+</html>

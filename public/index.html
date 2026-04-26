@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — workflow infrastructure for community health</title>
+<link rel="stylesheet" href="/assets/luma-fx.css">
+<style>
+  :root {
+    --paper: #EAE7DD;
+    --green: #425442;
+    --sage: #8A9682;
+    --ink: #1A1A1A;
+    --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: var(--amber); color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+
+  /* Hero with live demo */
+  .hero {
+    display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;
+  }
+  .hero .left {
+    background: var(--green); color: white;
+    padding: 60px 50px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .hero .right {
+    padding: 32px 36px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .top { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+  .word {
+    font-size: 100px; font-weight: 800; letter-spacing: -0.04em; line-height: 0.95;
+    margin: 60px 0 0;
+  }
+  h2 {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+    margin: 0 0 18px;
+  }
+  p { font-size: 14px; max-width: 50ch; margin: 0 0 12px; }
+
+  /* Phone mockup */
+  .phone {
+    width: 460px; max-width: 100%;
+    background: var(--ink); border-radius: 26px;
+    padding: 16px 14px;
+    box-shadow: 0 16px 50px rgba(26,26,26,0.22);
+  }
+  .phone .header {
+    background: var(--green); color: white;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .phone .header .sub {
+    font-size: 11px; color: var(--sage); margin-top: 3px; font-weight: 400;
+  }
+  .phone .body {
+    background: #0A0A0A; border-radius: 10px;
+    padding: 18px 16px; min-height: 480px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .msg {
+    max-width: 88%; padding: 10px 14px; font-size: 14px;
+    border-radius: 12px; line-height: 1.45;
+    opacity: 0; animation: pop-in 0.4s forwards;
+  }
+  .msg.in {
+    background: #143E2E; color: #F0F0E8; align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+  .msg.out {
+    background: #1E2A3A; color: #E8E8E0; align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+  .msg.system {
+    background: rgba(138,150,130,0.18); color: #D4D4CC;
+    align-self: center;
+    font-size: 11px; padding: 6px 12px;
+    font-style: italic; max-width: 92%;
+    text-align: center;
+  }
+  .msg .src {
+    display: block; margin-top: 6px;
+    font-size: 10px; color: rgba(255,255,255,0.45);
+    font-style: italic;
+  }
+  .typing {
+    align-self: flex-start; display: inline-flex;
+    gap: 4px; padding: 12px 16px;
+    background: rgba(255,255,255,0.06); border-radius: 12px;
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes pop-in {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Live chat input — appears at bottom of phone */
+  .phone .input-bar {
+    margin-top: 10px;
+    display: flex; gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 6px;
+  }
+  .phone .input-bar input {
+    flex: 1;
+    background: transparent; border: 0; outline: none;
+    color: #F0F0E8; font-size: 13px;
+    padding: 8px 10px;
+    font-family: inherit;
+  }
+  .phone .input-bar input::placeholder {
+    color: rgba(255,255,255,0.4);
+  }
+  .phone .input-bar button {
+    background: var(--green); color: #FFFFFF;
+    border: 0; cursor: pointer;
+    width: 38px; height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+  }
+  .phone .input-bar button:hover { background: #4A8E3F; }
+  .phone .input-bar button:active { transform: scale(0.92); }
+  .phone .input-bar button:disabled {
+    opacity: 0.5; cursor: wait;
+    background: rgba(255,255,255,0.1);
+  }
+  .phone .input-bar button .arrow {
+    transform: translateY(-1px);
+  }
+
+  /* Suggestion chips above the input */
+  .phone .suggest-row {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .phone .suggest {
+    font-family: inherit;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.78);
+    font-size: 10.5px;
+    padding: 5px 9px;
+    border-radius: 14px;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+  }
+  .phone .suggest:hover {
+    background: rgba(74,142,63,0.20); color: #FFFFFF;
+    border-color: rgba(74,142,63,0.45);
+  }
+  .phone .suggest:active { transform: scale(0.96); }
+
+  /* Hint when interactive mode hasn't started yet */
+  .phone .interactive-hint {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+  .phone .interactive-hint .pulse-pip {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; background: #6CC85B;
+    margin-right: 6px; vertical-align: middle;
+    animation: lumaPulse 2s ease-out infinite;
+  }
+
+  /* Source pill on response messages */
+  .msg.out .src-pill {
+    display: inline-flex; align-items: center;
+    margin-top: 8px;
+    font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(108,200,91,0.85);
+    background: rgba(108,200,91,0.10);
+    padding: 3px 8px;
+    border-radius: 1px;
+    font-style: normal;
+  }
+  .msg.out .latency-tag {
+    display: block; margin-top: 6px;
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* Sections below */
+  section {
+    padding: 56px 56px;
+    border-top: 1px solid var(--ink);
+  }
+  section h2 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6); margin: 0 0 12px;
+  }
+  section h3 {
+    font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+    margin: 0 0 24px; max-width: 28ch;
+  }
+
+  .three-up {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+    margin-top: 18px;
+  }
+  .three-up .item {
+    border-top: 2px solid var(--green); padding-top: 14px;
+  }
+  .three-up .item .name {
+    font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  /* ============================================================
+   * EXPLORE — rich interactive tile grid
+   * ============================================================ */
+  .explore-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 28px;
+  }
+  @media (max-width: 1100px) { .explore-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .explore-grid { grid-template-columns: 1fr; } }
+
+  .explore-tile {
+    --accent: #425442;
+    position: relative;
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(26,26,26,0.18);
+    border-radius: 2px;
+    text-decoration: none;
+    color: var(--ink);
+    overflow: hidden;
+    min-height: 290px;
+    transition:
+      transform 0.32s cubic-bezier(0.22,1,0.36,1),
+      box-shadow 0.32s cubic-bezier(0.22,1,0.36,1),
+      border-color 0.2s ease,
+      background 0.2s ease;
+    will-change: transform;
+  }
+  .explore-tile::before {
+    content: "";
+    position: absolute; top: 0; left: 0;
+    width: 0; height: 3px;
+    background: var(--accent);
+    transition: width 0.45s cubic-bezier(0.22,1,0.36,1);
+    z-index: 4;
+  }
+  .explore-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 44px rgba(26,26,26,0.14);
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.85);
+  }
+  .explore-tile:hover::before { width: 100%; }
+  .explore-tile:active { transform: translateY(-1px); transition-duration: 0.08s; }
+
+  .ex-preview {
+    position: relative;
+    height: 168px;
+    overflow: hidden;
+    background: rgba(66,84,66,0.04);
+    border-bottom: 1px solid rgba(26,26,26,0.10);
+  }
+  .ex-meta {
+    padding: 16px 18px 18px;
+    display: flex; flex-direction: column; gap: 4px;
+    flex: 1;
+  }
+  .ex-title {
+    font-size: 15px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .ex-sub {
+    font-size: 11.5px; line-height: 1.45;
+    color: rgba(26,26,26,0.65);
+    margin-top: 2px;
+  }
+  .ex-stat {
+    margin-top: 8px;
+    font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .ex-arrow {
+    position: absolute; right: 14px; bottom: 14px;
+    font-size: 20px; line-height: 1;
+    color: var(--accent);
+    transform: translateX(-6px);
+    opacity: 0.5;
+    transition:
+      transform 0.32s cubic-bezier(0.22,1,0.36,1),
+      opacity 0.2s ease;
+  }
+  .explore-tile:hover .ex-arrow { transform: translateX(0); opacity: 1; }
+
+  /* Tile preview: BARS (Public Health) */
+  .ex-bars { display: flex; align-items: flex-end; gap: 12px; height: 100%; padding: 22px; }
+  .ex-bars .b {
+    flex: 1; background: var(--accent);
+    height: 0;
+    animation: exBarsRise 1s cubic-bezier(0.22,1,0.36,1) forwards;
+    opacity: 0.85;
+  }
+  .ex-bars .b.b1 { animation-delay: 0.05s; --target: 38%; background: rgba(138,150,130,0.65); }
+  .ex-bars .b.b2 { animation-delay: 0.15s; --target: 70%; background: rgba(198,139,63,0.75); }
+  .ex-bars .b.b3 { animation-delay: 0.25s; --target: 88%; background: var(--accent); }
+  .ex-bars .b.b4 { animation-delay: 0.35s; --target: 55%; background: rgba(138,150,130,0.55); }
+  @keyframes exBarsRise { to { height: var(--target); } }
+  .explore-tile:hover .ex-bars .b {
+    animation: exBarsRise 1s cubic-bezier(0.22,1,0.36,1) forwards, exBarsBreathe 1.6s ease-in-out infinite 1s;
+  }
+  @keyframes exBarsBreathe {
+    0%, 100% { transform: scaleY(1); }
+    50%      { transform: scaleY(1.08); }
+  }
+
+  /* Tile preview: MAP (Ministry) */
+  .ex-map { position: absolute; inset: 0; padding: 18px; display: flex; align-items: center; justify-content: center; }
+  .ex-map svg { width: 100%; height: 100%; }
+  .ex-map path {
+    fill: rgba(66,84,66,0.16);
+    stroke: rgba(26,26,26,0.45);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    transition: fill 0.4s ease;
+  }
+  .explore-tile:hover .ex-map path { fill: rgba(66,84,66,0.28); }
+  .ex-map .pulse {
+    fill: #4A8E3F;
+    animation: exMapPing 2.4s ease-out infinite;
+    transform-origin: center; transform-box: fill-box;
+  }
+  .ex-map .pulse.p1 { animation-delay: 0s;   }
+  .ex-map .pulse.p2 { animation-delay: 0.7s; }
+  .ex-map .pulse.p3 { animation-delay: 1.4s; }
+  @keyframes exMapPing {
+    0%   { opacity: 0; transform: scale(0.4); }
+    20%  { opacity: 1; }
+    100% { opacity: 0; transform: scale(2.5); }
+  }
+
+  /* Tile preview: SPARKLINE (Pharma data) */
+  .ex-spark { position: absolute; inset: 0; padding: 20px 22px; }
+  .ex-spark .num {
+    font-size: 42px; font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .ex-spark .num .pct { font-size: 22px; color: var(--accent); }
+  .ex-spark .label {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-top: 4px;
+  }
+  .ex-spark svg { position: absolute; left: 22px; right: 22px; bottom: 22px; width: calc(100% - 44px); height: 50px; }
+  .ex-spark path {
+    fill: none;
+    stroke: var(--accent); stroke-width: 1.6;
+    stroke-dasharray: 250; stroke-dashoffset: 250;
+    animation: exSparkDraw 1.4s cubic-bezier(0.22,1,0.36,1) forwards 0.2s;
+  }
+  @keyframes exSparkDraw { to { stroke-dashoffset: 0; } }
+  .ex-spark .dot {
+    fill: var(--accent);
+    animation: lumaPulse 2.4s ease-out infinite;
+  }
+
+  /* Tile preview: TICKER (Audit log) */
+  .ex-ticker { position: absolute; inset: 0; padding: 18px 20px; overflow: hidden; }
+  .ex-ticker .row {
+    display: flex; gap: 10px; align-items: baseline;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(26,26,26,0.08);
+    font-size: 10.5px; line-height: 1.3;
+    animation: exTickerSlide 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .ex-ticker .row .t { color: rgba(26,26,26,0.5); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .ex-ticker .row .q { color: var(--ink); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ex-ticker .row .pill {
+    font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+    background: rgba(66,84,66,0.18); color: var(--accent);
+    padding: 1px 6px; border-radius: 1px; flex-shrink: 0; font-weight: 700;
+  }
+  .ex-ticker .row.refused .pill { background: rgba(198,139,63,0.22); color: #9F6924; }
+  .ex-ticker .row:nth-child(1) { animation-delay: 0.0s; }
+  .ex-ticker .row:nth-child(2) { animation-delay: 0.1s; }
+  .ex-ticker .row:nth-child(3) { animation-delay: 0.2s; }
+  .ex-ticker .row:nth-child(4) { animation-delay: 0.3s; }
+  @keyframes exTickerSlide {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Tile preview: BELL CURVE (Methodology) */
+  .ex-curve { position: absolute; inset: 0; padding: 16px 22px; }
+  .ex-curve .formula {
+    font-family: "Menlo", monospace; font-size: 10px;
+    color: rgba(26,26,26,0.55);
+    letter-spacing: 0.02em;
+  }
+  .ex-curve svg { position: absolute; left: 22px; right: 22px; bottom: 14px; width: calc(100% - 44px); height: 90px; }
+  .ex-curve .prior {
+    fill: rgba(138,150,130,0.45); stroke: rgba(138,150,130,0.85); stroke-width: 1.5;
+    stroke-dasharray: 320; stroke-dashoffset: 320;
+    animation: exCurveDraw 1.2s cubic-bezier(0.22,1,0.36,1) forwards 0.2s;
+  }
+  .ex-curve .post {
+    fill: rgba(66,84,66,0.55); stroke: var(--accent); stroke-width: 1.8;
+    stroke-dasharray: 320; stroke-dashoffset: 320;
+    animation: exCurveDraw 1.2s cubic-bezier(0.22,1,0.36,1) forwards 0.7s;
+  }
+  @keyframes exCurveDraw { to { stroke-dashoffset: 0; } }
+  .explore-tile:hover .ex-curve .post { animation: exCurveShift 2.4s ease-in-out infinite; }
+  @keyframes exCurveShift {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(6px); }
+  }
+
+  /* Tile preview: CODE (API docs) */
+  .ex-code {
+    position: absolute; inset: 0;
+    background: var(--ink); color: #C8E6BF;
+    padding: 16px 18px;
+    font-family: "Menlo", monospace; font-size: 11px; line-height: 1.65;
+    overflow: hidden;
+  }
+  .ex-code .ln { color: rgba(255,255,255,0.25); margin-right: 10px; user-select: none; }
+  .ex-code .k  { color: #E0A86A; }
+  .ex-code .s  { color: #C8E6BF; }
+  .ex-code .n  { color: #B8D8F0; }
+  .ex-code .cm { color: rgba(255,255,255,0.4); font-style: italic; }
+  .ex-code .cur {
+    display: inline-block; width: 7px; height: 12px;
+    background: #C8E6BF; vertical-align: middle;
+    animation: exCursorBlink 1.1s steps(2) infinite;
+  }
+  @keyframes exCursorBlink { 50% { opacity: 0; } }
+
+  /* Tile preview: STATUS DOT (/health) */
+  .ex-health { position: absolute; inset: 0; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+  .ex-health .dot-wrap {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ex-health .big-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #4A8E3F;
+    box-shadow: 0 0 0 0 rgba(74,142,63,0.5);
+    animation: lumaPulse 1.6s ease-out infinite;
+  }
+  .ex-health .ok {
+    font-family: "Menlo", monospace; font-size: 22px; font-weight: 700; color: var(--ink);
+  }
+  .ex-health .uptime {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Tile preview: PITCH (Pharma RWE pitch — BETA) */
+  .ex-pitch {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(198,139,63,0.20), rgba(66,84,66,0.10));
+    padding: 20px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .ex-pitch .pitch-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ink); color: #EAE7DD;
+    font-size: 9px; letter-spacing: 0.20em; text-transform: uppercase;
+    padding: 5px 9px; border-radius: 1px;
+    align-self: flex-start;
+  }
+  .ex-pitch .pitch-tag .b-pill {
+    background: var(--amber, #C68B3F); color: #FFF;
+    font-size: 8px; padding: 1px 5px; letter-spacing: 0.16em;
+    border-radius: 1px;
+  }
+  .ex-pitch .pitch-quote {
+    font-size: 14px; line-height: 1.35; font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+  }
+  .ex-pitch .pitch-quote span { color: var(--amber, #C68B3F); }
+  .ex-pitch .pitch-foot {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+  }
+
+  /* Tile preview: PHARMA DATA — focuses on numeric posterior */
+  .ex-pharma { position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+  .ex-pharma .ph-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    font-size: 10.5px;
+  }
+  .ex-pharma .ph-row .ph-k { color: rgba(26,26,26,0.55); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
+  .ex-pharma .ph-row .ph-v { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .ex-pharma .ph-bar { height: 4px; background: rgba(26,26,26,0.08); margin-top: 2px; position: relative; overflow: hidden; }
+  .ex-pharma .ph-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    width: 0;
+    animation: exPhFill 1.2s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes exPhFill { to { width: var(--w); } }
+
+  footer {
+    padding: 18px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+
+  @media (max-width: 800px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero .left { padding: 40px 28px; }
+    .hero .right { padding: 40px 28px; }
+    .three-up { grid-template-columns: 1fr; }
+    .word { font-size: 72px; }
+    section { padding: 40px 28px; }
+  }
+
+  /* ============================================================
+   * HERO — pop-off layer (entrance, lesotho bg, marquee, events)
+   * ============================================================ */
+
+  /* Make hero.left a stacking context for overlays */
+  .hero .left { position: relative; overflow: hidden; }
+  .hero .left > * { position: relative; z-index: 2; }
+
+  /* Subtle grain noise over green panel */
+  .hero .left::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.05;
+    z-index: 1;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Ghosted Lesotho map background */
+  .hero-map-bg {
+    position: absolute; inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease-out 0.4s;
+  }
+  .hero-map-bg.is-loaded { opacity: 1; }
+  .hero-map-bg svg {
+    width: 110%; height: 110%;
+    position: absolute; left: -5%; top: -5%;
+  }
+  .hero-map-bg path {
+    fill: rgba(255,255,255,0.04);
+    stroke: rgba(255,255,255,0.14);
+    stroke-width: 1;
+    stroke-linejoin: round;
+  }
+  .hero-map-bg path.is-active {
+    fill: rgba(255,255,255,0.085);
+  }
+
+  /* Live pulses on the ghosted map */
+  .hero-map-pulses {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  }
+  .hero-map-pulse {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: rgba(180, 220, 165, 0.85);
+    transform: translate(-50%, -50%) scale(0.4);
+    animation: heroMapPulse 2.4s cubic-bezier(0.22,1,0.36,1) forwards;
+    box-shadow: 0 0 0 0 rgba(180, 220, 165, 0.5);
+  }
+  @keyframes heroMapPulse {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); box-shadow: 0 0 0 0 rgba(180, 220, 165, 0.55); }
+    18%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); box-shadow: 0 0 0 28px rgba(180, 220, 165, 0); }
+  }
+
+  /* LUMA wordmark — dramatic entrance + slow gleam */
+  .word {
+    position: relative;
+    color: rgba(255,255,255,0.97);
+    background: linear-gradient(110deg,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255,255,255,1) 35%,
+      rgba(220, 240, 200, 1) 50%,
+      rgba(255,255,255,1) 65%,
+      rgba(255,255,255,0.95) 100%);
+    background-size: 220% 100%;
+    background-position: 200% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation:
+      wordEntrance 1.4s cubic-bezier(0.22,1,0.36,1) both,
+      wordGleam 7s ease-in-out 1.6s infinite;
+  }
+  @keyframes wordEntrance {
+    0%   { opacity: 0; transform: scale(0.86) translateY(28px); letter-spacing: -0.07em; filter: blur(6px); }
+    60%  { opacity: 1; filter: blur(0); }
+    100% { opacity: 1; transform: scale(1) translateY(0); letter-spacing: -0.04em; filter: blur(0); }
+  }
+  @keyframes wordGleam {
+    0%, 100% { background-position: 200% 0; }
+    50%      { background-position: -100% 0; }
+  }
+
+  /* Eyebrow above wordmark */
+  .top {
+    opacity: 0;
+    animation: eyebrowIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.3s both;
+  }
+  @keyframes eyebrowIn {
+    0%   { opacity: 0; transform: translateY(-6px); letter-spacing: 0.05em; }
+    100% { opacity: 1; transform: translateY(0); letter-spacing: 0.18em; }
+  }
+
+  /* Tagline word-by-word stagger */
+  .hero-tagline {
+    margin-top: 26px;
+    font-size: 17px;
+    color: rgba(255,255,255,0.88);
+    max-width: 38ch; line-height: 1.5;
+  }
+  .hero-tagline .w {
+    display: inline-block;
+    opacity: 0; transform: translateY(8px);
+    animation: tagWord 0.6s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes tagWord {
+    0%   { opacity: 0; transform: translateY(10px); filter: blur(2px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  /* Live counter chip near top of left panel */
+  .live-counter-row {
+    display: flex; gap: 18px; align-items: center;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    font-variant-numeric: tabular-nums;
+    margin-top: 10px;
+    opacity: 0;
+    animation: eyebrowIn 0.6s cubic-bezier(0.22,1,0.36,1) 0.55s both;
+  }
+  .live-counter-row .lc-stat {
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .live-counter-row .lc-stat .v {
+    color: #FFFFFF; font-weight: 700;
+  }
+  .live-counter-row .lc-stat .v.big {
+    font-size: 16px;
+  }
+
+  /* Marquee at bottom of left panel */
+  .hero-marquee {
+    margin-top: 38px;
+    border-top: 1px solid rgba(255,255,255,0.16);
+    padding-top: 18px;
+    overflow: hidden;
+    position: relative;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    opacity: 0;
+    animation: eyebrowIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.9s both;
+  }
+  .hero-marquee .track {
+    display: inline-flex; gap: 38px;
+    white-space: nowrap;
+    animation: marqueeScroll 42s linear infinite;
+    will-change: transform;
+  }
+  .hero-marquee .item {
+    display: inline-flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .hero-marquee .item .place {
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
+  }
+  .hero-marquee .item .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(180, 220, 165, 0.85);
+  }
+  @keyframes marqueeScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Right side: phone stage with glow + tilt */
+  .hero .right {
+    position: relative;
+    overflow: hidden;
+  }
+  .phone-stage {
+    position: relative;
+    perspective: 1400px;
+    z-index: 2;
+  }
+  .phone-glow {
+    position: absolute;
+    width: 460px; height: 460px;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side,
+      rgba(74,142,63,0.35), rgba(74,142,63,0) 70%);
+    filter: blur(40px);
+    z-index: -1;
+    animation: phoneGlowBreath 5.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes phoneGlowBreath {
+    0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scale(1); }
+    50%      { opacity: 0.78; transform: translate(-50%, -50%) scale(1.08); }
+  }
+  .phone {
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+    opacity: 0;
+    animation: phoneEntrance 1s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+  }
+  @keyframes phoneEntrance {
+    0%   { opacity: 0; transform: translateY(40px) rotateY(-12deg) scale(0.94); }
+    100% { opacity: 1; transform: translateY(0) rotateY(0deg) scale(1); }
+  }
+
+  /* Mobile shrinks */
+  @media (max-width: 800px) {
+    .phone-glow { width: 360px; height: 360px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY →</a>
+</div>
+
+<div class="hero">
+
+  <div class="left">
+    <div class="hero-map-bg" id="hero-map-bg" aria-hidden="true"></div>
+    <div class="hero-map-pulses" id="hero-map-pulses" aria-hidden="true"></div>
+
+    <div class="top">LESOTHO · ACTIVE PILOT</div>
+    <div>
+      <div class="word">LUMA</div>
+      <div class="live-counter-row">
+        <span class="lc-stat"><span class="v big" id="lc-convos" data-count-target="14283" data-count-duration="2200">0</span> CONVERSATIONS · 30D</span>
+        <span class="lc-stat"><span class="v" id="lc-emerg" data-count-target="42">0</span> EMERGENCIES FLAGGED</span>
+      </div>
+      <p class="hero-tagline" id="hero-tagline-1">Ministry-licensed workflow infrastructure for community health.</p>
+      <p class="hero-tagline" id="hero-tagline-2" style="margin-top:10px;">Africa's first credible RWE channel out of the last mile.</p>
+    </div>
+
+    <div class="hero-marquee" aria-hidden="true">
+      <div class="track" id="hero-marquee-track"></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="phone-stage" id="phone-stage">
+      <div class="phone-glow"></div>
+      <div class="phone" id="phone-tilt">
+        <div class="header">
+          luma · MoH Lesotho
+          <div class="sub">● online — replies in Sesotho, English</div>
+        </div>
+        <div class="body" id="demo-body">
+          <!-- messages injected by JS -->
+        </div>
+        <div class="suggest-row" id="suggest-row">
+          <button class="suggest" data-q="My ART patient missed her refill last month — what's the protocol?">ART defaulter</button>
+          <button class="suggest" data-q="Pregnant woman with severe headache and blurred vision — what should I do?">Pre-eclampsia signs</button>
+          <button class="suggest" data-q="A family member of a TB patient is coughing. What's the next step?">TB contact</button>
+          <button class="suggest" data-q="What dose of bedaquiline for a 45kg patient?">Dose request (refused)</button>
+        </div>
+        <div class="input-bar">
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Ask luma a real question…"
+            autocomplete="off"
+            maxlength="500"
+          />
+          <button id="chat-send" aria-label="Send"><span class="arrow">→</span></button>
+        </div>
+        <div class="interactive-hint" id="chat-hint">
+          <span class="pulse-pip"></span>LIVE · TYPE TO TALK TO LUMA
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<section>
+  <h2>WHAT IS LUMA</h2>
+  <h3>Two products. One conversation.</h3>
+  <div class="three-up">
+    <div class="item">
+      <div class="name">FOR THE WORKER</div>
+      <p>WhatsApp workflow companion. Surfaces the right ministry protocol, in the worker's language, with the right contact for escalation. Decision support — never clinical advice.</p>
+    </div>
+    <div class="item">
+      <div class="name">FOR THE MINISTRY</div>
+      <p>Operational dashboard of CHW network activity, severity flags, district coverage gaps. Free at point of use. Ministry retains full data ownership.</p>
+    </div>
+    <div class="item">
+      <div class="name">FOR PHARMA RWE</div>
+      <p>Versioned API serving Bayesian-updated burden posteriors, treatment cascade analytics, and trial-site cohort sizing. Ministry-licensed data agreements throughout.</p>
+    </div>
+  </div>
+</section>
+
+<section style="background: rgba(66,84,66,0.05);">
+  <h2>EXPLORE</h2>
+  <h3>Every surface is live.</h3>
+
+  <div class="explore-grid" id="explore-grid">
+
+    <a href="/pharma" class="explore-tile" style="--accent:#C68B3F">
+      <div class="ex-preview">
+        <div class="ex-pitch">
+          <span class="pitch-tag">RWE PITCH <span class="b-pill">BETA</span></span>
+          <p class="pitch-quote">Africa is a <span>$250B blind spot.</span> Ministry-licensed last-mile data is the way in.</p>
+          <span class="pitch-foot">10 districts · 3 protocol families · live</span>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Pharma RWE pitch</div>
+        <div class="ex-sub">The case for pharma to pay. Trial-site selection, RWE pricing tiers, the data agreement.</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/insights/public-health" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-bars">
+          <div class="b b1"></div>
+          <div class="b b2"></div>
+          <div class="b b3"></div>
+          <div class="b b4"></div>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Public Health dashboard</div>
+        <div class="ex-sub">Bayesian posteriors against published priors — for WHO, donors, regional partners.</div>
+        <div class="ex-stat">5 indicators · 95% CI</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/insights/ministry" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-map" id="ex-map-tile" aria-hidden="true"></div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Ministry operational view</div>
+        <div class="ex-sub">CHW network activity, severity flags, district coverage. Free at point of use.</div>
+        <div class="ex-stat">10 districts · live network</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/insights/pharma" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-spark">
+          <div class="num"><span data-count-target="21" data-count-decimals="0">0</span><span class="pct">.4%</span></div>
+          <div class="label">HIV PREVALENCE · POSTERIOR</div>
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none">
+            <path d="M 0 38 L 25 32 L 50 36 L 75 24 L 100 28 L 125 18 L 150 22 L 175 12 L 200 14"/>
+            <circle class="dot" cx="200" cy="14" r="3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Pharma data dashboard</div>
+        <div class="ex-sub">Treatment cascade, burden posteriors, daily trend. Versioned API.</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/log" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-ticker">
+          <div class="row">
+            <span class="t">14:42</span>
+            <span class="q">Patient missed ART refill — what's the protocol?</span>
+            <span class="pill">allowed</span>
+          </div>
+          <div class="row">
+            <span class="t">14:41</span>
+            <span class="q">Pregnant woman, severe headache, blurred vision</span>
+            <span class="pill">allowed</span>
+          </div>
+          <div class="row refused">
+            <span class="t">14:39</span>
+            <span class="q">What dose of bedaquiline for 45kg patient?</span>
+            <span class="pill">refused</span>
+          </div>
+          <div class="row">
+            <span class="t">14:36</span>
+            <span class="q">TB contact tracing — exposed family, what next?</span>
+            <span class="pill">allowed</span>
+          </div>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Audit log</div>
+        <div class="ex-sub">Every conversation is logged with safety outcome, latency, and retrieved sources.</div>
+        <div class="ex-stat" id="ex-log-stat">14,283 entries · 30d</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/methodology" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-curve">
+          <span class="formula">P(θ | data) ∝ P(data | θ) · P(θ)</span>
+          <svg viewBox="0 0 200 90" preserveAspectRatio="none">
+            <!-- Prior (sage, wider) -->
+            <path class="prior" d="M 0 88 C 30 88 60 28 100 28 C 140 28 170 88 200 88 L 200 90 L 0 90 Z"/>
+            <!-- Posterior (green, sharper) -->
+            <path class="post" d="M 60 88 C 90 88 110 16 130 16 C 150 16 170 88 180 88 L 180 90 L 60 90 Z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">Projection methodology</div>
+        <div class="ex-sub">How the prior + observed CHW signal collapse into a posterior. Beta-Binomial conjugate update.</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/api/docs" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-code">
+          <div><span class="ln">1</span><span class="cm">// GET /api/insights/pharma</span></div>
+          <div><span class="ln">2</span><span class="k">{</span></div>
+          <div><span class="ln">3</span>&nbsp;&nbsp;<span class="s">"hiv_prevalence"</span>: <span class="n">0.214</span>,</div>
+          <div><span class="ln">4</span>&nbsp;&nbsp;<span class="s">"ci_95"</span>: [<span class="n">0.198</span>, <span class="n">0.231</span>],</div>
+          <div><span class="ln">5</span>&nbsp;&nbsp;<span class="s">"sample_n"</span>: <span class="n">14283</span><span class="cur"></span></div>
+          <div><span class="ln">6</span><span class="k">}</span></div>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">API documentation</div>
+        <div class="ex-sub">JSON endpoints for every dashboard. Versioned. Authenticated. Rate-limited.</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+    <a href="/health" class="explore-tile">
+      <div class="ex-preview">
+        <div class="ex-health">
+          <div class="dot-wrap">
+            <span class="big-dot"></span>
+            <span class="ok">200 OK</span>
+          </div>
+          <div>
+            <div class="uptime">UPTIME · <span id="ex-uptime">99.97%</span></div>
+            <div style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(26,26,26,0.55); margin-top: 4px; font-variant-numeric: tabular-nums;">RESPONSE · <span id="ex-rt" data-count-target="42">0</span>ms</div>
+          </div>
+        </div>
+      </div>
+      <div class="ex-meta">
+        <div class="ex-title">/health</div>
+        <div class="ex-sub">Live status. The endpoint that answers when nothing else will.</div>
+        <div class="ex-arrow">→</div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span>© 2026 LUMA HEALTH</span>
+</footer>
+
+<script src="/assets/luma-fx.js"></script>
+<script>
+  // ----- Live demo conversation loop -----
+  // Loops two scenarios: a grounded answer (HIV question) + a refusal (dose request).
+
+  const SCENES = [
+    [
+      { type: "in",  text: "[voice memo, 14s] My ART patient missed her refill last month. I can't reach her by phone. What's the protocol?", delay: 0 },
+      { type: "typing", delay: 1500 },
+      { type: "out", text: "Per ART Defaulter Pathway § 4.2 — home visit between days 14 and 28. Visit during morning hours; if she's not home, leave a discreet note (no HIV-specific language) and try one repeat visit that week.\n\nWant to log this as a defaulter case for your supervisor?", delay: 1700, src: "ART Defaulter Pathway · § 4.2" },
+      { type: "in",  text: "Yes — log it", delay: 2200 },
+      { type: "system", text: "✓ Case logged. District-level dashboard updated.", delay: 1200 },
+    ],
+    [
+      { type: "in",  text: "What dose of bedaquiline should I give a 45kg patient?", delay: 0 },
+      { type: "typing", delay: 800 },
+      { type: "out", text: "I can't recommend dosing — that's a clinician's call. I can send you the relevant protocol section. Want me to do that?", delay: 1500 },
+      { type: "system", text: "✗ Hard refusal — dosing request flagged in audit log.", delay: 1300 },
+    ],
+    [
+      { type: "in",  text: "Pregnant woman with severe headache and blurred vision", delay: 0 },
+      { type: "typing", delay: 1200 },
+      { type: "out", text: "Per MNCH Referral Pathway § 1 — those are pre-eclampsia danger signs. Arrange immediate transport to the nearest CEmOC facility. Do not delay for further assessment.\n\nWant me to flag this as an emergency referral for the district MNCH coordinator?", delay: 1900, src: "MNCH Referral Pathway · § 1" },
+      { type: "in",  text: "Yes please", delay: 2000 },
+      { type: "system", text: "✓ Emergency flagged. District coordinator notified.", delay: 1100 },
+    ],
+  ];
+
+  const body = document.getElementById("demo-body");
+
+  function addMsg({ type, text, src }) {
+    if (type === "typing") {
+      const el = document.createElement("div");
+      el.className = "typing";
+      el.innerHTML = '<span></span><span></span><span></span>';
+      body.appendChild(el);
+      // Force animation by reading offsetHeight
+      void el.offsetHeight;
+      el.style.opacity = 1;
+      el.dataset.typing = "1";
+      body.scrollTop = body.scrollHeight;
+      return el;
+    }
+    const el = document.createElement("div");
+    el.className = "msg " + type;
+    el.textContent = text;
+    if (src) {
+      const s = document.createElement("span");
+      s.className = "src";
+      s.textContent = src;
+      el.appendChild(s);
+    }
+    body.appendChild(el);
+    void el.offsetHeight;
+    body.scrollTop = body.scrollHeight;
+    return el;
+  }
+
+  function removeTyping() {
+    const t = body.querySelector("[data-typing='1']");
+    if (t) t.remove();
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  let sceneIdx = 0;
+  let interactive = false; // flips to true the moment the user types/clicks
+  let loopAlive = true;
+
+  async function runScene() {
+    if (interactive) return;
+    body.innerHTML = "";
+    const scene = SCENES[sceneIdx];
+    sceneIdx = (sceneIdx + 1) % SCENES.length;
+    for (const step of scene) {
+      if (interactive) return;
+      await sleep(step.delay);
+      if (interactive) return;
+      if (step.type === "typing") {
+        addMsg(step);
+        await sleep(1500);
+        removeTyping();
+      } else {
+        addMsg(step);
+      }
+    }
+    if (interactive) return;
+    await sleep(4000);
+    if (loopAlive && !interactive) runScene();
+  }
+
+  runScene();
+
+  // ----- Live chatbot demo (hits POST /api/demo-chat) -----
+  const chatInput = document.getElementById("chat-input");
+  const chatSend  = document.getElementById("chat-send");
+  const chatHint  = document.getElementById("chat-hint");
+  const suggestRow = document.getElementById("suggest-row");
+
+  function enterInteractive() {
+    if (interactive) return;
+    interactive = true;
+    loopAlive = false;
+    // Clear the looping pre-recorded conversation
+    body.innerHTML = "";
+    if (chatHint) {
+      chatHint.innerHTML = '<span class="pulse-pip"></span>LIVE · CONNECTED TO RAG + CLAUDE';
+    }
+    // Greeter so the body isn't empty on first message
+    addMsg({ type: "system", text: "Real conversation — answers grounded in Lesotho ministry protocols." });
+  }
+
+  function escapeHtmlSafe(s) {
+    return (s || "").toString().replace(/[&<>"]/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
+    })[c]);
+  }
+
+  function addUserMsg(text) {
+    const el = document.createElement("div");
+    el.className = "msg in"; // user input renders on the left as the worker
+    el.textContent = text;
+    body.appendChild(el);
+    void el.offsetHeight;
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function addBotMsg(text, sources, latencyMs, mode) {
+    const el = document.createElement("div");
+    el.className = "msg out"; // bot reply on the right (luma)
+    // Preserve newlines — Claude responses are formatted prose
+    const lines = text.split("\n").map(escapeHtmlSafe).join("<br>");
+    el.innerHTML = lines;
+
+    if (sources && sources.length > 0) {
+      const pill = document.createElement("span");
+      pill.className = "src-pill";
+      const first = sources[0];
+      pill.textContent = `${first.source} · ${first.section}`;
+      el.appendChild(pill);
+    }
+    if (typeof latencyMs === "number") {
+      const tag = document.createElement("span");
+      tag.className = "latency-tag";
+      const tagText = mode === "fallback" ? "general knowledge" : (sources && sources.length ? "grounded · " : "");
+      tag.textContent = `${tagText}${latencyMs} ms`;
+      el.appendChild(tag);
+    }
+    body.appendChild(el);
+    void el.offsetHeight;
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function addErrorMsg(text) {
+    const el = document.createElement("div");
+    el.className = "msg system";
+    el.textContent = text;
+    body.appendChild(el);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  let isPending = false;
+  async function sendChat(message) {
+    if (isPending) return;
+    const text = (message || chatInput.value || "").trim();
+    if (!text) return;
+
+    enterInteractive();
+    isPending = true;
+    chatSend.disabled = true;
+    chatInput.value = "";
+
+    addUserMsg(text);
+
+    // Typing indicator while waiting
+    const typingEl = document.createElement("div");
+    typingEl.className = "typing";
+    typingEl.innerHTML = '<span></span><span></span><span></span>';
+    body.appendChild(typingEl);
+    body.scrollTop = body.scrollHeight;
+
+    try {
+      const r = await fetch("/api/demo-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      typingEl.remove();
+
+      if (r.status === 429) {
+        const j = await r.json().catch(() => ({}));
+        addErrorMsg(j.error || "Slow down — too many requests.");
+        return;
+      }
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        addErrorMsg(j.error || `Error ${r.status}`);
+        return;
+      }
+      const data = await r.json();
+      addBotMsg(data.response, data.sources, data.latencyMs, data.mode);
+    } catch (err) {
+      typingEl.remove();
+      addErrorMsg("Network hiccup — try again.");
+    } finally {
+      isPending = false;
+      chatSend.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  if (chatSend) chatSend.addEventListener("click", () => sendChat());
+  if (chatInput) {
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+    // Don't enterInteractive on every keystroke — only when they actually send.
+  }
+  if (suggestRow) {
+    suggestRow.querySelectorAll(".suggest").forEach((b) => {
+      b.addEventListener("click", () => {
+        const q = b.dataset.q || b.textContent.trim();
+        chatInput.value = q;
+        sendChat(q);
+      });
+    });
+  }
+
+  // ----- Tagline word-by-word stagger -----
+  function staggerWords(el, baseDelay) {
+    if (!el) return;
+    const words = el.textContent.trim().split(/\s+/);
+    el.innerHTML = words.map((w, i) =>
+      `<span class="w" style="animation-delay:${(baseDelay + i * 0.045).toFixed(3)}s">${w}</span>`
+    ).join(" ");
+  }
+  staggerWords(document.getElementById("hero-tagline-1"), 0.7);
+  staggerWords(document.getElementById("hero-tagline-2"), 1.0);
+
+  // ----- Hero status counters fire on load -----
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.lumaFx && window.lumaFx.animate) {
+      window.lumaFx.animate(document.body);
+    }
+  });
+
+  // ----- Lesotho ghosted map background + live pulses -----
+  (async function () {
+    try {
+      const r = await fetch("/assets/lesotho-districts.json");
+      if (!r.ok) return;
+      const geo = await r.json();
+      const bg = document.getElementById("hero-map-bg");
+      if (!bg) return;
+      const pieces = geo.districts.map((d, i) =>
+        `<path d="${d.path}" data-cx="${d.centroid[0]}" data-cy="${d.centroid[1]}" class="${i % 2 === 0 ? 'is-active' : ''}"/>`
+      ).join("");
+      bg.innerHTML = `<svg viewBox="${geo.viewBox}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">${pieces}</svg>`;
+      requestAnimationFrame(() => bg.classList.add("is-loaded"));
+
+      // Populate the EXPLORE Ministry tile mini-map too
+      const exMap = document.getElementById("ex-map-tile");
+      if (exMap) {
+        const mapPaths = geo.districts.map((d) =>
+          `<path d="${d.path}"/>`
+        ).join("");
+        // Choose 3 districts to pulse on (use first three centroids)
+        const pulses = geo.districts.slice(0, 3).map((d, i) =>
+          `<circle class="pulse p${i+1}" cx="${d.centroid[0]}" cy="${d.centroid[1]}" r="6"/>`
+        ).join("");
+        exMap.innerHTML = `<svg viewBox="${geo.viewBox}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">${mapPaths}${pulses}</svg>`;
+      }
+
+      // Live pulse spawner — convert SVG centroid to pixel coords each time
+      const pulseLayer = document.getElementById("hero-map-pulses");
+      const svg = bg.querySelector("svg");
+      const districts = Array.from(bg.querySelectorAll("path"));
+
+      function spawnPulse() {
+        if (document.hidden) return;
+        if (!districts.length) return;
+        const p = districts[Math.floor(Math.random() * districts.length)];
+        const cx = parseFloat(p.dataset.cx);
+        const cy = parseFloat(p.dataset.cy);
+        const ctm = svg.getCTM();
+        const rect = bg.getBoundingClientRect();
+        // Map SVG userspace → screen pixels relative to bg
+        const pt = svg.createSVGPoint();
+        pt.x = cx; pt.y = cy;
+        const sp = pt.matrixTransform(svg.getScreenCTM());
+        const x = sp.x - rect.left;
+        const y = sp.y - rect.top;
+
+        const el = document.createElement("div");
+        el.className = "hero-map-pulse";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        pulseLayer.appendChild(el);
+        setTimeout(() => el.remove(), 2500);
+      }
+
+      function loop() {
+        const wait = 1200 + Math.random() * 2200;
+        setTimeout(() => { spawnPulse(); loop(); }, wait);
+      }
+      setTimeout(loop, 1400);
+    } catch (e) { /* silent — map is decorative */ }
+  })();
+
+  // ----- Marquee track content (duplicated so the loop is seamless) -----
+  const MARQUEE_ITEMS = [
+    "MASERU · ART REFILL FOLLOW-UP",
+    "BEREA · TB CONTACT TRACING",
+    "LERIBE · MNCH REFERRAL",
+    "MAFETENG · HIV TEST RESULT",
+    "MOHALES HOEK · PRE-ECLAMPSIA FLAG",
+    "QUTHING · DEFAULTER VISIT LOGGED",
+    "QACHAS NEK · PEDIATRIC FEVER",
+    "MOKHOTLONG · IMMUNIZATION DUE",
+    "THABA-TSEKA · STI COUNSELLING",
+    "BUTHA-BUTHE · ADHERENCE CHECK",
+    "MASERU · DRUG STOCKOUT REPORTED",
+    "LERIBE · MOTHER-INFANT FOLLOW-UP",
+  ];
+  function renderMarquee() {
+    const track = document.getElementById("hero-marquee-track");
+    if (!track) return;
+    const items = MARQUEE_ITEMS.concat(MARQUEE_ITEMS); // duplicate for seamless loop
+    track.innerHTML = items.map(t => {
+      const [place, ...rest] = t.split(" · ");
+      return `<span class="item"><span class="dot"></span><span class="place">${place}</span>${rest.length ? "<span> · " + rest.join(" · ") + "</span>" : ""}</span>`;
+    }).join("");
+  }
+  renderMarquee();
+
+  // ----- Phone tilt to mouse (isolated to .phone, not all cards) -----
+  const phoneStage = document.getElementById("phone-stage");
+  const phoneEl = document.getElementById("phone-tilt");
+  if (phoneStage && phoneEl && window.matchMedia && window.matchMedia("(hover: hover)").matches) {
+    let rect = null;
+    const onEnter = () => { rect = phoneStage.getBoundingClientRect(); };
+    const onMove = (e) => {
+      if (!rect) rect = phoneStage.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+      const rx = (0.5 - py) * 8;   // ±4 deg up/down
+      const ry = (px - 0.5) * 10;  // ±5 deg left/right
+      phoneEl.style.transform =
+        `perspective(1400px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(8px)`;
+    };
+    const onLeave = () => {
+      phoneEl.style.transform = "";
+      rect = null;
+    };
+    phoneStage.addEventListener("mouseenter", onEnter);
+    phoneStage.addEventListener("mousemove", onMove);
+    phoneStage.addEventListener("mouseleave", onLeave);
+  }
+</script>
+
+</body>
+</html>

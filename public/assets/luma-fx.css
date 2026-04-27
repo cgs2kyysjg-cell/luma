@@ -491,15 +491,18 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
   display: none;
   flex-direction: column;
   justify-content: space-between;
-  align-self: center;            /* center vertically inside the nav row */
-  width: 22px; height: 12px;     /* tighter — lines closer together */
+  align-self: center !important;   /* center vertically inside the nav row */
+  width: 22px !important;
+  height: 12px !important;         /* lines ~3px apart */
   margin-left: auto;
   margin-right: 22px;
+  margin-top: 0; margin-bottom: 0;
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0;
+  padding: 0 !important;
   flex-shrink: 0;
+  box-sizing: content-box;
 }
 .nav-mobile-btn span {
   display: block;

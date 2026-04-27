@@ -1,7 +1,7 @@
 {
   "name": "luma",
   "version": "0.1.0",
-  "description": "luma — Ministry-licensed workflow infrastructure for community health, with pharma RWE as the data layer.",
+  "description": "luma — Ministry-owned workflow infrastructure for the off-ramp from foreign aid. Pharma RWE on the same data subsidises the ministry license.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

@@ -1,6 +1,9 @@
 # luma — prototype
 
-> **WhatsApp workflow assistant for community health workers.**
+> **Ministry-owned workflow infrastructure for the off-ramp from foreign aid.**
+> Software that helps health ministries do more with what they have, replacing
+> the operational layer INGOs used to deliver — at 5–15% of the cost.
+> Pharma RWE on the same data subsidises the ministry license.
 > A YC application prototype. Decision support, not clinical advice.
 > Grounded in published Lesotho Ministry of Health protocols.
 

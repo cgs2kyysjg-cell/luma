@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — why now · after USAID</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=13">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=14">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -114,20 +114,6 @@
     max-height: 0; opacity: 0;
     padding-top: 0; padding-bottom: 0;
     border-bottom-color: transparent;
-  }
-  /* freshly-arrived item gets a brief amber flash */
-  .aid-item.is-fresh::after {
-    content: 'New';
-    position: absolute; right: 16px; top: 11px;
-    background: var(--amber); color: #fff;
-    font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase;
-    padding: 1px 6px; font-weight: 800;
-    animation: aidFresh 2.4s ease-out forwards;
-  }
-  @keyframes aidFresh {
-    0%   { opacity: 1; transform: translateY(0); }
-    80%  { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-4px); }
   }
 
   .aid-item .meta {
@@ -528,7 +514,7 @@
       </div>
       <div class="aid-feed-scroll" id="aidScroll" role="list"></div>
       <div class="aid-feed-foot">
-        <span>Auto-scrolling · Hover to pause</span>
+        <span></span>
         <button class="pause-btn" id="aidPause" type="button" aria-label="Pause feed">⏸ Pause</button>
       </div>
     </aside>
@@ -872,7 +858,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=13"></script>
+<script src="/assets/luma-fx.js?v=14"></script>
 <script>
   function fmtUSD(n) {
     if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";
@@ -997,22 +983,20 @@
     }
 
     // State.
-    let hovering = false, manualPause = false;
-    feedEl.addEventListener("mouseenter", () => hovering = true);
-    feedEl.addEventListener("mouseleave", () => hovering = false);
+    let manualPause = false;
     pauseBtn.addEventListener("click", () => {
       manualPause = !manualPause;
       pauseBtn.textContent = manualPause ? "▶ Play" : "⏸ Pause";
     });
 
     function pop() {
-      if (hovering || manualPause) return;
+      if (manualPause) return;
 
       // Insert next event at top, collapsed.
       const next = aidEvents[head % aidEvents.length];
       head++;
       const node = buildCard(next);
-      node.classList.add("is-entering", "is-fresh");
+      node.classList.add("is-entering");
       scroll.insertBefore(node, scroll.firstChild);
 
       // Force layout, then drop entering class to animate to natural size.
@@ -1027,9 +1011,6 @@
         last.classList.add("is-leaving");
         setTimeout(() => last.remove(), ANIM_MS + 30);
       }
-
-      // Drop the "New" flash badge after its animation finishes.
-      setTimeout(() => node.classList.remove("is-fresh"), 2500);
     }
 
     setInterval(pop, TICK_MS);

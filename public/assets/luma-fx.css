@@ -591,6 +591,81 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
 }
 
 /* ============================================================
+ * Tactile nav tabs (.tactile) — for the new live-data tabs
+ * (AT SCALE, GLOBAL). Subtle green tint + pulsing status dot +
+ * animated underline on hover. Don't override the .active state.
+ * ============================================================ */
+.nav a.tactile {
+  position: relative;
+  background: rgba(66, 84, 66, 0.07);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.nav a.tactile::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green, #425442);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(66, 84, 66, 0.55);
+  animation: navTabPulse 2.4s var(--ease-out-quart) infinite;
+}
+.nav a.tactile::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  height: 1.5px;
+  background: var(--green, #425442);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s var(--ease-out-quart);
+}
+.nav a.tactile:hover {
+  background: rgba(66, 84, 66, 0.14);
+}
+.nav a.tactile:hover::after {
+  transform: scaleX(1);
+}
+.nav a.tactile:active {
+  transform: translateY(1px);
+}
+.nav a.tactile.active {
+  background: var(--green, #425442);
+  color: var(--paper, #EAE7DD);
+  animation: none;
+}
+.nav a.tactile.active::before {
+  background: var(--paper, #EAE7DD);
+  box-shadow: 0 0 0 0 rgba(234, 231, 221, 0.55);
+  animation: navTabPulseActive 2.4s var(--ease-out-quart) infinite;
+}
+.nav a.tactile.active::after {
+  display: none;
+}
+
+@keyframes navTabPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(66, 84, 66, 0.55); }
+  60%  { box-shadow: 0 0 0 7px rgba(66, 84, 66, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(66, 84, 66, 0);    }
+}
+@keyframes navTabPulseActive {
+  0%   { box-shadow: 0 0 0 0   rgba(234, 231, 221, 0.55); }
+  60%  { box-shadow: 0 0 0 7px rgba(234, 231, 221, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(234, 231, 221, 0);    }
+}
+
+@media (max-width: 800px) {
+  .nav a.tactile { gap: 6px; }
+  .nav a.tactile::before { width: 5px; height: 5px; }
+}
+
+/* ============================================================
  * Reduced-motion users — keep things readable, kill the show.
  * ============================================================ */
 @media (prefers-reduced-motion: reduce) {

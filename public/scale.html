@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — at scale</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=6">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=7">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -156,8 +156,14 @@
     font-variant-numeric: tabular-nums;
   }
   .heat .cell-h {
-    width: 14px; height: 14px;
+    height: 14px;
     background: rgba(66,84,66,0.06);
+    min-width: 0;
+  }
+  .heat .row-h { min-width: 0; }
+  .heat-wrap { overflow-x: visible; }
+  @media (max-width: 700px) {
+    .heat-wrap { overflow-x: auto; }
   }
   .heat .col-headers {
     font-size: 9px; color: rgba(26,26,26,0.55);
@@ -263,8 +269,8 @@
   <a href="/" class="home-link">luma</a>
   <a href="/insights/public-health">PUBLIC HEALTH</a>
   <a href="/insights/ministry">MINISTRY</a>
-  <a href="/scale" class="active">AT SCALE</a>
-  <a href="/global">GLOBAL</a>
+  <a href="/scale" class="tactile active">AT SCALE</a>
+  <a href="/global" class="tactile">GLOBAL</a>
   <a href="/log">AUDIT LOG</a>
   <a href="/pharma">PHARMA</a>
   <a href="/try">TRY IT</a>
@@ -417,7 +423,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/api/scale/summary">/api/scale/summary</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=6"></script>
+<script src="/assets/luma-fx.js?v=7"></script>
 <script>
   // ---------------------------------------------------------------------------
   // Helpers
@@ -645,7 +651,7 @@
     let html = "";
     // Column header row (week numbers, every 4th)
     const cols = weeks.length;
-    let header = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, 14px)">`;
+    let header = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, minmax(8px, 1fr))">`;
     header += `<div class="lbl col-headers" style="text-align:right">CHW · DISTRICT</div>`;
     weeks.forEach((w, i) => {
       header += `<div class="col-headers">${i % 4 === 0 || i === cols - 1 ? "W" + (i+1) : ""}</div>`;
@@ -654,7 +660,7 @@
     html += header;
 
     chws.forEach((c, ci) => {
-      let row = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, 14px)">`;
+      let row = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, minmax(8px, 1fr))">`;
       const label = (c.chw_name || ("CHW " + c.chw_id)) + " · " + (c.district || "");
       row += `<div class="lbl">${label.length > 22 ? label.slice(0,21) + "…" : label}</div>`;
       // Generate weekly counts: spread c.count across weeks with realistic variation

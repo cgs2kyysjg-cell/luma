@@ -515,10 +515,21 @@
     }
     .word { font-size: 56px; }
     .live-counter-row {
-      flex-direction: column; align-items: flex-start;
-      gap: 6px; font-size: 10px;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 8px;
+      font-size: 10px;
+      width: 100%;
     }
-    .live-counter-row .lc-stat .v.big { font-size: 14px; }
+    .live-counter-row .lc-stat {
+      align-self: flex-start !important;
+    }
+    /* Force both stat numbers to the same size on mobile */
+    .live-counter-row .lc-stat .v,
+    .live-counter-row .lc-stat .v.big {
+      font-size: 18px !important;
+      letter-spacing: -0.01em;
+    }
     .hero-tagline { font-size: 15px; max-width: 100%; }
     .hero-marquee { margin-top: 24px; padding-top: 12px; }
     .phone {

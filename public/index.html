@@ -53,9 +53,8 @@
     display: flex; flex-direction: column; justify-content: space-between;
   }
   .hero .right {
-    padding: 32px 36px 60px;
+    padding: 32px 36px;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    position: relative;
   }
   .top { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
   .word {
@@ -134,11 +133,12 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  /* CTA button — pinned to bottom-right column, aligns with green panel bottom strip */
+  /* CTA button — sits directly below the phone in the right column */
   .try-cta {
     display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 22px;
     padding: 14px 20px;
-    width: 460px; max-width: calc(100% - 72px);
+    width: 460px; max-width: calc(100% - 16px);
     background: var(--paper);
     color: var(--ink);
     text-decoration: none;
@@ -146,10 +146,6 @@
     font-weight: 800;
     border: 1px solid var(--ink);
     box-sizing: border-box;
-    position: absolute;
-    bottom: 60px;
-    left: 50%;
-    transform: translateX(-50%);
     transition:
       background 0.18s ease, color 0.18s ease,
       transform 0.22s cubic-bezier(0.22,1,0.36,1),
@@ -158,10 +154,10 @@
   .try-cta:hover {
     background: var(--green);
     color: var(--paper);
-    transform: translate(-50%, -2px);
+    transform: translateY(-2px);
     box-shadow: 0 10px 22px rgba(66,84,66,0.30);
   }
-  .try-cta:active { transform: translate(-50%, 0); }
+  .try-cta:active { transform: translateY(0); }
   .try-cta-pip {
     width: 7px; height: 7px; border-radius: 50%;
     background: #6CC85B;

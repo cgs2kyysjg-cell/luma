@@ -25,17 +25,8 @@
   display: inline-flex; align-items: center; gap: 6px;
   transition: background 0.15s, color 0.15s;
 }
-.nav .home-link::before {
-  content: "";
-  display: inline-block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #4A8E3F;
-  margin-right: 8px;
-  box-shadow: 0 0 0 0 rgba(74, 142, 63, 0.5);
-  animation: lumaPulse 2.4s ease-out infinite;
-  flex-shrink: 0;
-}
+/* Pulsing dot on the home link — removed by user request */
+.nav .home-link::before { display: none; }
 .nav .home-link:hover {
   background: var(--green, #425442) !important;
   color: var(--paper, #EAE7DD) !important;

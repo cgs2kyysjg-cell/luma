@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — why now · after USAID</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=14">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=15">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -43,16 +43,28 @@
   .hero-text { min-width: 0; }
   .hero-text .lede { margin-bottom: 0; }
 
+  /* Wrapper takes the grid cell; panel is absolutely positioned inside so its
+     content can never push the grid row's height (which fixes the frame-jump
+     when a new card animates in / out). */
+  .aid-col {
+    position: relative;
+    min-width: 0;
+    min-height: 380px;
+  }
   /* Aid-cut news feed — editorial, paper-toned */
   .aid-feed {
+    position: absolute;
+    inset: 0;
     background: #FFFFFF;
     color: var(--ink);
     border: 1px solid var(--ink);
     display: flex; flex-direction: column;
-    overflow: hidden; position: relative;
-    height: 100%; min-height: 380px;
+    overflow: hidden;
   }
-  @media (max-width: 1100px) { .aid-feed { height: 320px; min-height: 0; } }
+  @media (max-width: 1100px) {
+    .aid-col { position: static; min-height: 0; height: 360px; }
+    .aid-feed { position: static; height: 100%; }
+  }
 
   .aid-feed-head {
     display: flex; justify-content: space-between; align-items: center;
@@ -507,17 +519,19 @@
         ministries operate independently of donor cycles, at 5–15% of what implementing partners cost.
       </p>
     </div>
-    <aside class="aid-feed" id="aidFeed" aria-label="Live feed of foreign aid cuts">
-      <div class="aid-feed-head">
-        <span class="live">Live · Aid-cut feed</span>
-        <span class="count" id="aidCount">— events</span>
-      </div>
-      <div class="aid-feed-scroll" id="aidScroll" role="list"></div>
-      <div class="aid-feed-foot">
-        <span></span>
-        <button class="pause-btn" id="aidPause" type="button" aria-label="Pause feed">⏸ Pause</button>
-      </div>
-    </aside>
+    <div class="aid-col">
+      <aside class="aid-feed" id="aidFeed" aria-label="Live feed of foreign aid cuts">
+        <div class="aid-feed-head">
+          <span class="live">Live · Aid-cut feed</span>
+          <span class="count" id="aidCount">— events</span>
+        </div>
+        <div class="aid-feed-scroll" id="aidScroll" role="list"></div>
+        <div class="aid-feed-foot">
+          <span></span>
+          <button class="pause-btn" id="aidPause" type="button" aria-label="Pause feed">⏸ Pause</button>
+        </div>
+      </aside>
+    </div>
   </div>
 </header>
 
@@ -858,7 +872,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=14"></script>
+<script src="/assets/luma-fx.js?v=15"></script>
 <script>
   function fmtUSD(n) {
     if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";

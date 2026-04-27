@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — insights</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=8">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=9">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -599,16 +599,56 @@
 <div class="nav">
   <a href="/" class="home-link">luma</a>
   <a href="/why-now" class="tactile">WHY NOW</a>
-  <a href="/insights/public-health" id="nav-public-health">PUBLIC HEALTH</a>
-  <a href="/insights/ministry" id="nav-ministry">MINISTRY</a>
+  <a href="/insights/ministry" id="nav-insights">INSIGHTS</a>
   <a href="/scale" class="tactile">AT SCALE</a>
   <a href="/global" class="tactile">GLOBAL</a>
-  <a href="/log" id="nav-log">AUDIT LOG</a>
   <a href="/pharma" id="nav-pharma">PHARMA</a>
   <a href="/try">TRY IT</a>
+  <a href="/log" class="right-link">AUDIT LOG</a>
   <a href="/api/docs" class="right-link">API DOCS</a>
   <a href="/methodology" class="right-link">METHODOLOGY →</a>
 </div>
+
+<!-- In-page sub-tab: switch between Ministry and Public Health views -->
+<div class="subnav" id="insights-subnav">
+  <a href="/insights/ministry"      data-view="ministry">MINISTRY VIEW</a>
+  <a href="/insights/public-health" data-view="public-health">PUBLIC HEALTH VIEW</a>
+  <span class="subnav-hint">Same data layer · two consumer perspectives</span>
+</div>
+<style>
+  .subnav {
+    display: flex; align-items: center;
+    background: rgba(66,84,66,0.06);
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    padding: 0 48px;
+    overflow-x: auto;
+  }
+  .subnav a {
+    display: inline-block;
+    padding: 10px 18px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7);
+    text-decoration: none; font-weight: 700;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .subnav a:hover { color: var(--ink); }
+  .subnav a.active {
+    color: var(--green);
+    border-bottom-color: var(--green);
+  }
+  .subnav-hint {
+    margin-left: auto;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.45);
+    white-space: nowrap;
+  }
+  @media (max-width: 700px) {
+    .subnav { padding: 0 22px; }
+    .subnav-hint { display: none; }
+    .subnav a { padding: 9px 12px; font-size: 9.5px; letter-spacing: 0.14em; }
+  }
+</style>
 
 <header id="page-header">
   <div class="header-content">
@@ -631,7 +671,7 @@
   <span><a id="api-link" href="#">/API</a> · <a href="/health">/HEALTH</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=8"></script>
+<script src="/assets/luma-fx.js?v=9"></script>
 <script>
   // Determine view from URL path: /insights/pharma → pharma
   const pathParts = window.location.pathname.split("/").filter(Boolean);
@@ -640,12 +680,13 @@
   // Backward-compat: "who" is the old name for "public-health"
   if (view === "who") view = "public-health";
 
-  // Auto-highlight nav for matching view. The PHARMA tab in the simplified
-  // nav links to /pharma (pitch page), not /insights/pharma, so we skip
-  // the active state when the user is on /insights/pharma.
+  // Auto-highlight the consolidated INSIGHTS tab + the in-page sub-tab for the active view.
   if (view !== "pharma") {
-    document.getElementById("nav-" + view)?.classList.add("active");
+    document.getElementById("nav-insights")?.classList.add("active");
   }
+  document.querySelectorAll("#insights-subnav a").forEach((a) => {
+    if (a.dataset.view === view) a.classList.add("active");
+  });
   document.getElementById("api-link").href = "/api/insights/" + view;
 
   function escapeHtml(s) {

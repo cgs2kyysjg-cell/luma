@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — workflow infrastructure for community health</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=8">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=9">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -823,16 +823,174 @@
 <div class="nav">
   <a href="/" class="home-link">luma</a>
   <a href="/why-now" class="tactile">WHY NOW</a>
-  <a href="/insights/public-health">PUBLIC HEALTH</a>
-  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/insights/ministry" id="nav-insights">INSIGHTS</a>
   <a href="/scale" class="tactile">AT SCALE</a>
   <a href="/global" class="tactile">GLOBAL</a>
-  <a href="/log">AUDIT LOG</a>
   <a href="/pharma">PHARMA</a>
   <a href="/try">TRY IT</a>
+  <a href="/log" class="right-link">AUDIT LOG</a>
   <a href="/api/docs" class="right-link">API DOCS</a>
   <a href="/methodology" class="right-link">METHODOLOGY →</a>
 </div>
+
+<!-- WHY NOW banner — the math that frames the moment -->
+<a href="/why-now" class="why-banner">
+  <div class="wb-inner">
+    <div class="wb-left">
+      <div class="wb-tag">
+        <span class="wb-dot"></span> WHY NOW · 2025
+      </div>
+      <div class="wb-headline">
+        USAID used to fund 100% of African primary-care infrastructure.
+        Today, <strong>50% comes back</strong> — and the <strong>30% that ran through INGOs</strong> doesn't.
+      </div>
+      <div class="wb-sub">
+        Two gaps need filling: 20% unfunded, and the operational layer the surviving 30% used to be spent through.
+        luma is the software-native replacement for both.
+        <span class="wb-cta">READ THE THESIS →</span>
+      </div>
+    </div>
+    <div class="wb-right">
+      <div class="wb-bar" aria-hidden="true">
+        <div class="wb-seg wb-seg-returned" style="flex: 50;">
+          <div class="wb-seg-pct">50%</div>
+          <div class="wb-seg-l">RETURNED</div>
+          <div class="wb-seg-s">direct to ministries</div>
+        </div>
+        <div class="wb-seg wb-seg-unfunded" style="flex: 20;">
+          <div class="wb-seg-pct">20%</div>
+          <div class="wb-seg-l">UNFUNDED</div>
+          <div class="wb-seg-s">just gone</div>
+        </div>
+        <div class="wb-seg wb-seg-ingo" style="flex: 30;">
+          <div class="wb-seg-pct">30%</div>
+          <div class="wb-seg-l">INGO LAYER</div>
+          <div class="wb-seg-s">funds gone OR money still flows but operational capacity vanished</div>
+        </div>
+      </div>
+      <div class="wb-bar-foot">
+        <span><strong style="color:#425442;">— old USAID spend, by where it went —</strong></span>
+        <span class="wb-bar-total">100% baseline</span>
+      </div>
+    </div>
+  </div>
+</a>
+
+<style>
+  .why-banner {
+    display: block;
+    background: var(--paper);
+    border-bottom: 1px solid var(--ink);
+    text-decoration: none; color: var(--ink);
+    transition: background 0.2s ease;
+  }
+  .why-banner:hover { background: rgba(66,84,66,0.06); }
+  .wb-inner {
+    display: grid;
+    grid-template-columns: 1fr 540px;
+    gap: 36px;
+    padding: 22px 48px 24px;
+    align-items: center;
+  }
+  @media (max-width: 1100px) {
+    .wb-inner { grid-template-columns: 1fr 420px; gap: 24px; }
+  }
+  @media (max-width: 900px) {
+    .wb-inner { grid-template-columns: 1fr; gap: 18px; padding: 20px 22px 22px; }
+  }
+  .wb-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .wb-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(66,84,66,0.55);
+    animation: lumaPulse 2.4s cubic-bezier(0.22,1,0.36,1) infinite;
+  }
+  .wb-headline {
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 500;
+    margin-bottom: 10px;
+    max-width: 56ch;
+    color: var(--ink);
+  }
+  .wb-headline strong { font-weight: 800; }
+  .wb-sub {
+    font-size: 12.5px;
+    color: rgba(26,26,26,0.7);
+    line-height: 1.55;
+    max-width: 60ch;
+  }
+  .wb-cta {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+    border-bottom: 1px solid var(--green);
+    padding-bottom: 1px;
+  }
+  .wb-bar {
+    display: flex;
+    height: 90px;
+    border: 1px solid var(--ink);
+    overflow: hidden;
+  }
+  .wb-seg {
+    padding: 12px 12px 10px;
+    display: flex; flex-direction: column; justify-content: center;
+    color: var(--ink);
+    border-right: 1px solid rgba(26,26,26,0.18);
+    overflow: hidden;
+    transition: filter 0.2s ease;
+  }
+  .wb-seg:last-child { border-right: 0; }
+  .wb-seg-returned { background: rgba(66,84,66,0.18); }
+  .wb-seg-unfunded { background: rgba(198,139,63,0.30); }
+  .wb-seg-ingo     { background: var(--ink); color: var(--paper); }
+  .why-banner:hover .wb-seg { filter: brightness(1.04); }
+  .wb-seg-pct {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .wb-seg-ingo .wb-seg-pct { color: white; }
+  .wb-seg-l {
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    margin-top: 4px; font-weight: 700;
+  }
+  .wb-seg-s {
+    font-size: 9.5px; line-height: 1.35;
+    margin-top: 4px;
+    color: rgba(26,26,26,0.7);
+  }
+  .wb-seg-ingo .wb-seg-s { color: rgba(234,231,221,0.75); }
+  .wb-bar-foot {
+    display: flex; justify-content: space-between;
+    margin-top: 6px;
+    font-size: 9.5px; letter-spacing: 0.06em;
+    color: rgba(26,26,26,0.6);
+  }
+  .wb-bar-total {
+    font-variant-numeric: tabular-nums; font-weight: 700;
+    color: var(--ink);
+  }
+
+  @media (max-width: 700px) {
+    .wb-headline { font-size: 15.5px; }
+    .wb-bar { height: 78px; }
+    .wb-seg-pct { font-size: 17px; }
+    .wb-seg-s { display: none; }
+  }
+  @media (max-width: 460px) {
+    .wb-seg-l { font-size: 8px; letter-spacing: 0.12em; }
+    .wb-seg { padding: 10px 8px; }
+  }
+</style>
 
 <div class="hero">
 
@@ -1061,7 +1219,7 @@
   <span>© 2026 LUMA HEALTH</span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=8"></script>
+<script src="/assets/luma-fx.js?v=9"></script>
 <script>
   // ----- Live demo conversation loop -----
   // Loops two scenarios: a grounded answer (HIV question) + a refusal (dose request).

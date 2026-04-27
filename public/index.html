@@ -133,12 +133,12 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  /* CTA button — sits directly below the phone in the right column */
+  /* CTA button — sits directly below the phone, matched width */
   .try-cta {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     margin-top: 22px;
     padding: 14px 20px;
-    width: 460px; max-width: calc(100% - 16px);
+    width: 460px; max-width: 100%;     /* exact match to .phone */
     background: var(--paper);
     color: var(--ink);
     text-decoration: none;

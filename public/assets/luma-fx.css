@@ -489,11 +489,11 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
  * ============================================================ */
 .nav-mobile-btn {
   display: none;
-  position: relative;              /* anchor for the absolute spans */
-  align-self: center !important;
+  position: relative;                              /* anchor for absolute spans */
+  align-self: flex-end !important;                 /* sit closer to bottom border */
   width: 22px !important;
   height: 14px !important;
-  margin: 0 22px 0 auto !important;
+  margin: 0 22px 14px auto !important;             /* 14px gap above bottom border */
   background: transparent;
   border: 0;
   cursor: pointer;

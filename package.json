@@ -6,10 +6,12 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "start:prod": "node scripts/seed-demo-data.js && node server.js",
+    "start:prod": "node scripts/seed-demo-data.js && node scripts/seed-historical-data.js && node server.js",
     "dev": "node --watch server.js",
     "ingest": "node src/ingest.js",
     "seed": "node scripts/seed-demo-data.js",
+    "seed:historical": "node scripts/seed-historical-data.js",
+    "seed:historical:py": "python3 scripts/seed_historical_data.py",
     "test:claude": "node scripts/test-claude.js",
     "test:adversarial": "node scripts/test-adversarial.js",
     "setup": "bash scripts/setup.sh"

@@ -22,6 +22,17 @@ const {
   pharmaView,
   whoView,
   ministryView,
+  // Historical / scale
+  weeklyVolume,
+  weeklyDistrictBreakdown,
+  weeklySeverityBreakdown,
+  ciEvolutionByWeek,
+  topCHWs,
+  buildCohort,
+  operationalSummary,
+  // For the scale projector + multi-country
+  bayesianProportionUpdate,
+  LESOTHO_PRIORS,
 } = require("./src/projections");
 const {
   runTrialSiteSelection,
@@ -533,6 +544,389 @@ app.get("/api/insights/:view", (req, res) => {
     console.error("[api] insights failed:", err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// ----------------------------------------------------------------------------
+// /scale — operational reality dashboard (powered by historical seed)
+// ----------------------------------------------------------------------------
+
+app.get("/scale", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "scale.html"));
+});
+
+app.get("/api/scale/summary", (req, res) => {
+  try {
+    res.json(operationalSummary());
+  } catch (err) {
+    console.error("[api] scale/summary failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/scale/trends", (req, res) => {
+  try {
+    const topic = req.query.topic || null;
+    res.json({
+      weekly_volume_total: weeklyVolume(null),
+      weekly_volume_topic: topic ? weeklyVolume(topic) : null,
+      weekly_severity: weeklySeverityBreakdown(),
+      weekly_district: weeklyDistrictBreakdown(),
+    });
+  } catch (err) {
+    console.error("[api] scale/trends failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/scale/ci-evolution", (req, res) => {
+  try {
+    // HIV prevalence as the showcase indicator (it's the most-discussed Lesotho number)
+    const evol = ciEvolutionByWeek({
+      priorMean: LESOTHO_PRIORS.hiv.prevalence_adult_15_49,
+      priorEffectiveN: 200,
+      topicForSuccess: "HIV",
+    });
+    res.json({
+      indicator: "HIV prevalence among adults 15-49",
+      prior: LESOTHO_PRIORS.hiv.prevalence_adult_15_49,
+      prior_source: LESOTHO_PRIORS.hiv.source,
+      prior_effective_n: 200,
+      weekly: evol,
+    });
+  } catch (err) {
+    console.error("[api] scale/ci-evolution failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/scale/chws", (req, res) => {
+  try {
+    res.json({ chws: topCHWs(50) });
+  } catch (err) {
+    console.error("[api] scale/chws failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * /api/scale/projection — given a hypothetical CHW count and weeks-of-data,
+ * project what the HIV-prevalence Bayesian CI would look like at that scale.
+ * Math: extrapolate trials linearly with CHW count × weeks, holding success
+ * rate at the currently-observed rate. Compute Beta-Binomial CI.
+ */
+app.get("/api/scale/projection", (req, res) => {
+  try {
+    const chws = parseInt(req.query.chws || "100", 10);
+    const weeks = parseInt(req.query.weeks || "26", 10);
+    const indicator = req.query.indicator || "hiv_prevalence";
+
+    // Current observed rate from the seeded data
+    const dbRef = require("./src/db");
+    const Database = require("better-sqlite3");
+    const path2 = require("path");
+    const localDb = new Database(path2.join(__dirname, "data", "luma.db"));
+    localDb.pragma("journal_mode = WAL");
+
+    const totalRows = localDb.prepare(`SELECT COUNT(*) as n FROM case_tags`).get().n;
+    const hivRows = localDb.prepare(`SELECT COUNT(*) as n FROM case_tags WHERE topic = 'HIV'`).get().n;
+    const observedRate = totalRows > 0 ? hivRows / totalRows : 0.36;
+
+    // Current network: 50 CHWs over ~26 weeks → totalRows trials
+    const currentChws = 50;
+    const currentWeeks = 26;
+    const trialsPerChwPerWeek = totalRows / (currentChws * currentWeeks);
+    const projectedTrials = Math.round(chws * weeks * trialsPerChwPerWeek);
+    const projectedSuccesses = Math.round(projectedTrials * observedRate);
+
+    let priorMean, priorEffectiveN, label;
+    if (indicator === "hiv_prevalence") {
+      priorMean = LESOTHO_PRIORS.hiv.prevalence_adult_15_49;
+      priorEffectiveN = 200;
+      label = "HIV prevalence among adults 15-49";
+    } else {
+      priorMean = 0.10;
+      priorEffectiveN = 50;
+      label = indicator;
+    }
+
+    const post = bayesianProportionUpdate({
+      priorMean,
+      priorEffectiveN,
+      observedSuccesses: projectedSuccesses,
+      observedTrials: Math.max(projectedTrials, 1),
+    });
+
+    localDb.close();
+
+    res.json({
+      inputs: { chws, weeks, indicator },
+      derived: {
+        observed_rate_now: observedRate,
+        trials_per_chw_per_week: trialsPerChwPerWeek,
+        projected_trials: projectedTrials,
+        projected_successes: projectedSuccesses,
+      },
+      prior: { mean: priorMean, effective_n: priorEffectiveN, label },
+      posterior: {
+        mean: post.posteriorMean,
+        lower_95ci: post.lower,
+        upper_95ci: post.upper,
+        ci_width: post.upper - post.lower,
+        effective_sample_size: Math.round(post.effectiveSampleSize),
+      },
+      note:
+        "Extrapolation assumes the current per-CHW-per-week interaction rate holds " +
+        "and the observed topic-share rate stays constant. The CI tightens because " +
+        "the Beta posterior accumulates more effective sample size — purely a function " +
+        "of n, not a model of network composition shifts at scale.",
+    });
+  } catch (err) {
+    console.error("[api] scale/projection failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ----------------------------------------------------------------------------
+// /api/cohort — pharma cohort builder
+// ----------------------------------------------------------------------------
+
+app.get("/api/cohort", (req, res) => {
+  try {
+    const filter = {};
+    const passthrough = [
+      "topic", "condition_substr", "severity", "age_band", "pregnancy",
+      "hiv_status", "district", "treatment_status", "viral_load_band",
+      "regimen", "adherence", "comorbidity",
+    ];
+    for (const k of passthrough) {
+      if (req.query[k]) filter[k] = req.query[k];
+    }
+    if (req.query.min_months_on_treatment) {
+      filter.min_months_on_treatment = parseInt(req.query.min_months_on_treatment, 10);
+    }
+    if (req.query.max_months_on_treatment) {
+      filter.max_months_on_treatment = parseInt(req.query.max_months_on_treatment, 10);
+    }
+    if (req.query.tb_hiv_coinfected != null && req.query.tb_hiv_coinfected !== "") {
+      filter.tb_hiv_coinfected = req.query.tb_hiv_coinfected === "true";
+    }
+    res.json(buildCohort(filter));
+  } catch (err) {
+    console.error("[api] cohort failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * /api/cohort.csv — same query as /api/cohort but downloads as CSV.
+ */
+app.get("/api/cohort.csv", (req, res) => {
+  try {
+    const filter = {};
+    const passthrough = [
+      "topic", "condition_substr", "severity", "age_band", "pregnancy",
+      "hiv_status", "district", "treatment_status", "viral_load_band",
+      "regimen", "adherence", "comorbidity",
+    ];
+    for (const k of passthrough) {
+      if (req.query[k]) filter[k] = req.query[k];
+    }
+    if (req.query.min_months_on_treatment) {
+      filter.min_months_on_treatment = parseInt(req.query.min_months_on_treatment, 10);
+    }
+    if (req.query.max_months_on_treatment) {
+      filter.max_months_on_treatment = parseInt(req.query.max_months_on_treatment, 10);
+    }
+    if (req.query.tb_hiv_coinfected != null && req.query.tb_hiv_coinfected !== "") {
+      filter.tb_hiv_coinfected = req.query.tb_hiv_coinfected === "true";
+    }
+    const cohort = buildCohort(filter);
+    const cols = [
+      "patient_id", "created_at", "district", "topic", "condition", "severity",
+      "age_band", "pregnancy", "hiv_status", "treatment_status",
+      "viral_load_band", "months_on_treatment", "regimen", "adherence",
+      "comorbidities",
+    ];
+    const lines = [cols.join(",")];
+    for (const r of cohort.samples) {
+      const row = cols.map((c) => {
+        let v = r[c];
+        if (Array.isArray(v)) v = v.join("|");
+        if (v == null) v = "";
+        v = String(v).replace(/"/g, '""');
+        return /[",\n]/.test(v) ? '"' + v + '"' : v;
+      });
+      lines.push(row.join(","));
+    }
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="luma-cohort-preview.csv"`,
+    );
+    res.send(lines.join("\n"));
+  } catch (err) {
+    console.error("[api] cohort.csv failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ----------------------------------------------------------------------------
+// /global — multi-country Bayesian comparison
+// ----------------------------------------------------------------------------
+
+const COUNTRY_PRIORS = {
+  Lesotho: {
+    population: 2_337_423,
+    hiv_prevalence: 0.185,        // UNAIDS 2023
+    hiv_prevalence_label: "18.5%",
+    tb_incidence_per_100k: 664,   // WHO 2023
+    mmr_per_100k: 566,            // WHO 2020
+    u5_mortality_per_1000: 72.2,  // World Bank 2022
+    contraceptive_prevalence: 0.598,
+    chws_in_network: 11000,
+    chw_label: "Village Health Workers (VHWs)",
+    languages: ["Sesotho", "English"],
+    sources: {
+      hiv: "Lesotho NAC State of AIDS Response 2024",
+      tb: "WHO Global TB Report 2024",
+      mmr: "World Bank/WHO 2020",
+      u5: "World Bank 2022",
+      cpr: "Lesotho DHS",
+      chw: "Ministry of Health/UNDP 2024",
+    },
+  },
+  Botswana: {
+    population: 2_521_139,
+    hiv_prevalence: 0.197,        // UNAIDS 2024
+    hiv_prevalence_label: "19.7%",
+    tb_incidence_per_100k: 235,
+    mmr_per_100k: 160,
+    u5_mortality_per_1000: 43.5,
+    contraceptive_prevalence: 0.804,
+    chws_in_network: null,
+    chw_label: "Family Welfare Educators",
+    languages: ["Setswana", "English"],
+    sources: {
+      hiv: "UNAIDS 2024",
+      tb: "WHO Global TB Report 2021",
+      mmr: "World Bank/WHO 2007–2011",
+      u5: "World Bank 2023",
+      cpr: "Botswana Demographic Survey",
+      chw: "Ministry of Health (figure not public)",
+    },
+  },
+  Eswatini: {
+    population: 1_242_822,
+    hiv_prevalence: 0.270,        // UNAIDS 2024 — highest in the world
+    hiv_prevalence_label: "27.0%",
+    tb_incidence_per_100k: 319,
+    mmr_per_100k: 590,
+    u5_mortality_per_1000: 45,
+    contraceptive_prevalence: 0.66,
+    chws_in_network: null,
+    chw_label: "Rural Health Motivators",
+    languages: ["siSwati", "English"],
+    sources: {
+      hiv: "UNAIDS 2024",
+      tb: "WHO/CDC Country Profile 2024",
+      mmr: "WHO/UNAIDS 2023",
+      u5: "World Bank 2023",
+      cpr: "DHS",
+      chw: "AU 2-million-CHW initiative",
+    },
+  },
+  Malawi: {
+    population: 21_655_286,
+    hiv_prevalence: 0.071,        // National AIDS Commission 2022
+    hiv_prevalence_label: "7.1%",
+    tb_incidence_per_100k: 132,   // WHO 2021
+    mmr_per_100k: 381,
+    u5_mortality_per_1000: 38.3,
+    contraceptive_prevalence: 0.66,
+    chws_in_network: 11000,
+    chw_label: "Health Surveillance Assistants (HSAs)",
+    languages: ["Chichewa", "English"],
+    sources: {
+      hiv: "Malawi National AIDS Commission 2022",
+      tb: "WHO Global TB Report 2021",
+      mmr: "World Bank/WHO 2020",
+      u5: "World Bank 2023",
+      cpr: "Malawi NSO 2024",
+      chw: "Malawi Community Health Strategy",
+    },
+  },
+};
+
+app.get("/global", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "global.html"));
+});
+
+app.get("/api/global/countries", (req, res) => {
+  // For each country, compute a Bayesian projection using the published
+  // prior + (illustrative) hypothetical CHW signal. For the prototype,
+  // Lesotho uses real seeded data; other countries show prior-only
+  // projections (no CHW network deployed yet).
+  try {
+    const out = {};
+    for (const [country, p] of Object.entries(COUNTRY_PRIORS)) {
+      let posterior = null;
+      if (country === "Lesotho") {
+        // Real seeded data
+        const Database = require("better-sqlite3");
+        const path2 = require("path");
+        const localDb = new Database(path2.join(__dirname, "data", "luma.db"));
+        localDb.pragma("journal_mode = WAL");
+        const total = localDb.prepare(`SELECT COUNT(*) as n FROM case_tags`).get().n;
+        const hiv = localDb.prepare(`SELECT COUNT(*) as n FROM case_tags WHERE topic = 'HIV'`).get().n;
+        localDb.close();
+        const post = bayesianProportionUpdate({
+          priorMean: p.hiv_prevalence,
+          priorEffectiveN: 200,
+          observedSuccesses: hiv,
+          observedTrials: Math.max(total, 1),
+        });
+        posterior = {
+          mean: post.posteriorMean,
+          lower_95ci: post.lower,
+          upper_95ci: post.upper,
+          observed_trials: total,
+          observed_successes: hiv,
+          effective_sample_size: Math.round(post.effectiveSampleSize),
+          status: "data_dominated",
+        };
+      } else {
+        // Prior-only (no deployment yet) — posterior = prior with prior-only width
+        const post = bayesianProportionUpdate({
+          priorMean: p.hiv_prevalence,
+          priorEffectiveN: 200,
+          observedSuccesses: 0,
+          observedTrials: 0,
+        });
+        posterior = {
+          mean: post.posteriorMean,
+          lower_95ci: post.lower,
+          upper_95ci: post.upper,
+          observed_trials: 0,
+          observed_successes: 0,
+          effective_sample_size: 200,
+          status: "prior_only",
+        };
+      }
+      out[country] = { ...p, hiv_posterior: posterior };
+    }
+    res.json({ countries: out });
+  } catch (err) {
+    console.error("[api] global/countries failed:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ----------------------------------------------------------------------------
+// /investors — data room
+// ----------------------------------------------------------------------------
+
+app.get("/investors", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "investors.html"));
 });
 
 // ----------------------------------------------------------------------------

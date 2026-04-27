@@ -335,6 +335,8 @@
   <a href="/" class="home-link">luma</a>
   <a href="/insights/public-health">PUBLIC HEALTH</a>
   <a href="/insights/ministry">MINISTRY</a>
+  <a href="/scale">AT SCALE</a>
+  <a href="/global">GLOBAL</a>
   <a href="/log">AUDIT LOG</a>
   <a href="/pharma" class="active">PHARMA</a>
   <a href="/try">TRY IT</a>
@@ -853,6 +855,327 @@
   </div>
 </section>
 
+<!-- ============================================================ -->
+<!-- COHORT BUILDER — pharma RWE killer feature, deep version      -->
+<!-- ============================================================ -->
+<section class="cb-section" style="background: rgba(66,84,66,0.04); border-top: 1px solid rgba(26,26,26,0.18);">
+  <div class="label">INTERACTIVE — COHORT BUILDER</div>
+  <h2>Build a cohort. Get the count.</h2>
+  <h3>Eligibility criteria → matched patient population from luma's structured CHW interaction log. Real fields. Downloadable CSV. This is what RWE feasibility looks like at WhatsApp scale.</h3>
+
+  <style>
+    .cb-grid {
+      display: grid; grid-template-columns: 320px 1fr; gap: 28px;
+      margin-top: 18px;
+    }
+    @media (max-width: 1000px) { .cb-grid { grid-template-columns: 1fr; gap: 18px; } }
+    .cb-controls {
+      background: white;
+      border: 1px solid rgba(26,26,26,0.2);
+      padding: 18px;
+    }
+    .cb-controls .ctitle {
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      margin-bottom: 14px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(26,26,26,0.15);
+      color: rgba(26,26,26,0.7); font-weight: 700;
+    }
+    .cb-controls .row {
+      margin-bottom: 14px;
+    }
+    .cb-controls label {
+      display: block; font-size: 10px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(26,26,26,0.7);
+      margin-bottom: 4px;
+    }
+    .cb-controls select, .cb-controls input[type=text], .cb-controls input[type=number] {
+      width: 100%; padding: 7px 8px;
+      border: 1px solid rgba(26,26,26,0.3);
+      background: white;
+      font-family: inherit; font-size: 12px;
+    }
+    .cb-controls .row.split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .cb-controls button.cb-go {
+      width: 100%; padding: 10px;
+      background: var(--green); color: white;
+      border: 0; cursor: pointer;
+      font-family: inherit;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .cb-controls button.cb-go:hover { background: #2d3a2d; }
+    .cb-controls .preset-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .cb-controls .preset-row button {
+      padding: 4px 8px;
+      background: transparent;
+      border: 1px solid rgba(26,26,26,0.3);
+      cursor: pointer;
+      font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      font-family: inherit;
+    }
+    .cb-controls .preset-row button:hover {
+      background: var(--green); color: white; border-color: var(--green);
+    }
+
+    .cb-result-card {
+      background: white;
+      border: 1px solid rgba(26,26,26,0.2);
+      padding: 22px;
+    }
+    .cb-result-card .summary {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+      padding-bottom: 18px; margin-bottom: 18px;
+      border-bottom: 1px solid rgba(26,26,26,0.15);
+    }
+    .cb-result-card .summary .ro {
+      border-left: 3px solid var(--green); padding-left: 12px;
+    }
+    .cb-result-card .summary .ro .v {
+      font-size: 32px; font-weight: 800; letter-spacing: -0.02em;
+      line-height: 1; font-variant-numeric: tabular-nums;
+    }
+    .cb-result-card .summary .ro .l {
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(26,26,26,0.6); margin-top: 6px;
+    }
+
+    .cb-section-h {
+      font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(26,26,26,0.65); font-weight: 700;
+      margin: 16px 0 10px;
+    }
+    .cb-district-bars {
+      display: grid; grid-template-columns: 130px 1fr 50px;
+      gap: 8px; align-items: center;
+      font-size: 12px;
+    }
+    .cb-district-bars > div {
+      padding: 5px 0;
+      border-bottom: 1px dotted rgba(26,26,26,0.12);
+    }
+    .cb-district-bars .b {
+      height: 12px; background: rgba(26,26,26,0.06); position: relative;
+    }
+    .cb-district-bars .b .fill {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      background: var(--green);
+    }
+    .cb-district-bars .v {
+      text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+    }
+
+    .cb-trend {
+      width: 100%; height: 90px;
+    }
+
+    .cb-csv-table {
+      width: 100%;
+      font-size: 11px;
+      border-collapse: collapse;
+      margin-top: 6px;
+    }
+    .cb-csv-table th, .cb-csv-table td {
+      padding: 4px 6px;
+      text-align: left;
+      border-bottom: 1px solid rgba(26,26,26,0.1);
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    .cb-csv-table th {
+      font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(26,26,26,0.6);
+      background: rgba(26,26,26,0.03);
+    }
+    .cb-csv-wrap {
+      max-height: 320px; overflow: auto;
+      border: 1px solid rgba(26,26,26,0.1);
+      margin-top: 6px;
+    }
+    .cb-download {
+      display: inline-block;
+      padding: 7px 14px; margin-top: 12px;
+      background: var(--ink); color: white;
+      text-decoration: none;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      font-weight: 700;
+    }
+    .cb-download:hover { background: var(--green); color: white; }
+
+    .cb-empty {
+      padding: 30px 0; text-align: center;
+      color: rgba(26,26,26,0.45);
+      font-style: italic; font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .cb-result-card .summary { grid-template-columns: 1fr; gap: 12px; }
+      .cb-result-card .summary .ro .v { font-size: 24px; }
+    }
+  </style>
+
+  <div class="cb-grid">
+
+    <!-- Controls -->
+    <div class="cb-controls">
+      <div class="ctitle">Eligibility criteria</div>
+
+      <div class="row">
+        <label>Topic</label>
+        <select id="cb-topic">
+          <option value="">(any)</option>
+          <option value="HIV">HIV</option>
+          <option value="TB">TB</option>
+          <option value="MNCH">MNCH</option>
+          <option value="FP">FP</option>
+          <option value="STI">STI</option>
+          <option value="Nutrition">Nutrition</option>
+          <option value="Immunization">Immunization</option>
+        </select>
+      </div>
+
+      <div class="row split">
+        <div>
+          <label>Severity</label>
+          <select id="cb-severity">
+            <option value="">(any)</option>
+            <option value="routine">Routine</option>
+            <option value="urgent">Urgent</option>
+            <option value="emergency">Emergency</option>
+          </select>
+        </div>
+        <div>
+          <label>Age band</label>
+          <select id="cb-age">
+            <option value="">(any)</option>
+            <option value="under_5">Under 5</option>
+            <option value="child_5_14">5–14</option>
+            <option value="adolescent_15_19">15–19</option>
+            <option value="adult_20_49">20–49</option>
+            <option value="older_adult_50plus">50+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row split">
+        <div>
+          <label>Pregnancy</label>
+          <select id="cb-preg">
+            <option value="">(any)</option>
+            <option value="pregnant">Pregnant</option>
+            <option value="postpartum">Postpartum</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div>
+          <label>HIV status</label>
+          <select id="cb-hiv">
+            <option value="">(any)</option>
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>District</label>
+        <select id="cb-district">
+          <option value="">(all)</option>
+          <option>Maseru</option>
+          <option>Berea</option>
+          <option>Leribe</option>
+          <option>Mafeteng</option>
+          <option>Mohale's Hoek</option>
+          <option>Quthing</option>
+          <option>Qacha's Nek</option>
+          <option>Mokhotlong</option>
+          <option>Thaba-Tseka</option>
+          <option>Butha-Buthe</option>
+        </select>
+      </div>
+
+      <div class="ctitle" style="margin-top: 22px;">HIV-specific (optional)</div>
+
+      <div class="row">
+        <label>Treatment status</label>
+        <select id="cb-tx">
+          <option value="">(any)</option>
+          <option value="on_art">On ART</option>
+          <option value="defaulted">Defaulted</option>
+          <option value="naive">ART-naive</option>
+          <option value="pre_art">Pre-ART</option>
+          <option value="prep_eligible">PrEP-eligible</option>
+        </select>
+      </div>
+
+      <div class="row split">
+        <div>
+          <label>Viral load</label>
+          <select id="cb-vl">
+            <option value="">(any)</option>
+            <option value="suppressed">Suppressed</option>
+            <option value="low_detectable">Low det.</option>
+            <option value="high">High</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+        <div>
+          <label>Regimen</label>
+          <select id="cb-reg">
+            <option value="">(any)</option>
+            <option value="TLD">TLD</option>
+            <option value="TLE">TLE</option>
+            <option value="second_line">2nd line</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row split">
+        <div>
+          <label>Min months on tx</label>
+          <input type="number" id="cb-min-mot" min="0" max="120" placeholder="e.g. 6"/>
+        </div>
+        <div>
+          <label>Max months on tx</label>
+          <input type="number" id="cb-max-mot" min="0" max="120" placeholder="e.g. 24"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Comorbidity</label>
+        <select id="cb-cm">
+          <option value="">(any)</option>
+          <option value="TB">TB</option>
+          <option value="HIV">HIV</option>
+        </select>
+      </div>
+
+      <button class="cb-go" id="cb-go">RUN COHORT QUERY <span style="margin-left:6px;">→</span></button>
+
+      <div class="ctitle" style="margin-top: 22px;">Presets</div>
+      <div class="preset-row">
+        <button data-preset="art_switch">ART switch trial</button>
+        <button data-preset="prep">PrEP-eligible</button>
+        <button data-preset="defaulters">HIV defaulters</button>
+        <button data-preset="anc_emergency">ANC emergency</button>
+        <button data-preset="mdr_tb">MDR-TB</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="cb-result-card" id="cb-result">
+      <div class="cb-empty">Run a query — left side. The result panel hydrates here.</div>
+    </div>
+
+  </div>
+</section>
+
 <section>
   <h2>PRICING</h2>
   <h3>Tiers scaled to deal complexity.</h3>
@@ -1165,6 +1488,195 @@
     resultEl.style.display = "block";
     resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+</script>
+
+<!-- Cohort Builder script -->
+<script>
+(() => {
+  const FIELDS = {
+    topic: "cb-topic",
+    severity: "cb-severity",
+    age_band: "cb-age",
+    pregnancy: "cb-preg",
+    hiv_status: "cb-hiv",
+    district: "cb-district",
+    treatment_status: "cb-tx",
+    viral_load_band: "cb-vl",
+    regimen: "cb-reg",
+    min_months_on_treatment: "cb-min-mot",
+    max_months_on_treatment: "cb-max-mot",
+    comorbidity: "cb-cm",
+  };
+
+  const PRESETS = {
+    art_switch: {
+      topic: "HIV", treatment_status: "on_art", viral_load_band: "suppressed",
+      regimen: "TLD", min_months_on_treatment: "6", age_band: "adult_20_49",
+    },
+    prep: {
+      topic: "HIV", treatment_status: "prep_eligible", hiv_status: "negative",
+    },
+    defaulters: {
+      topic: "HIV", treatment_status: "defaulted",
+    },
+    anc_emergency: {
+      topic: "MNCH", severity: "emergency", pregnancy: "pregnant",
+    },
+    mdr_tb: {
+      topic: "TB", regimen: "", treatment_status: "",
+      // condition_substr would be ideal but it's not exposed in UI
+    },
+  };
+
+  function buildQuery() {
+    const params = new URLSearchParams();
+    for (const [k, id] of Object.entries(FIELDS)) {
+      const el = document.getElementById(id);
+      if (el && el.value && el.value.trim()) params.set(k, el.value.trim());
+    }
+    return params;
+  }
+
+  function fmtNum(n) { return n == null ? "—" : n.toLocaleString(); }
+
+  function renderResult(d) {
+    const total = d.matched_count;
+    const filterCount = Object.keys(d.filter || {}).length;
+
+    // Trend SVG
+    const trend = d.weekly_trend || [];
+    let trendSvg = "";
+    if (trend.length > 1) {
+      const W = 600, H = 60, M = { l: 4, r: 4, t: 4, b: 4 };
+      const pw = W - M.l - M.r, ph = H - M.t - M.b;
+      const max = Math.max(...trend.map(t => t.count), 1);
+      let path = "";
+      trend.forEach((t, i) => {
+        const x = M.l + (i / (trend.length - 1 || 1)) * pw;
+        const y = M.t + ph - (t.count / max) * ph;
+        path += (i === 0 ? "M" : "L") + x + " " + y + " ";
+      });
+      let area = path + `L ${M.l + pw} ${M.t + ph} L ${M.l} ${M.t + ph} Z`;
+      trendSvg = `<svg class="cb-trend" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <path d="${area}" fill="rgba(66,84,66,0.15)"/>
+        <path d="${path}" fill="none" stroke="#425442" stroke-width="1.5"/>
+      </svg>`;
+    }
+
+    // District bars
+    const districts = d.by_district || [];
+    const maxD = Math.max(...districts.map(r => r.count), 1);
+    let dHtml = "";
+    if (districts.length > 0) {
+      dHtml = districts.slice(0, 10).map(r => `
+        <div>${r.district || "—"}</div>
+        <div class="b"><div class="fill" style="width:${(r.count/maxD*100).toFixed(1)}%"></div></div>
+        <div class="v">${fmtNum(r.count)}</div>
+      `).join("");
+    } else {
+      dHtml = `<div style="grid-column: 1/-1; color: rgba(26,26,26,0.5); font-style: italic;">No district matches.</div>`;
+    }
+
+    // Sample table
+    const samples = d.samples || [];
+    let tableHtml = "";
+    if (samples.length > 0) {
+      const cols = [
+        ["patient_id", "ID"],
+        ["created_at", "Date"],
+        ["district", "District"],
+        ["topic", "Topic"],
+        ["condition", "Condition"],
+        ["severity", "Sev."],
+        ["age_band", "Age"],
+        ["hiv_status", "HIV"],
+        ["treatment_status", "Tx"],
+        ["viral_load_band", "VL"],
+        ["months_on_treatment", "Mo."],
+        ["regimen", "Regimen"],
+        ["adherence", "Adh."],
+      ];
+      tableHtml = `<table class="cb-csv-table">
+        <thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr></thead>
+        <tbody>${samples.map(s => `<tr>${
+          cols.map(c => `<td>${s[c[0]] != null ? String(s[c[0]]).replace(/T.*$/,"").slice(0,16) : "—"}</td>`).join("")
+        }</tr>`).join("")}</tbody>
+      </table>`;
+    }
+
+    // Build CSV download URL
+    const params = buildQuery();
+    const csvUrl = "/api/cohort.csv?" + params.toString();
+
+    document.getElementById("cb-result").innerHTML = `
+      <div class="summary">
+        <div class="ro">
+          <div class="v">${fmtNum(total)}</div>
+          <div class="l">matched patients</div>
+        </div>
+        <div class="ro">
+          <div class="v">${districts.length}</div>
+          <div class="l">districts</div>
+        </div>
+        <div class="ro">
+          <div class="v">${filterCount}</div>
+          <div class="l">criteria applied</div>
+        </div>
+      </div>
+
+      ${trend.length > 1 ? `
+        <div class="cb-section-h">Weekly cohort accumulation</div>
+        ${trendSvg}
+      ` : ""}
+
+      <div class="cb-section-h">By district</div>
+      <div class="cb-district-bars">${dHtml}</div>
+
+      <div class="cb-section-h">Cohort sample · 50 anonymised rows</div>
+      <div class="cb-csv-wrap">${tableHtml || `<div class="cb-empty">No matching patients in luma's log for this query.</div>`}</div>
+      ${samples.length > 0 ? `<a href="${csvUrl}" class="cb-download" download>↓ Download cohort CSV</a>` : ""}
+
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dotted rgba(26,26,26,0.18); font-size: 11px; color: rgba(26,26,26,0.55); line-height: 1.5;">
+        ${d.methodology_note || ""}
+      </div>
+    `;
+  }
+
+  document.getElementById("cb-go").addEventListener("click", async () => {
+    const params = buildQuery();
+    document.getElementById("cb-result").innerHTML = `<div class="cb-empty">Querying luma's interaction log…</div>`;
+    try {
+      const res = await fetch("/api/cohort?" + params.toString());
+      const d = await res.json();
+      if (d.error) {
+        document.getElementById("cb-result").innerHTML = `<div class="cb-empty">Error: ${d.error}</div>`;
+        return;
+      }
+      renderResult(d);
+    } catch (err) {
+      document.getElementById("cb-result").innerHTML = `<div class="cb-empty">Request failed: ${err.message}</div>`;
+    }
+  });
+
+  // Presets
+  document.querySelectorAll(".cb-controls .preset-row button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.getAttribute("data-preset");
+      // Reset all
+      Object.values(FIELDS).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      const preset = PRESETS[key] || {};
+      for (const [k, v] of Object.entries(preset)) {
+        const el = document.getElementById(FIELDS[k]);
+        if (el) el.value = v;
+      }
+      // Auto-run
+      document.getElementById("cb-go").click();
+    });
+  });
+})();
 </script>
 
 </body>

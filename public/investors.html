@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — investors</title>
+<link rel="stylesheet" href="/assets/luma-fx.css?v=6">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.6;
+  }
+  header { padding: 32px 48px 20px; border-bottom: 1px solid var(--ink); }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0;
+  }
+  h1 .accent { color: var(--green); }
+  .lede { margin-top: 14px; font-size: 14px; max-width: 70ch; color: rgba(26,26,26,0.85); }
+
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+
+  main { padding: 0 48px 80px; max-width: 1200px; margin: 0 auto; }
+  .module {
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    padding: 36px 0 28px;
+  }
+  .module h2 {
+    font-size: 24px; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 6px; line-height: 1.0;
+  }
+  .module .sub {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 18px;
+  }
+  .module p {
+    font-size: 14px; color: rgba(26,26,26,0.9);
+    max-width: 80ch; margin: 0 0 12px;
+  }
+  .module p:last-child { margin: 0; }
+
+  /* Headline numbers strip */
+  .headline {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: rgba(66,84,66,0.04);
+  }
+  .headline .cell {
+    padding: 22px 24px;
+    border-right: 1px solid rgba(26,26,26,0.15);
+  }
+  .headline .cell:last-child { border-right: 0; }
+  .headline .v {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+    color: var(--green);
+  }
+  .headline .l {
+    margin-top: 6px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6);
+  }
+  .headline .sub-num {
+    margin-top: 8px;
+    font-size: 11px; color: rgba(26,26,26,0.65);
+  }
+
+  /* TAM/SAM/SOM math */
+  .tamssm {
+    background: white;
+    border: 1px solid rgba(26,26,26,0.2);
+    padding: 22px;
+    margin-top: 14px;
+  }
+  .tamssm .level {
+    padding: 14px 0;
+    border-bottom: 1px dotted rgba(26,26,26,0.2);
+    display: grid; grid-template-columns: 90px 1fr 140px;
+    gap: 20px; align-items: center;
+  }
+  .tamssm .level:last-child { border-bottom: 0; }
+  .tamssm .lvl-tag {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 800; color: var(--green);
+  }
+  .tamssm .lvl-desc {
+    font-size: 12.5px; color: rgba(26,26,26,0.85); line-height: 1.5;
+  }
+  .tamssm .lvl-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px; font-weight: 800; letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .tamssm .lvl-currency {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-top: 2px;
+  }
+
+  /* Milestones timeline */
+  .timeline {
+    margin-top: 14px;
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: ""; position: absolute;
+    left: 6px; top: 4px; bottom: 4px;
+    width: 2px;
+    background: rgba(66,84,66,0.4);
+  }
+  .timeline .milestone {
+    position: relative;
+    padding: 10px 0 18px;
+  }
+  .timeline .milestone::before {
+    content: ""; position: absolute;
+    left: -27px; top: 14px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 3px solid var(--paper);
+  }
+  .timeline .when {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+  }
+  .timeline .what {
+    font-size: 14px; font-weight: 700; margin-top: 2px;
+  }
+  .timeline .why {
+    font-size: 12.5px; color: rgba(26,26,26,0.7); margin-top: 4px;
+  }
+
+  /* Hiring grid */
+  .hiring {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  @media (max-width: 1000px) { .hiring { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .hiring { grid-template-columns: 1fr; } }
+  .role-card {
+    background: white;
+    border: 1px solid rgba(26,26,26,0.2);
+    padding: 16px;
+  }
+  .role-card .role-when {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 4px;
+  }
+  .role-card .role-title {
+    font-size: 14px; font-weight: 700; margin-bottom: 4px;
+  }
+  .role-card .role-why {
+    font-size: 12px; color: rgba(26,26,26,0.7); line-height: 1.5;
+  }
+
+  /* Competitor grid */
+  .compete {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.6fr;
+    gap: 0;
+    border: 1px solid rgba(26,26,26,0.2);
+    margin-top: 14px;
+    background: white;
+  }
+  .compete .ch, .compete .cc {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(26,26,26,0.1);
+    border-right: 1px solid rgba(26,26,26,0.1);
+    font-size: 12.5px;
+  }
+  .compete .ch {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    background: rgba(26,26,26,0.04);
+    font-weight: 700;
+  }
+  .compete .luma { background: rgba(66,84,66,0.07); font-weight: 700; }
+
+  /* Pricing model */
+  .pmodel {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    margin-top: 14px;
+  }
+  @media (max-width: 800px) { .pmodel { grid-template-columns: 1fr; } }
+  .pmodel .ptier {
+    border: 1px solid rgba(26,26,26,0.2);
+    background: white;
+    padding: 18px;
+  }
+  .pmodel .ptier .ptag {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+  }
+  .pmodel .ptier .pprice {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+    margin: 8px 0 4px;
+  }
+  .pmodel .ptier .pwho {
+    font-size: 12.5px; color: rgba(26,26,26,0.75);
+  }
+
+  /* Sources */
+  .sources {
+    background: rgba(26,26,26,0.04);
+    padding: 16px;
+    margin-top: 12px;
+    font-size: 11px; line-height: 1.6;
+    color: rgba(26,26,26,0.7);
+  }
+  .sources strong {
+    color: var(--ink); font-weight: 700;
+  }
+  .sources ul { margin: 6px 0 0; padding-left: 16px; }
+  .sources li { margin-bottom: 3px; }
+
+  /* Risk grid */
+  .risk-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    margin-top: 14px;
+  }
+  @media (max-width: 800px) { .risk-grid { grid-template-columns: 1fr; } }
+  .risk {
+    background: white;
+    border-left: 3px solid var(--amber);
+    padding: 14px 16px;
+  }
+  .risk .rh {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 4px;
+  }
+  .risk .rd { font-size: 12.5px; color: rgba(26,26,26,0.8); }
+  .risk .rmit {
+    font-size: 11.5px; margin-top: 8px;
+    color: rgba(66,84,66,0.95);
+  }
+  .risk .rmit::before { content: "↳ "; }
+
+  footer {
+    padding: 22px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  @media (max-width: 900px) {
+    header { padding: 26px 22px 16px; }
+    h1 { font-size: 30px !important; }
+    main { padding: 0 22px 56px; }
+    .module h2 { font-size: 20px; }
+    .headline { grid-template-columns: repeat(2, 1fr); }
+    .headline .cell { border-bottom: 1px solid rgba(26,26,26,0.12); }
+    .headline .v { font-size: 22px; }
+    .tamssm .level { grid-template-columns: 70px 1fr; gap: 12px; }
+    .tamssm .level .lvl-num { grid-column: 1/-1; text-align: left; }
+    .compete { grid-template-columns: 1fr; font-size: 11.5px; }
+    footer { padding: 16px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/scale">AT SCALE</a>
+  <a href="/global">GLOBAL</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/try">TRY IT</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · INVESTOR DATA ROOM</span>
+    <span>YC W26</span>
+  </div>
+  <h1>SUB-SAHARAN HEALTH WORKFLOW.<br/><span class="accent">FOUR-LAYER REVENUE.</span></h1>
+  <p class="lede">
+    luma is workflow infrastructure for community health workers in sub-Saharan Africa, billing four parties for the same operational data: ministries (workflow license), pharma RWE buyers (cohort data), public-health funders (surveillance API), and academic researchers (de-identified protocol). Lesotho is live; the framework extends to every country with a stipended CHW network and WhatsApp penetration.
+  </p>
+</header>
+
+<section class="headline">
+  <div class="cell">
+    <div class="v">$8.4B</div>
+    <div class="l">TAM · SSA digital health workforce</div>
+    <div class="sub-num">addressable annually by 2030</div>
+  </div>
+  <div class="cell">
+    <div class="v">$1.1B</div>
+    <div class="l">SAM · CHW workflow + pharma RWE</div>
+    <div class="sub-num">7 SSA countries × 4 buyer types</div>
+  </div>
+  <div class="cell">
+    <div class="v">$28M</div>
+    <div class="l">SOM · 36-month obtainable</div>
+    <div class="sub-num">Lesotho beachhead → 4 countries</div>
+  </div>
+  <div class="cell">
+    <div class="v">$1.5M</div>
+    <div class="l">Seed ask · 18-month runway</div>
+    <div class="sub-num">5 hires · MoU → 3 country contracts</div>
+  </div>
+</section>
+
+<main>
+
+  <!-- Market sizing -->
+  <section class="module">
+    <div class="sub">Module 01 · Market sizing</div>
+    <h2>The bottom-up math</h2>
+    <p>
+      luma sells the same operational dataset to four buyer types in parallel. Each layer compounds: ministries pay for workflow, pharma pays for RWE access, funders pay for surveillance APIs, researchers pay for de-identified data. The math is bottom-up, country-by-country.
+    </p>
+
+    <div class="tamssm">
+
+      <div class="level">
+        <div class="lvl-tag">TAM</div>
+        <div class="lvl-desc">
+          <strong>Sub-Saharan digital health workforce platform.</strong> 1.4M+ stipended CHWs across SSA × $300/yr workflow license + $25M/yr per-country pharma RWE + $5M/yr per-country surveillance API + research licenses. WHO + AU "2 million CHWs" initiative locks in the denominator.
+        </div>
+        <div>
+          <div class="lvl-num">$8.4B</div>
+          <div class="lvl-currency">USD / yr (2030)</div>
+        </div>
+      </div>
+
+      <div class="level">
+        <div class="lvl-tag">SAM</div>
+        <div class="lvl-desc">
+          <strong>7 priority countries × 4 buyer types.</strong> Lesotho, Eswatini, Botswana, Malawi, Zambia, Zimbabwe, Mozambique — high-burden, English/Bantu language coverage, government-run CHW programs. Sums to ~85k CHWs and pharma trial-site demand for HIV/TB/MNCH.
+        </div>
+        <div>
+          <div class="lvl-num">$1.1B</div>
+          <div class="lvl-currency">USD / yr</div>
+        </div>
+      </div>
+
+      <div class="level">
+        <div class="lvl-tag">SOM</div>
+        <div class="lvl-desc">
+          <strong>4 countries by month 36, two anchor pharma contracts.</strong> Lesotho ($2.4M ARR full deployment), then Eswatini ($1.8M), Botswana ($3.1M), Malawi ($8.6M). Pharma RWE: 2 anchor contracts × $5–8M = $12M–16M. SOM = workflow + pharma layers only.
+        </div>
+        <div>
+          <div class="lvl-num">$28M</div>
+          <div class="lvl-currency">ARR by month 36</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="sources">
+      <strong>Sources:</strong>
+      <ul>
+        <li>African Union "2 Million CHWs" initiative (2017) for the workforce denominator across SSA.</li>
+        <li>UNAIDS country factsheets (2023–2024) for HIV-burden trial-eligible populations per country.</li>
+        <li>PEPFAR Country Operational Plans for ART/PMTCT cascade volumes per district.</li>
+        <li>WHO Africa Region health workforce density estimates (2021).</li>
+        <li>Pharma RWE comparable: Sermo / Truveta / Datavant per-country data licensing benchmarks.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 18-month milestones -->
+  <section class="module">
+    <div class="sub">Module 02 · 18-month plan</div>
+    <h2>What $1.5M buys</h2>
+    <p>5-person team, 18 months. The plan is paced to the partnership signal we already have, not invented backwards from a target raise.</p>
+
+    <div class="timeline">
+      <div class="milestone">
+        <div class="when">Month 0–3 · Now</div>
+        <div class="what">Ministry of Health Lesotho MoU → pilot agreement</div>
+        <div class="why">Existing engagement; conversion into a paid pilot covering 3 districts (~250 CHWs) at $250k/yr.</div>
+      </div>
+      <div class="milestone">
+        <div class="when">Month 3–6</div>
+        <div class="what">First pharma RWE contract — anchor partner LOI → executed agreement</div>
+        <div class="why">Cohort builder + trial-site selection productised; one anchor at $1–2M/yr against Lesotho HIV/TB cohorts.</div>
+      </div>
+      <div class="milestone">
+        <div class="when">Month 6–9</div>
+        <div class="what">National Lesotho expansion — all 10 districts, ~1,500 CHWs</div>
+        <div class="why">Government-paid workflow line ramps to $2.4M ARR. Pharma layer crosses $1M ARR.</div>
+      </div>
+      <div class="milestone">
+        <div class="when">Month 9–12</div>
+        <div class="what">Country #2: Eswatini deployment</div>
+        <div class="why">Highest HIV prevalence on Earth + tiny country = fast cycle. siSwati ASR retraining off Sesotho base.</div>
+      </div>
+      <div class="milestone">
+        <div class="when">Month 12–18</div>
+        <div class="what">Country #3 + second pharma anchor</div>
+        <div class="why">Botswana (procurement-mature) or Malawi (largest CHW network). Second pharma at $5–8M/yr against multi-country cohort.</div>
+      </div>
+      <div class="milestone">
+        <div class="when">Month 18 · Series A</div>
+        <div class="what">Run rate $6–9M ARR · 2 countries live · 2 pharma anchors</div>
+        <div class="why">Series A target $8–12M to fund Country #4–7 + pharma RWE GTM team.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hiring plan -->
+  <section class="module">
+    <div class="sub">Module 03 · Hiring plan</div>
+    <h2>5 hires, 18 months</h2>
+    <p>Founder builds (full-stack + clinical-product fluency). First five hires unblock the GTM and deepen the platform.</p>
+
+    <div class="hiring">
+      <div class="role-card">
+        <div class="role-when">Hire 01 · Month 1</div>
+        <div class="role-title">Lesotho country lead</div>
+        <div class="role-why">In-country, Sesotho-speaking, public-health background. Owns ministry relationship, CHW onboarding, district expansion. Likely ex-PEPFAR / ex-MoH.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-when">Hire 02 · Month 3</div>
+        <div class="role-title">Senior backend / data engineer</div>
+        <div class="role-why">Owns the Bayesian projection layer + cohort builder + the pharma RWE API surface. Python or Go. Comfortable with Bayesian stats + healthcare data.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-when">Hire 03 · Month 4</div>
+        <div class="role-title">Pharma RWE GTM lead</div>
+        <div class="role-why">Sales + clinical research org. Books the first anchor pharma contract. Comp = base + commission tied to anchor signing.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-when">Hire 04 · Month 8</div>
+        <div class="role-title">Clinical content / safety lead</div>
+        <div class="role-why">RN or MD with public-health field experience. Owns protocol corpus expansion, safety guardrails, evals. Reports on accuracy + refusal metrics.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-when">Hire 05 · Month 12</div>
+        <div class="role-title">Eswatini country lead</div>
+        <div class="role-why">Mirrors Hire 01 for Country #2. Government relationship + CHW operations. Hires before launch, builds trust before deployment.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="module">
+    <div class="sub">Module 04 · Pricing model</div>
+    <h2>Four buyer types, four price points</h2>
+    <p>Same platform, four pricing surfaces. The unit-economics of the pharma layer (high contract value, low marginal cost per query) are what make the workflow layer affordable for ministries.</p>
+
+    <div class="pmodel">
+      <div class="ptier">
+        <div class="ptag">Workflow · ministry</div>
+        <div class="pprice">$250k–$3M / yr</div>
+        <div class="pwho">By district size + CHW count. Volume-based commitment with a floor. National coverage target ARR per country: $2–9M.</div>
+      </div>
+      <div class="ptier">
+        <div class="ptag">Pharma RWE</div>
+        <div class="pprice">$1M–$8M / yr</div>
+        <div class="pwho">Per study × per country. Trial-site selection + cohort builder + ongoing data refresh. Tiered by exclusivity and number of indications.</div>
+      </div>
+      <div class="ptier">
+        <div class="ptag">Surveillance API</div>
+        <div class="pprice">$50k–$500k / yr</div>
+        <div class="pwho">WHO Africa region, US PEPFAR, Global Fund, country-specific surveillance programs. By data refresh cadence and indicator coverage.</div>
+      </div>
+      <div class="ptier">
+        <div class="ptag">Research</div>
+        <div class="pprice">Free → $25k</div>
+        <div class="pwho">Academic license, free with publication credit. Larger commercial-research datasets at modest fee. Generates papers that validate the platform.</div>
+      </div>
+      <div class="ptier" style="grid-column: span 2; background: rgba(66,84,66,0.06);">
+        <div class="ptag">Combined target by month 36</div>
+        <div class="pprice">~$28M ARR</div>
+        <div class="pwho">4 countries × workflow + 2 pharma anchors + 2 surveillance contracts + research licenses. Workflow $14M / pharma $12M / other $2M.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Competitive landscape -->
+  <section class="module">
+    <div class="sub">Module 05 · Competitive landscape</div>
+    <h2>What we're up against</h2>
+    <p>No single competitor sits in our position — workflow tool that is also a structured-data layer for pharma RWE. Closest analogs are split between workflow-only (CommCare, Ona, Medic Mobile) and data-only (Datavant, Sermo, Truveta).</p>
+
+    <div class="compete">
+      <div class="ch">Player</div>
+      <div class="ch">Workflow?</div>
+      <div class="ch">Data layer?</div>
+      <div class="ch">Notes</div>
+
+      <div class="cc luma">luma</div>
+      <div class="cc luma">Yes — WhatsApp + protocol RAG</div>
+      <div class="cc luma">Yes — Bayesian + cohort builder</div>
+      <div class="cc luma">Both layers in one platform. Same operational data pays four buyer types.</div>
+
+      <div class="cc">CommCare</div>
+      <div class="cc">Yes — CHW forms-based</div>
+      <div class="cc">No — internal use only</div>
+      <div class="cc">Open source, low ARR per CHW. No structured-extraction layer for pharma reuse.</div>
+
+      <div class="cc">Medic Mobile</div>
+      <div class="cc">Yes — SMS-first</div>
+      <div class="cc">No</div>
+      <div class="cc">Strong NGO presence but no commercial pharma channel.</div>
+
+      <div class="cc">Ona / OpenSRP</div>
+      <div class="cc">Yes — forms</div>
+      <div class="cc">Limited</div>
+      <div class="cc">Open source. Government-grant funded; no commercial wedge.</div>
+
+      <div class="cc">Datavant / Truveta</div>
+      <div class="cc">No</div>
+      <div class="cc">Yes — US-only</div>
+      <div class="cc">US health-record networks. Doesn't reach SSA. The pharma-RWE comparable for what we sell.</div>
+
+      <div class="cc" style="border-bottom: 0;">Babyl / Babylon Africa</div>
+      <div class="cc" style="border-bottom: 0;">No — patient-facing</div>
+      <div class="cc" style="border-bottom: 0;">No</div>
+      <div class="cc" style="border-bottom: 0;">Telemedicine for patients, not workers. Partial Babylon Health acquisition; future uncertain.</div>
+    </div>
+
+    <p style="margin-top: 14px;">
+      <strong>Defensibility:</strong> the moat is the operational data accumulated from CHW interactions over time. Once a ministry adopts luma, switching costs are high (protocol corpus, language model fine-tuning, district workflows). Pharma buyers are sticky because the data refreshes weekly — replacing it requires a five-year DHS cycle.
+    </p>
+  </section>
+
+  <!-- Risk register -->
+  <section class="module">
+    <div class="sub">Module 06 · Risk register</div>
+    <h2>What can go wrong</h2>
+    <p>Honest list. The mitigation row is what we're already doing.</p>
+
+    <div class="risk-grid">
+      <div class="risk">
+        <div class="rh">Government adoption is slow</div>
+        <div class="rd">Ministry decision cycles can be 12–18 months. Slow money = slow runway.</div>
+        <div class="rmit">Pharma + research layers ship faster (8–12 weeks contract cycle); they de-risk runway while ministry deals close.</div>
+      </div>
+      <div class="risk">
+        <div class="rh">Clinical safety incident</div>
+        <div class="rd">A wrong answer harms a patient. Regulatory blowback could ban LLM-mediated CHW guidance.</div>
+        <div class="rmit">Three-tier safety system: protocol-grounded, soft fallback, refusal. Audit log is public. CHWs are the deciders, not patients — luma never replaces clinical judgment.</div>
+      </div>
+      <div class="risk">
+        <div class="rh">WhatsApp policy change</div>
+        <div class="rd">Meta could throttle business-API access or change pricing.</div>
+        <div class="rmit">Twilio is the abstraction; we can swap to MTN/Africa-native messaging APIs in <6 weeks. Voice path (Whisper) provides a non-WhatsApp fallback.</div>
+      </div>
+      <div class="risk">
+        <div class="rh">Pharma deal compression</div>
+        <div class="rd">First anchor pharma may pay less than $1M while the asset proves out.</div>
+        <div class="rmit">$0 academic + research licenses validate methodology publicly; second pharma anchor benchmarks against research papers, not the first commercial.</div>
+      </div>
+      <div class="risk">
+        <div class="rh">Competitive entry by US health-tech</div>
+        <div class="rd">A funded entrant (US digital health unicorn) could enter SSA with deeper pockets.</div>
+        <div class="rmit">First-mover government MoUs in 4 countries by month 18. Local-language ASR + protocol corpus is hard to replicate without 12+ months of in-country work.</div>
+      </div>
+      <div class="risk">
+        <div class="rh">Founder bandwidth (solo)</div>
+        <div class="rd">Solo founder building product + closing GTM + handling ops at the same time.</div>
+        <div class="rmit">Hire #1 (country lead) and Hire #3 (pharma GTM) front-load the bandwidth bottleneck. Founder retains technical + product within first 12 months.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why now -->
+  <section class="module">
+    <div class="sub">Module 07 · Why now</div>
+    <h2>Three structural shifts converging</h2>
+    <p>
+      <strong>1. WhatsApp is the universal SSA messaging layer.</strong> 80%+ smartphone penetration in Lesotho's CHW workforce. WhatsApp Business API stable since 2022. Not a hypothesis — a measured fact in our pilot.
+    </p>
+    <p>
+      <strong>2. Sesotho/Bantu-family ASR has crossed the usability threshold.</strong> Whisper v3 + minor fine-tuning gives transcription quality good enough for clinical Q&A. Five years ago this was not possible at this cost.
+    </p>
+    <p>
+      <strong>3. Pharma RWE budgets shifted to LMIC populations.</strong> ICH E17 (2018) and FDA RWE framework (2023) accept LMIC trial sites. Pharma are now actively budgeting for African RWE access — historically they could not.
+    </p>
+    <p>
+      Each of these on its own is a known trend; the intersection is a five-year window where the workflow product builds the data asset that pharma is now budgeted to buy. luma exists to occupy that intersection before someone else does.
+    </p>
+  </section>
+
+  <!-- Founder -->
+  <section class="module">
+    <div class="sub">Module 08 · Founder</div>
+    <h2>Why this team can do this</h2>
+    <p>
+      Solo founder. Technical-product, public-health-fluent, sub-Saharan operational experience. The combination is unusual — most US health-tech founders don't speak Sesotho; most SSA public-health professionals don't ship production software. luma is being built precisely at that overlap.
+    </p>
+    <p>
+      The plan above front-loads two hires (country lead, pharma GTM) that complement the founder's coverage. Series A buys a co-founder-grade engineering hire and the third country lead.
+    </p>
+  </section>
+
+  <!-- Ask -->
+  <section class="module">
+    <div class="sub">Module 09 · The ask</div>
+    <h2>$1.5M seed</h2>
+    <p>
+      18 months of runway. Closes the Lesotho ministry contract, executes the first pharma anchor, expands to Eswatini, hires 5 people. Series A target month 18 at $6–9M ARR.
+    </p>
+    <p style="font-size: 13px; color: rgba(26,26,26,0.7);">
+      Anyone who's read this far: <a href="mailto:sebastian@meetluma.org">sebastian@meetluma.org</a>.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <span>LUMA · INVESTORS</span>
+  <span><a href="/">HOME</a> · <a href="/methodology">METHODOLOGY</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js?v=6"></script>
+</body>
+</html>

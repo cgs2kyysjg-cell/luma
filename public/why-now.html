@@ -477,41 +477,80 @@
     </div>
   </section>
 
-  <!-- 3. The reality on the ground -->
+  <!-- 3. The reality + the bigger argument, side-by-side -->
   <section class="module">
-    <div class="sub">Module 03 · The reality on the ground</div>
-    <h2>Ministries are operating. They're stretched in two directions at once.</h2>
-    <p class="desc">
-      Ministries inherited the responsibility. They are spending what's flowing direct. Patients are still being seen, nurses
-      are still showing up, CHW networks are still attached to district health offices. <strong>The system isn't paralyzed —
-      it's stretched.</strong> Stretched on budget (~20% pure shortfall), and stretched on capability (the trainers, supervisors,
-      and M&amp;E officers that used to come with the money aren't there anymore).
-    </p>
-    <p class="desc">
-      Building INGO-equivalent in-house operational capacity from scratch — hiring trainers, building M&amp;E systems, running
-      supervisory cycles — is a decade-long project that costs more than ministries have in absolute dollars. The donor cycle
-      that used to fund that work is itself the thing being unwound. <strong>Software is the only substitution path that
-      fits the budget.</strong> That's why this is a venture opportunity rather than a development-aid opportunity.
-    </p>
-  </section>
+    <div class="paired-modules">
+      <div class="paired-col">
+        <div class="sub">Module 03A · The reality on the ground</div>
+        <h2 class="paired-h2">Ministries are operating. They're stretched in two directions at once.</h2>
+        <p class="desc">
+          Ministries inherited the responsibility. They are spending what's flowing direct. Patients are still being seen, nurses
+          are still showing up, CHW networks are still attached to district health offices. <strong>The system isn't paralyzed —
+          it's stretched.</strong> Stretched on budget (~20% pure shortfall), and stretched on capability (the trainers, supervisors,
+          and M&amp;E officers that used to come with the money aren't there anymore).
+        </p>
+        <p class="desc">
+          Building INGO-equivalent in-house operational capacity from scratch — hiring trainers, building M&amp;E systems, running
+          supervisory cycles — is a decade-long project that costs more than ministries have in absolute dollars. The donor cycle
+          that used to fund that work is itself the thing being unwound. <strong>Software is the only substitution path that
+          fits the budget.</strong> That's why this is a venture opportunity rather than a development-aid opportunity.
+        </p>
+      </div>
 
-  <!-- 3b. The off-ramp argument -->
-  <section class="module">
-    <div class="sub">Module 03b · The bigger argument</div>
-    <h2>International aid was always supposed to make itself unnecessary.</h2>
-    <p class="desc">
-      The forty-year unspoken contract of foreign aid is that the recipient eventually graduates from it. In practice, off-ramp
-      planning has been structurally absent — politically uncomfortable for donor governments to discuss, harder still for recipient
-      governments to publicly endorse. The 2025 cuts forced the conversation by removing the alternative. The transition is brutal.
-      The destination — country-level independence from donor cycles — is one almost everyone in global health agrees on in principle.
-    </p>
-    <p class="desc">
-      luma sits on the off-ramp side of that argument. We are not trying to rebuild USAID-as-it-was. We are not selling
-      "donor-as-a-service." <strong>We are building software that lets ministries do the operational work themselves —
-      durably, at scale, paid for by a commercial wedge that doesn't depend on the donor cycle at all.</strong> The pharma RWE
-      revenue stream subsidises the ministry license. The same operational data feeds both. As the ministry pays less and the
-      pharma layer pays more, the share of luma's cost recovered from international aid trends to zero. That's the off-ramp.
-    </p>
+      <div class="paired-col">
+        <div class="sub">Module 03B · The bigger argument</div>
+        <h2 class="paired-h2">International aid was always supposed to make itself unnecessary.</h2>
+        <p class="desc">
+          The forty-year unspoken contract of foreign aid is that the recipient eventually graduates from it. In practice, off-ramp
+          planning has been structurally absent — politically uncomfortable for donor governments to discuss, harder still for recipient
+          governments to publicly endorse. The 2025 cuts forced the conversation by removing the alternative. The transition is brutal.
+          The destination — country-level independence from donor cycles — is one almost everyone in global health agrees on in principle.
+        </p>
+        <p class="desc">
+          luma sits on the off-ramp side of that argument. We are not trying to rebuild USAID-as-it-was. We are not selling
+          "donor-as-a-service." <strong>We are building software that lets ministries do the operational work themselves —
+          durably, at scale, paid for by a commercial wedge that doesn't depend on the donor cycle at all.</strong> The pharma RWE
+          revenue stream subsidises the ministry license. The same operational data feeds both. As the ministry pays less and the
+          pharma layer pays more, the share of luma's cost recovered from international aid trends to zero. That's the off-ramp.
+        </p>
+      </div>
+    </div>
+
+    <style>
+      .paired-modules {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+      .paired-col {
+        display: flex; flex-direction: column;
+      }
+      .paired-col .sub {
+        font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: rgba(26,26,26,0.55); margin-bottom: 14px;
+        font-weight: 700;
+      }
+      .paired-col h2.paired-h2 {
+        font-size: 22px;
+        font-weight: 800; letter-spacing: -0.012em;
+        line-height: 1.15;
+        margin: 0 0 14px;
+        max-width: none;
+      }
+      .paired-col .desc {
+        font-size: 14px;
+        line-height: 1.6;
+        color: rgba(26,26,26,0.85);
+        max-width: none;
+        margin: 0 0 14px;
+      }
+      .paired-col .desc:last-child { margin-bottom: 0; }
+      @media (max-width: 900px) {
+        .paired-modules { grid-template-columns: 1fr; gap: 32px; }
+        .paired-col h2.paired-h2 { font-size: 19px; }
+      }
+    </style>
   </section>
 
   <!-- 4. luma as replacement -->

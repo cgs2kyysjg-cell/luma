@@ -925,24 +925,57 @@
 </div>
 
 <section class="why-section">
-  <p class="why-paragraph">
-    Ministries are operating. The 50% that's flowing direct gets spent — on the same patients, by the same nurses,
-    in the same districts. They're just stretched in two directions at once: <strong>20% less budget</strong>, and
-    no INGO partner left to run the trainings, supervisory visits, M&amp;E systems, or last-mile supply chain that
-    the previous <strong>30%</strong> used to deliver.
-  </p>
-
-  <p class="why-paragraph">
-    The bigger argument is one international aid has been ducking for forty years: the <strong>goal of foreign assistance
-    is supposed to be the recipient's eventual independence from it</strong>. In practice, off-ramp planning has been
-    politically uncomfortable and structurally absent. The 2025 cuts forced the conversation — abruptly, without warning,
-    with real human cost in the transition. <strong>luma sits on the off-ramp side of that argument</strong>: software
-    that helps ministries do more with what they have, that scales without a foreign implementing partner, that
-    contributes to the independence aid was always meant to enable.
-  </p>
+  <div class="why-paragraphs-grid">
+    <div class="why-col">
+      <div class="why-col-tag">The immediate gap</div>
+      <p class="why-paragraph">
+        Ministries are operating. The 50% that's flowing direct gets spent — on the same patients, by the same nurses,
+        in the same districts. They're just stretched in two directions at once: <strong>20% less budget</strong>, and
+        no INGO partner left to run the trainings, supervisory visits, M&amp;E systems, or last-mile supply chain that
+        the previous <strong>30%</strong> used to deliver.
+      </p>
+    </div>
+    <div class="why-col">
+      <div class="why-col-tag">The bigger argument</div>
+      <p class="why-paragraph">
+        International aid has been ducking one question for forty years: the <strong>goal of foreign assistance
+        is supposed to be the recipient's eventual independence from it</strong>. In practice, off-ramp planning has been
+        politically uncomfortable and structurally absent. The 2025 cuts forced the conversation — abruptly, without warning,
+        with real human cost in the transition. <strong>luma sits on the off-ramp side of that argument</strong>: software
+        that helps ministries do more with what they have, that scales without a foreign implementing partner, that
+        contributes to the independence aid was always meant to enable.
+      </p>
+    </div>
+  </div>
 
   <a href="/why-now" class="why-cta">READ THE FULL THESIS →</a>
 </section>
+
+<style>
+  .why-paragraphs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    margin-bottom: 28px;
+  }
+  .why-paragraphs-grid .why-paragraph {
+    max-width: none;       /* let the column width decide */
+    margin: 0;
+  }
+  .why-col-tag {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(66,84,66,0.35);
+  }
+  @media (max-width: 900px) {
+    .why-paragraphs-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+</style>
 
 <style>
   /* Override the default home `section` styling for the WHY NOW pair */

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — why now · after USAID</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=12">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=13">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -83,19 +83,23 @@
   }
 
   .aid-feed-scroll {
-    flex: 1; overflow-y: auto;
-    scroll-behavior: auto;
+    flex: 1; overflow: hidden;
+    display: flex; flex-direction: column;
   }
-  .aid-feed-scroll::-webkit-scrollbar { width: 4px; }
-  .aid-feed-scroll::-webkit-scrollbar-track { background: transparent; }
-  .aid-feed-scroll::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.15); }
 
   .aid-item {
     display: block; padding: 12px 16px 13px;
     border-bottom: 1px solid rgba(26,26,26,0.08);
     color: var(--ink); text-decoration: none;
     position: relative;
-    transition: background 0.16s ease, padding 0.16s ease;
+    max-height: 220px; opacity: 1;
+    overflow: hidden;
+    transition:
+      max-height 0.6s cubic-bezier(0.22,1,0.36,1),
+      opacity 0.45s ease,
+      padding 0.55s cubic-bezier(0.22,1,0.36,1),
+      border-bottom-color 0.4s ease,
+      background 0.16s ease;
   }
   .aid-item::before {
     content: ''; position: absolute; left: 0; top: 0; bottom: 0;
@@ -104,6 +108,27 @@
   }
   .aid-item:hover { background: rgba(66,84,66,0.05); }
   .aid-item:hover::before { width: 3px; }
+  /* entrance / exit states (heights collapse) */
+  .aid-item.is-entering,
+  .aid-item.is-leaving {
+    max-height: 0; opacity: 0;
+    padding-top: 0; padding-bottom: 0;
+    border-bottom-color: transparent;
+  }
+  /* freshly-arrived item gets a brief amber flash */
+  .aid-item.is-fresh::after {
+    content: 'New';
+    position: absolute; right: 16px; top: 11px;
+    background: var(--amber); color: #fff;
+    font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 1px 6px; font-weight: 800;
+    animation: aidFresh 2.4s ease-out forwards;
+  }
+  @keyframes aidFresh {
+    0%   { opacity: 1; transform: translateY(0); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-4px); }
+  }
 
   .aid-item .meta {
     display: flex; gap: 9px; align-items: center;
@@ -847,7 +872,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=12"></script>
+<script src="/assets/luma-fx.js?v=13"></script>
 <script>
   function fmtUSD(n) {
     if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";
@@ -942,12 +967,15 @@
     const pauseBtn= document.getElementById("aidPause");
     if (!scroll || !feedEl) return;
 
+    const VISIBLE  = 6;       // always show this many cards
+    const TICK_MS  = 4200;    // how often a new card pops in
+    const ANIM_MS  = 600;     // CSS animation duration (matches transition above)
+
     countEl.textContent = aidEvents.length + " events · 2025–2026";
 
-    // Build cards twice for a seamless loop.
-    function buildCard(e, i, isLatest) {
+    function buildCard(e) {
       const a = document.createElement("a");
-      a.className = "aid-item tag-" + e.tag.toLowerCase() + (isLatest ? " is-latest" : "");
+      a.className = "aid-item tag-" + e.tag.toLowerCase();
       a.href = e.url; a.target = "_blank"; a.rel = "noopener noreferrer";
       a.setAttribute("role", "listitem");
       a.innerHTML =
@@ -959,11 +987,17 @@
         '<div class="head">' + e.head + '</div>';
       return a;
     }
-    aidEvents.forEach((e, i) => scroll.appendChild(buildCard(e, i, i === 0)));
-    aidEvents.forEach((e, i) => scroll.appendChild(buildCard(e, i, false)));
 
-    // Auto-scroll: linear, slow. Pause on hover or when manually paused.
-    let hovering = false, manualPause = false, last = performance.now(), acc = 0;
+    // Initial 6 cards (most-recent at top).
+    let head = 0;
+    for (let i = 0; i < VISIBLE; i++) {
+      const e = aidEvents[i % aidEvents.length];
+      scroll.appendChild(buildCard(e));
+      head = i + 1;
+    }
+
+    // State.
+    let hovering = false, manualPause = false;
     feedEl.addEventListener("mouseenter", () => hovering = true);
     feedEl.addEventListener("mouseleave", () => hovering = false);
     pauseBtn.addEventListener("click", () => {
@@ -971,22 +1005,34 @@
       pauseBtn.textContent = manualPause ? "▶ Play" : "⏸ Pause";
     });
 
-    function tick(now) {
-      const dt = now - last; last = now;
-      const paused = hovering || manualPause;
-      if (!paused) {
-        acc += dt * 0.022; // ~22px/sec
-        if (acc >= 1) {
-          const px = Math.floor(acc); acc -= px;
-          scroll.scrollTop += px;
-          // Loop back when we've crossed the first copy boundary.
-          const half = scroll.scrollHeight / 2;
-          if (scroll.scrollTop >= half) scroll.scrollTop -= half;
-        }
+    function pop() {
+      if (hovering || manualPause) return;
+
+      // Insert next event at top, collapsed.
+      const next = aidEvents[head % aidEvents.length];
+      head++;
+      const node = buildCard(next);
+      node.classList.add("is-entering", "is-fresh");
+      scroll.insertBefore(node, scroll.firstChild);
+
+      // Force layout, then drop entering class to animate to natural size.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => node.classList.remove("is-entering"));
+      });
+
+      // Collapse the bottom-most item out.
+      const items = scroll.querySelectorAll(".aid-item");
+      if (items.length > VISIBLE) {
+        const last = items[items.length - 1];
+        last.classList.add("is-leaving");
+        setTimeout(() => last.remove(), ANIM_MS + 30);
       }
-      requestAnimationFrame(tick);
+
+      // Drop the "New" flash badge after its animation finishes.
+      setTimeout(() => node.classList.remove("is-fresh"), 2500);
     }
-    requestAnimationFrame(tick);
+
+    setInterval(pop, TICK_MS);
   })();
 </script>
 </body>

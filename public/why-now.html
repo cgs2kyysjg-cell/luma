@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — why now · after USAID</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=15">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=17">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -74,21 +74,8 @@
     background: var(--paper);
     font-weight: 700;
   }
-  .aid-feed-head .live {
-    display: inline-flex; align-items: center; gap: 7px;
-    color: var(--green);
-  }
-  .aid-feed-head .live::before {
-    content: ''; width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 0 rgba(66,84,66,0.55);
-    animation: aidPulse 1.7s ease-out infinite;
-  }
-  @keyframes aidPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(66,84,66,0.55); }
-    100% { box-shadow: 0 0 0 9px rgba(66,84,66,0); }
-  }
-  .aid-feed-head .count {
+  .aid-feed-head .title { color: var(--ink); }
+  .aid-feed-head .range {
     color: rgba(26,26,26,0.55); font-weight: 600;
     font-family: "SF Mono", "Menlo", "Consolas", monospace;
     letter-spacing: 0.1em;
@@ -522,8 +509,8 @@
     <div class="aid-col">
       <aside class="aid-feed" id="aidFeed" aria-label="Live feed of foreign aid cuts">
         <div class="aid-feed-head">
-          <span class="live">Live · Aid-cut feed</span>
-          <span class="count" id="aidCount">— events</span>
+          <span class="title">Aid-cut feed</span>
+          <span class="range">2025–2026</span>
         </div>
         <div class="aid-feed-scroll" id="aidScroll" role="list"></div>
         <div class="aid-feed-foot">
@@ -872,7 +859,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=15"></script>
+<script src="/assets/luma-fx.js?v=17"></script>
 <script>
   function fmtUSD(n) {
     if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";
@@ -970,8 +957,6 @@
     const VISIBLE  = 6;       // always show this many cards
     const TICK_MS  = 4200;    // how often a new card pops in
     const ANIM_MS  = 600;     // CSS animation duration (matches transition above)
-
-    countEl.textContent = aidEvents.length + " events · 2025–2026";
 
     function buildCard(e) {
       const a = document.createElement("a");

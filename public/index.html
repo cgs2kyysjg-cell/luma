@@ -42,10 +42,10 @@
   }
 
   /* Hero with live demo
-   * Green panel width = sum of left-side nav tabs (LUMA + PUBLIC HEALTH + MINISTRY + AUDIT LOG + PHARMA + TRY IT)
-   * so its right edge lines up with the TRY IT tab's right border. ~720px at default font sizes. */
+   * Green panel width is set at runtime to match the right edge of the TRY IT
+   * nav tab (see <script> at bottom). Default falls back to 50/50. */
   .hero {
-    display: grid; grid-template-columns: 720px 1fr; min-height: 80vh;
+    display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;
   }
   .hero .left {
     background: var(--green); color: white;
@@ -1053,6 +1053,31 @@
   }
 
   runScene();
+
+  // ----- Snap green hero panel to the right edge of the TRY IT nav tab -----
+  function snapHeroToTryTab() {
+    if (window.innerWidth <= 1100) {
+      document.querySelector(".hero").style.gridTemplateColumns = "";
+      return;
+    }
+    const tryTab = document.querySelector('.nav a[href="/try"]');
+    const hero = document.querySelector(".hero");
+    if (!tryTab || !hero) return;
+    const heroRect = hero.getBoundingClientRect();
+    const tryRect = tryTab.getBoundingClientRect();
+    const greenWidth = tryRect.right - heroRect.left;
+    if (greenWidth > 200 && greenWidth < heroRect.width - 200) {
+      hero.style.gridTemplateColumns = `${greenWidth}px 1fr`;
+    }
+  }
+  // Run after the page settles so fonts are loaded
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(snapHeroToTryTab);
+  } else {
+    setTimeout(snapHeroToTryTab, 100);
+  }
+  window.addEventListener("resize", snapHeroToTryTab);
+  window.addEventListener("load", snapHeroToTryTab);
 
   // ----- Tagline word-by-word stagger -----
   function staggerWords(el, baseDelay) {

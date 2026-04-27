@@ -833,164 +833,6 @@
   <a href="/methodology" class="right-link">METHODOLOGY →</a>
 </div>
 
-<!-- WHY NOW banner — the math that frames the moment -->
-<a href="/why-now" class="why-banner">
-  <div class="wb-inner">
-    <div class="wb-left">
-      <div class="wb-tag">
-        <span class="wb-dot"></span> WHY NOW · 2025
-      </div>
-      <div class="wb-headline">
-        USAID used to fund 100% of African primary-care infrastructure.
-        Today, <strong>50% comes back</strong> — and the <strong>30% that ran through INGOs</strong> doesn't.
-      </div>
-      <div class="wb-sub">
-        Two gaps need filling: 20% unfunded, and the operational layer the surviving 30% used to be spent through.
-        luma is the software-native replacement for both.
-        <span class="wb-cta">READ THE THESIS →</span>
-      </div>
-    </div>
-    <div class="wb-right">
-      <div class="wb-bar" aria-hidden="true">
-        <div class="wb-seg wb-seg-returned" style="flex: 50;">
-          <div class="wb-seg-pct">50%</div>
-          <div class="wb-seg-l">RETURNED</div>
-          <div class="wb-seg-s">direct to ministries</div>
-        </div>
-        <div class="wb-seg wb-seg-unfunded" style="flex: 20;">
-          <div class="wb-seg-pct">20%</div>
-          <div class="wb-seg-l">UNFUNDED</div>
-          <div class="wb-seg-s">just gone</div>
-        </div>
-        <div class="wb-seg wb-seg-ingo" style="flex: 30;">
-          <div class="wb-seg-pct">30%</div>
-          <div class="wb-seg-l">INGO LAYER</div>
-          <div class="wb-seg-s">funds gone OR money still flows but operational capacity vanished</div>
-        </div>
-      </div>
-      <div class="wb-bar-foot">
-        <span><strong style="color:#425442;">— old USAID spend, by where it went —</strong></span>
-        <span class="wb-bar-total">100% baseline</span>
-      </div>
-    </div>
-  </div>
-</a>
-
-<style>
-  .why-banner {
-    display: block;
-    background: var(--paper);
-    border-bottom: 1px solid var(--ink);
-    text-decoration: none; color: var(--ink);
-    transition: background 0.2s ease;
-  }
-  .why-banner:hover { background: rgba(66,84,66,0.06); }
-  .wb-inner {
-    display: grid;
-    grid-template-columns: 1fr 540px;
-    gap: 36px;
-    padding: 22px 48px 24px;
-    align-items: center;
-  }
-  @media (max-width: 1100px) {
-    .wb-inner { grid-template-columns: 1fr 420px; gap: 24px; }
-  }
-  @media (max-width: 900px) {
-    .wb-inner { grid-template-columns: 1fr; gap: 18px; padding: 20px 22px 22px; }
-  }
-  .wb-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--green); font-weight: 800;
-    margin-bottom: 8px;
-  }
-  .wb-dot {
-    display: inline-block;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 0 0 rgba(66,84,66,0.55);
-    animation: lumaPulse 2.4s cubic-bezier(0.22,1,0.36,1) infinite;
-  }
-  .wb-headline {
-    font-size: 18px;
-    line-height: 1.35;
-    font-weight: 500;
-    margin-bottom: 10px;
-    max-width: 56ch;
-    color: var(--ink);
-  }
-  .wb-headline strong { font-weight: 800; }
-  .wb-sub {
-    font-size: 12.5px;
-    color: rgba(26,26,26,0.7);
-    line-height: 1.55;
-    max-width: 60ch;
-  }
-  .wb-cta {
-    display: inline-block;
-    margin-left: 6px;
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--green); font-weight: 800;
-    border-bottom: 1px solid var(--green);
-    padding-bottom: 1px;
-  }
-  .wb-bar {
-    display: flex;
-    height: 90px;
-    border: 1px solid var(--ink);
-    overflow: hidden;
-  }
-  .wb-seg {
-    padding: 12px 12px 10px;
-    display: flex; flex-direction: column; justify-content: center;
-    color: var(--ink);
-    border-right: 1px solid rgba(26,26,26,0.18);
-    overflow: hidden;
-    transition: filter 0.2s ease;
-  }
-  .wb-seg:last-child { border-right: 0; }
-  .wb-seg-returned { background: rgba(66,84,66,0.18); }
-  .wb-seg-unfunded { background: rgba(198,139,63,0.30); }
-  .wb-seg-ingo     { background: var(--ink); color: var(--paper); }
-  .why-banner:hover .wb-seg { filter: brightness(1.04); }
-  .wb-seg-pct {
-    font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
-    line-height: 1; font-variant-numeric: tabular-nums;
-  }
-  .wb-seg-ingo .wb-seg-pct { color: white; }
-  .wb-seg-l {
-    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-    margin-top: 4px; font-weight: 700;
-  }
-  .wb-seg-s {
-    font-size: 9.5px; line-height: 1.35;
-    margin-top: 4px;
-    color: rgba(26,26,26,0.7);
-  }
-  .wb-seg-ingo .wb-seg-s { color: rgba(234,231,221,0.75); }
-  .wb-bar-foot {
-    display: flex; justify-content: space-between;
-    margin-top: 6px;
-    font-size: 9.5px; letter-spacing: 0.06em;
-    color: rgba(26,26,26,0.6);
-  }
-  .wb-bar-total {
-    font-variant-numeric: tabular-nums; font-weight: 700;
-    color: var(--ink);
-  }
-
-  @media (max-width: 700px) {
-    .wb-headline { font-size: 15.5px; }
-    .wb-bar { height: 78px; }
-    .wb-seg-pct { font-size: 17px; }
-    .wb-seg-s { display: none; }
-  }
-  @media (max-width: 460px) {
-    .wb-seg-l { font-size: 8px; letter-spacing: 0.12em; }
-    .wb-seg { padding: 10px 8px; }
-  }
-</style>
 
 <div class="hero">
 
@@ -1033,6 +875,179 @@
   </div>
 
 </div>
+
+<!-- WHY NOW section — sits below the hero like the rest of the sections -->
+<section class="why-section">
+  <div class="why-eyebrow">
+    <span class="why-dot"></span> WHY NOW · 2025
+  </div>
+  <h2>USAID used to fund 100% of African primary-care infrastructure.</h2>
+  <h3>Today, <span class="hl-paper">50% comes back</span> — and the <span class="hl-paper">30% that ran through INGOs</span> doesn't.</h3>
+
+  <div class="why-bar" aria-hidden="true">
+    <div class="why-seg why-seg-returned" style="flex: 50;">
+      <div class="why-seg-pct">50%</div>
+      <div class="why-seg-l">RETURNED</div>
+      <div class="why-seg-s">direct to ministries — but with no implementation partner</div>
+    </div>
+    <div class="why-seg why-seg-unfunded" style="flex: 20;">
+      <div class="why-seg-pct">20%</div>
+      <div class="why-seg-l">UNFUNDED</div>
+      <div class="why-seg-s">just gone</div>
+    </div>
+    <div class="why-seg why-seg-ingo" style="flex: 30;">
+      <div class="why-seg-pct">30%</div>
+      <div class="why-seg-l">INGO LAYER</div>
+      <div class="why-seg-s">funds gone, OR money still flows but the operational capacity to spend it vanished</div>
+    </div>
+  </div>
+  <div class="why-bar-foot">
+    <span><strong>— old USAID spend, by where it went —</strong></span>
+    <span class="why-bar-total">100% baseline</span>
+  </div>
+
+  <p class="why-paragraph">
+    Two gaps need filling: the unfunded 20%, and the operational layer the surviving 30% used to be spent through.
+    The trainers, supervisors, M&amp;E officers, and clinical mentors that converted aid into trained, supervised health workers
+    are gone. Ministries inherited the function and need a software substitute.
+    <strong>luma is the software-native replacement for both.</strong>
+  </p>
+
+  <a href="/why-now" class="why-cta">READ THE FULL THESIS →</a>
+</section>
+
+<style>
+  .why-section {
+    /* Inherits the existing site `section` styling (padding, border-top) */
+    background: var(--paper);
+  }
+  .why-section h2 {
+    /* The home page section h2s are the small uppercase eyebrow style.
+     * Override here for a real hero-style headline. */
+    font-size: 32px !important;
+    letter-spacing: -0.018em !important;
+    text-transform: none !important;
+    font-weight: 800 !important;
+    color: var(--ink) !important;
+    margin: 0 0 6px !important;
+    max-width: 32ch;
+    line-height: 1.1 !important;
+  }
+  .why-section h3 {
+    font-size: 21px;
+    line-height: 1.3;
+    font-weight: 500;
+    color: rgba(26,26,26,0.85);
+    margin: 0 0 24px;
+    max-width: 60ch;
+  }
+  .why-section h3 .hl-paper {
+    background: rgba(66,84,66,0.18);
+    padding: 1px 6px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .why-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--green); font-weight: 800;
+    margin-bottom: 14px;
+  }
+  .why-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(66,84,66,0.55);
+    animation: lumaPulse 2.4s cubic-bezier(0.22,1,0.36,1) infinite;
+  }
+
+  .why-bar {
+    display: flex;
+    height: 110px;
+    border: 1px solid var(--ink);
+    overflow: hidden;
+    margin-top: 10px;
+    max-width: 1100px;
+  }
+  .why-seg {
+    padding: 16px 16px 14px;
+    display: flex; flex-direction: column; justify-content: center;
+    color: var(--ink);
+    border-right: 1px solid rgba(26,26,26,0.18);
+    overflow: hidden;
+    transition: filter 0.2s ease;
+    min-width: 0;
+  }
+  .why-seg:last-child { border-right: 0; }
+  .why-seg-returned { background: rgba(66,84,66,0.20); }
+  .why-seg-unfunded { background: rgba(198,139,63,0.32); }
+  .why-seg-ingo     { background: var(--ink); color: var(--paper); }
+  .why-seg-pct {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .why-seg-ingo .why-seg-pct { color: white; }
+  .why-seg-l {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    margin-top: 6px; font-weight: 700;
+  }
+  .why-seg-s {
+    font-size: 11px; line-height: 1.4;
+    margin-top: 5px;
+    color: rgba(26,26,26,0.75);
+  }
+  .why-seg-ingo .why-seg-s { color: rgba(234,231,221,0.78); }
+  .why-bar-foot {
+    display: flex; justify-content: space-between;
+    margin-top: 8px; max-width: 1100px;
+    font-size: 10px; letter-spacing: 0.06em;
+    color: rgba(26,26,26,0.6);
+  }
+  .why-bar-foot strong { color: var(--green); font-weight: 700; }
+  .why-bar-total {
+    font-variant-numeric: tabular-nums; font-weight: 700;
+    color: var(--ink);
+  }
+
+  .why-paragraph {
+    margin: 28px 0 22px;
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 80ch;
+    color: rgba(26,26,26,0.85);
+  }
+  .why-paragraph strong { font-weight: 700; color: var(--ink); }
+
+  .why-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px;
+    background: var(--green); color: var(--paper);
+    text-decoration: none;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800;
+    border: 1px solid var(--green);
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+  .why-cta:hover {
+    background: var(--ink); border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 800px) {
+    .why-section h2 { font-size: 24px !important; }
+    .why-section h3 { font-size: 16px; }
+    .why-bar { height: 100px; }
+    .why-seg-pct { font-size: 22px; }
+    .why-seg-s { font-size: 10px; }
+  }
+  @media (max-width: 500px) {
+    .why-seg-s { display: none; }
+    .why-seg { padding: 12px 8px; }
+    .why-seg-l { font-size: 8.5px; letter-spacing: 0.12em; }
+  }
+</style>
 
 <section>
   <h2>WHAT IS LUMA</h2>

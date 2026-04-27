@@ -133,6 +133,65 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
+  /* Voice memo bubble — looks like an actual WhatsApp voice memo */
+  .msg.in.voice {
+    display: flex; flex-direction: column; gap: 8px;
+    min-width: 240px; max-width: 88%;
+    padding: 10px 12px;
+  }
+  .msg.in.voice .voice-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .msg.in.voice .play-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: #F0F0E8;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    padding-left: 2px;     /* nudge triangle visually centered */
+  }
+  .msg.in.voice .waveform {
+    display: flex; align-items: center; gap: 2px;
+    flex: 1; height: 22px;
+    min-width: 120px;
+  }
+  .msg.in.voice .waveform i {
+    display: block;
+    width: 2px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 1px;
+    animation: voiceWave 1.6s ease-in-out infinite;
+  }
+  .msg.in.voice .duration {
+    font-family: "Menlo", monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .msg.in.voice .transcript {
+    font-size: 11.5px; line-height: 1.45;
+    color: rgba(255,255,255,0.70);
+    font-style: italic;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+  }
+  .msg.in.voice .transcript::before {
+    content: "TRANSCRIBED · SESOTHO → EN";
+    display: block;
+    font-size: 8.5px; letter-spacing: 0.16em;
+    color: rgba(255,255,255,0.40);
+    font-style: normal;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  @keyframes voiceWave {
+    0%, 100% { transform: scaleY(0.5); }
+    50%      { transform: scaleY(1.05); }
+  }
+
   /* CTA button — sits directly below the phone, matched width */
   .try-cta {
     display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -1005,7 +1064,7 @@
 
   const SCENES = [
     [
-      { type: "in",  text: "[voice memo, 14s] My ART patient missed her refill last month. I can't reach her by phone. What's the protocol?", delay: 0 },
+      { type: "voice", duration: "0:14", transcript: "My ART patient missed her refill last month. I can't reach her by phone. What's the protocol?", delay: 0 },
       { type: "typing", delay: 1500 },
       { type: "out", text: "Per ART Defaulter Pathway § 4.2 — home visit between days 14 and 28. Visit during morning hours; if she's not home, leave a discreet note (no HIV-specific language) and try one repeat visit that week.\n\nWant to log this as a defaulter case for your supervisor?", delay: 1700, src: "ART Defaulter Pathway · § 4.2" },
       { type: "in",  text: "Yes — log it", delay: 2200 },
@@ -1028,16 +1087,36 @@
 
   const body = document.getElementById("demo-body");
 
-  function addMsg({ type, text, src }) {
+  function addMsg({ type, text, src, duration, transcript }) {
     if (type === "typing") {
       const el = document.createElement("div");
       el.className = "typing";
       el.innerHTML = '<span></span><span></span><span></span>';
       body.appendChild(el);
-      // Force animation by reading offsetHeight
       void el.offsetHeight;
       el.style.opacity = 1;
       el.dataset.typing = "1";
+      body.scrollTop = body.scrollHeight;
+      return el;
+    }
+    if (type === "voice") {
+      const el = document.createElement("div");
+      el.className = "msg in voice";
+      // Build a wave of 22 bars with pseudo-random heights and animation delays
+      const heights = [40, 65, 80, 55, 90, 70, 100, 60, 45, 75, 95, 50, 80, 65, 90, 55, 70, 85, 60, 75, 50, 65];
+      const bars = heights.map((h, i) =>
+        `<i style="height:${h}%; animation-delay:${(i * 0.04).toFixed(2)}s"></i>`
+      ).join("");
+      el.innerHTML = `
+        <div class="voice-row">
+          <span class="play-btn">▶</span>
+          <div class="waveform">${bars}</div>
+          <span class="duration">${duration || "0:14"}</span>
+        </div>
+        <div class="transcript">${transcript || ""}</div>
+      `;
+      body.appendChild(el);
+      void el.offsetHeight;
       body.scrollTop = body.scrollHeight;
       return el;
     }

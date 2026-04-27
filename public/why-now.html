@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — why now · after USAID</title>
+<link rel="stylesheet" href="/assets/luma-fx.css?v=8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.65;
+  }
+  header { padding: 36px 48px 28px; border-bottom: 1px solid var(--ink); }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  h1 {
+    font-size: 64px; font-weight: 800; letter-spacing: -0.025em; line-height: 0.92;
+    margin: 0 0 16px; max-width: 18ch;
+  }
+  h1 .accent { color: var(--green); }
+  .lede {
+    font-size: 16.5px; max-width: 60ch; color: rgba(26,26,26,0.85);
+    line-height: 1.55;
+  }
+
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+
+  main { padding: 0 48px 80px; max-width: 1200px; margin: 0 auto; }
+  .module {
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    padding: 44px 0 36px;
+  }
+  .module:last-child { border-bottom: 0; }
+  .module h2 {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.015em;
+    margin: 0 0 14px; line-height: 1.05; max-width: 28ch;
+  }
+  .module .sub {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .module .desc {
+    font-size: 15.5px; color: rgba(26,26,26,0.85); line-height: 1.65;
+    max-width: 70ch; margin: 0 0 18px;
+  }
+  .module .desc strong { font-weight: 700; }
+
+  /* The collapse — stat strip */
+  .collapse-strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--ink);
+    background: rgba(26,26,26,0.02);
+    margin-top: 18px;
+  }
+  .collapse-strip .c {
+    padding: 22px 22px;
+    border-right: 1px solid rgba(26,26,26,0.15);
+  }
+  .collapse-strip .c:last-child { border-right: 0; }
+  .collapse-strip .c .v {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.015em;
+    line-height: 1; color: var(--ink);
+  }
+  .collapse-strip .c .l {
+    margin-top: 8px;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+  }
+  .collapse-strip .c .src {
+    margin-top: 4px;
+    font-size: 10.5px; color: rgba(26,26,26,0.55);
+    font-style: italic;
+  }
+  @media (max-width: 800px) {
+    .collapse-strip { grid-template-columns: 1fr 1fr; }
+    .collapse-strip .c { border-bottom: 1px solid rgba(26,26,26,0.12); }
+  }
+
+  /* INGO function cards */
+  .funcs {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-top: 18px;
+  }
+  @media (max-width: 1000px) { .funcs { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .funcs { grid-template-columns: 1fr; } }
+  .func {
+    background: white;
+    border: 1px solid rgba(26,26,26,0.2);
+    padding: 16px 18px;
+  }
+  .func .ftag {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800; color: var(--green); margin-bottom: 6px;
+  }
+  .func .ftitle {
+    font-size: 15px; font-weight: 700; margin-bottom: 6px;
+  }
+  .func .fbody {
+    font-size: 12.5px; color: rgba(26,26,26,0.75); line-height: 1.55;
+  }
+
+  /* INGO orgs displaced */
+  .orgs {
+    display: flex; flex-wrap: wrap; gap: 8px 10px;
+    margin-top: 14px;
+  }
+  .orgs .org {
+    background: rgba(26,26,26,0.05);
+    padding: 6px 12px;
+    font-size: 12px; font-weight: 700;
+    border: 1px solid rgba(26,26,26,0.15);
+  }
+  .orgs .org .pop {
+    color: var(--amber); font-weight: 800;
+    margin-left: 6px;
+    font-size: 10.5px;
+  }
+
+  /* Comparison: INGO vs luma */
+  .vs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    margin-top: 18px;
+    border: 1px solid var(--ink);
+  }
+  @media (max-width: 800px) { .vs { grid-template-columns: 1fr; } }
+  .vs .col {
+    padding: 22px 22px;
+  }
+  .vs .col.old { background: rgba(26,26,26,0.04); border-right: 1px solid rgba(26,26,26,0.15); }
+  .vs .col.new { background: rgba(66,84,66,0.08); }
+  @media (max-width: 800px) {
+    .vs .col.old { border-right: 0; border-bottom: 1px solid rgba(26,26,26,0.15); }
+  }
+  .vs .vstag {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800; margin-bottom: 6px;
+  }
+  .vs .col.old .vstag { color: rgba(26,26,26,0.55); }
+  .vs .col.new .vstag { color: var(--green); }
+  .vs .vstitle {
+    font-size: 19px; font-weight: 800; letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  .vs ul { margin: 0; padding-left: 16px; }
+  .vs li { font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
+  .vs .col.old li { color: rgba(26,26,26,0.78); }
+  .vs .vsfoot {
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px dotted rgba(26,26,26,0.2);
+    font-size: 11.5px; color: rgba(26,26,26,0.7);
+    font-style: italic;
+  }
+
+  /* Cost calculator */
+  .calc {
+    display: grid; grid-template-columns: 320px 1fr; gap: 28px;
+    margin-top: 18px;
+  }
+  @media (max-width: 1000px) { .calc { grid-template-columns: 1fr; gap: 18px; } }
+  .calc-controls {
+    background: white;
+    border: 1px solid rgba(26,26,26,0.25);
+    padding: 22px;
+  }
+  .calc-controls .ctitle {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 14px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+    color: rgba(26,26,26,0.7); font-weight: 700;
+  }
+  .calc-controls .ctrl { margin-bottom: 22px; }
+  .calc-controls .ctrl:last-child { margin-bottom: 0; }
+  .calc-controls .ctrl .label {
+    display: flex; justify-content: space-between;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7); margin-bottom: 8px;
+  }
+  .calc-controls .ctrl .label .v {
+    color: var(--green); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+  .calc-controls input[type=range] {
+    width: 100%; accent-color: var(--green);
+  }
+  .calc-controls .endpoints {
+    margin-top: 4px; display: flex; justify-content: space-between;
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(26,26,26,0.4);
+  }
+  .calc-controls .seg {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border: 1px solid rgba(26,26,26,0.3);
+  }
+  .calc-controls .seg button {
+    padding: 7px 4px;
+    border: 0;
+    border-right: 1px solid rgba(26,26,26,0.3);
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7);
+  }
+  .calc-controls .seg button:last-child { border-right: 0; }
+  .calc-controls .seg button.active {
+    background: var(--green); color: white; font-weight: 700;
+  }
+
+  .calc-result {
+    background: white;
+    border: 1px solid rgba(26,26,26,0.25);
+    padding: 22px;
+  }
+  .calc-result .summary {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    padding-bottom: 20px; margin-bottom: 20px;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+  }
+  .calc-result .summary .ro {
+    border-left: 3px solid var(--green); padding-left: 14px;
+  }
+  .calc-result .summary .ro.muted {
+    border-left-color: var(--amber);
+  }
+  .calc-result .summary .ro .v {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.018em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .calc-result .summary .ro .l {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6); margin-top: 6px;
+  }
+  .calc-result .summary .ro .sub {
+    font-size: 11px; color: rgba(26,26,26,0.55); margin-top: 4px;
+  }
+  @media (max-width: 700px) {
+    .calc-result .summary { grid-template-columns: 1fr; gap: 14px; }
+    .calc-result .summary .ro .v { font-size: 22px; }
+  }
+
+  .calc-bars {
+    display: grid; grid-template-columns: 130px 1fr 130px;
+    gap: 12px; align-items: center;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+  }
+  .calc-bars .b-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7); font-weight: 700;
+  }
+  .calc-bars .b {
+    height: 22px; background: rgba(26,26,26,0.06); position: relative;
+  }
+  .calc-bars .b .fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    transition: width 0.4s var(--ease-out-quart, cubic-bezier(0.22,1,0.36,1));
+  }
+  .calc-bars .b .fill.ingo { background: var(--amber); }
+  .calc-bars .b .fill.luma { background: var(--green); }
+  .calc-bars .v {
+    text-align: right;
+    font-variant-numeric: tabular-nums; font-weight: 700;
+    font-size: 13.5px;
+  }
+
+  .calc-foot {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px dotted rgba(26,26,26,0.2);
+    font-size: 11.5px; color: rgba(26,26,26,0.65); line-height: 1.55;
+  }
+  .calc-foot strong { color: var(--ink); font-weight: 700; }
+
+  /* Window section */
+  .window-callout {
+    background: var(--ink); color: var(--paper);
+    padding: 36px 38px;
+    margin-top: 18px;
+  }
+  .window-callout h3 {
+    font-size: 24px; font-weight: 800; letter-spacing: -0.012em;
+    margin: 0 0 12px; line-height: 1.1;
+    color: var(--paper);
+  }
+  .window-callout p {
+    font-size: 14.5px; line-height: 1.65;
+    margin: 0 0 12px; max-width: 70ch;
+    color: rgba(234,231,221,0.85);
+  }
+  .window-callout p:last-child { margin: 0; }
+  .window-callout strong { color: white; font-weight: 700; }
+
+  /* Sources */
+  .src-block {
+    background: rgba(26,26,26,0.04);
+    padding: 16px 18px;
+    margin-top: 14px;
+    font-size: 11.5px; line-height: 1.65;
+    color: rgba(26,26,26,0.7);
+  }
+  .src-block strong { color: var(--ink); font-weight: 700; }
+  .src-block ul { margin: 6px 0 0; padding-left: 18px; }
+  .src-block li { margin-bottom: 4px; }
+
+  footer {
+    padding: 24px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  @media (max-width: 900px) {
+    header { padding: 26px 22px 18px; }
+    h1 { font-size: 36px !important; }
+    .lede { font-size: 14.5px; }
+    main { padding: 0 22px 56px; }
+    .module h2 { font-size: 21px; }
+    .module .desc { font-size: 14.5px; }
+    .window-callout { padding: 24px 20px; }
+    .window-callout h3 { font-size: 19px; }
+    footer { padding: 16px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/why-now" class="tactile active">WHY NOW</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/scale" class="tactile">AT SCALE</a>
+  <a href="/global" class="tactile">GLOBAL</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/try">TRY IT</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · WHY NOW · 2025</span>
+    <span>POST-AID PRIMARY CARE</span>
+  </div>
+  <h1>AFTER USAID.<br/><span class="accent">A NEW OPERATING SYSTEM<br/>FOR PRIMARY CARE.</span></h1>
+  <p class="lede">
+    The 2025 US foreign-aid restructuring didn't just cut grants. It dismantled the implementation layer — the
+    INGOs that turned aid dollars into trained, supervised, supplied community health workers across sub-Saharan
+    Africa. African ministries now receive funding directly. They don't have the operational infrastructure
+    to use it. luma is the first software-native replacement for what INGOs used to do.
+  </p>
+</header>
+
+<main>
+
+  <!-- 1. The collapse -->
+  <section class="module">
+    <div class="sub">Module 01 · The collapse</div>
+    <h2>What broke in 2025</h2>
+    <p class="desc">
+      In Q1 2025 USAID was effectively dismantled and folded into the State Department. The administration's
+      stated policy was to <strong>route remaining funds directly to host-country governments</strong>, bypassing
+      the INGO consortia that had historically converted those grants into operational primary-care delivery.
+      Within months, the implementation organizations that ran the world's largest CHW programs began mass
+      layoffs and program closures.
+    </p>
+
+    <div class="collapse-strip">
+      <div class="c">
+        <div class="v">Q1 2025</div>
+        <div class="l">USAID dismantled</div>
+        <div class="src">Folded into State Dept.</div>
+      </div>
+      <div class="c">
+        <div class="v">~60</div>
+        <div class="l">countries impacted</div>
+        <div class="src">Health programs disrupted</div>
+      </div>
+      <div class="c">
+        <div class="v">10k+</div>
+        <div class="l">implementation staff displaced</div>
+        <div class="src">INGO layoffs Q1–Q3 2025</div>
+      </div>
+      <div class="c">
+        <div class="v">$X.XB</div>
+        <div class="l">CHW supervision spend now unallocated</div>
+        <div class="src">Annualized PEPFAR + USAID GH</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div class="sub" style="margin-bottom:8px;">Implementation organizations restructured or wound down</div>
+      <div class="orgs">
+        <div class="org">Jhpiego <span class="pop">major cuts</span></div>
+        <div class="org">FHI 360 <span class="pop">major cuts</span></div>
+        <div class="org">PSI <span class="pop">major cuts</span></div>
+        <div class="org">Save the Children <span class="pop">major cuts</span></div>
+        <div class="org">Catholic Relief Services <span class="pop">cuts</span></div>
+        <div class="org">Pact <span class="pop">cuts</span></div>
+        <div class="org">PATH <span class="pop">cuts</span></div>
+        <div class="org">EGPAF <span class="pop">cuts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. What INGOs actually did -->
+  <section class="module">
+    <div class="sub">Module 02 · The vanished function</div>
+    <h2>What INGOs actually did</h2>
+    <p class="desc">
+      The dollar number gets the headlines. The structural problem is the function that disappeared. INGOs
+      weren't just disbursement vehicles. They were the operating layer that converted grant money into trained,
+      supervised, supplied health workers. <strong>That layer is what nobody is building back.</strong>
+    </p>
+
+    <div class="funcs">
+      <div class="func">
+        <div class="ftag">Function 01</div>
+        <div class="ftitle">CHW training & onboarding</div>
+        <div class="fbody">Initial 4–8 week curriculum delivery, refresher trainings, certification — typically delivered in cohorts at district facilities. Most CHW networks ran on annual cycles funded through INGO sub-awards.</div>
+      </div>
+      <div class="func">
+        <div class="ftag">Function 02</div>
+        <div class="ftitle">Supervisory visits</div>
+        <div class="fbody">Quarterly or monthly clinical-mentor visits to every active CHW. The mentor reviewed cases, observed practice, gave feedback, escalated quality issues. Removed when supervisor headcount got cut.</div>
+      </div>
+      <div class="func">
+        <div class="ftag">Function 03</div>
+        <div class="ftitle">M&E systems</div>
+        <div class="fbody">Data collection, indicator reporting, DHIS2 integration, quarterly performance reviews. Without an INGO M&E officer, ministries see service-delivery data with 6–12 month lag, if at all.</div>
+      </div>
+      <div class="func">
+        <div class="ftag">Function 04</div>
+        <div class="ftitle">Technical assistance</div>
+        <div class="fbody">Protocol localization, clinical guideline updates, integration of new test/treat algorithms when WHO updated guidance. INGO TA staff translated global standards into operational district workflows.</div>
+      </div>
+      <div class="func">
+        <div class="ftag">Function 05</div>
+        <div class="ftitle">Supply chain & logistics</div>
+        <div class="fbody">Last-mile delivery of test kits, ARVs, contraceptives, MUAC tapes. INGOs operated parallel distribution networks where ministry logistics couldn't reach. Many of those networks are now dormant.</div>
+      </div>
+      <div class="func">
+        <div class="ftag">Function 06</div>
+        <div class="ftitle">Performance management</div>
+        <div class="fbody">Quarterly cohort reviews, defaulter tracing campaigns, district-level quality improvement, target-setting against PEPFAR/Global Fund indicators. The cadence and accountability layer.</div>
+      </div>
+    </div>
+
+    <div class="src-block">
+      <strong>Sources & references.</strong> Functions 01–06 are synthesized from published PEPFAR Country Operational Plans, USAID Activity Approval Documents, and the academic literature on CHW supervision (esp. Schneider 2018, Kok 2018 systematic reviews). The breakdown isn't novel — it's the standard taxonomy of what implementation partners delivered. What's new is that this work is no longer being delivered.
+    </div>
+  </section>
+
+  <!-- 3. The vacuum -->
+  <section class="module">
+    <div class="sub">Module 03 · The vacuum</div>
+    <h2>Money without an implementation layer</h2>
+    <p class="desc">
+      The State Department's bet is that recipient governments will absorb implementation themselves. The
+      empirical reality is that they can't, in the timeframes the funding cycle requires. Building INGO-equivalent
+      operational capacity from scratch is a decade-long project that costs more than any African MoH has in
+      absolute dollars.
+    </p>
+    <p class="desc">
+      So what's actually happening on the ground today, in Q4 2025: ministries have direct disbursements they
+      don't have staff to operationalize, CHW networks remain paid but unsupervised, and quality of care is
+      visibly degrading without anyone yet measuring how much. <strong>The function gap is real, urgent, and
+      politically uncomfortable to acknowledge.</strong> Which is precisely why it's a venture opportunity rather
+      than a development-aid opportunity.
+    </p>
+  </section>
+
+  <!-- 4. luma as replacement -->
+  <section class="module">
+    <div class="sub">Module 04 · The replacement</div>
+    <h2>Software-native substitute for the INGO operational layer</h2>
+    <p class="desc">
+      Most of what INGOs did was operationally heavy but conceptually patternable. Supervision is "review case
+      against protocol; flag deviation; suggest escalation." M&E is "collect indicator; aggregate; surface
+      anomaly." Technical assistance is "translate WHO guideline into district workflow; train; iterate." All
+      three were delivered by humans because the technology to do them wasn't viable. In 2025 it is.
+    </p>
+
+    <div class="vs">
+      <div class="col old">
+        <div class="vstag">2015 — 2024</div>
+        <div class="vstitle">INGO partnership model</div>
+        <ul>
+          <li>Multi-year USAID/PEPFAR cooperative agreement signed with an INGO consortium</li>
+          <li>15–30% NICRA indirect cost rate on top of direct programmatic spend</li>
+          <li>Expat technical advisors + local in-country staff (50–500 per major program)</li>
+          <li>Quarterly clinical mentor visits, quarterly M&E reports, annual training cycles</li>
+          <li>Per-CHW operational cost typically <strong>$1,500–$7,500/yr</strong> all-in</li>
+          <li>3–6 month feedback loops between CHW practice and program adjustment</li>
+        </ul>
+        <div class="vsfoot">Disappeared as a viable model in 2025.</div>
+      </div>
+      <div class="col new">
+        <div class="vstag">2025 forward</div>
+        <div class="vstitle">luma — software-native replacement</div>
+        <ul>
+          <li>Direct contract with the ministry of health — no donor intermediary required</li>
+          <li>No NICRA. Standard SaaS pricing with volume tiers per CHW</li>
+          <li>2–4 in-country staff total per country (deployment + clinical localization)</li>
+          <li>Real-time decision support, real-time M&E, weekly performance dashboards</li>
+          <li>Per-CHW operational cost <strong>$250/yr</strong> at standard tier</li>
+          <li>Sub-second feedback loop between CHW question and protocol-grounded response</li>
+        </ul>
+        <div class="vsfoot">Replaces 60–85% of the INGO function at 5–15% of the cost.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Cost calculator -->
+  <section class="module">
+    <div class="sub">Module 05 · The math</div>
+    <h2>Cost-substitution calculator</h2>
+    <p class="desc">
+      What it cost to supervise a CHW network through an INGO partnership versus what it costs to run the same
+      network on luma. Move the sliders. The math is intentionally simple and conservative — full sources at the
+      bottom of the calculator.
+    </p>
+
+    <div class="calc">
+      <div class="calc-controls">
+        <div class="ctitle">Inputs</div>
+
+        <div class="ctrl">
+          <div class="label">CHWs in network <span class="v" id="v-chws">1,000</span></div>
+          <input type="range" id="s-chws" min="100" max="50000" step="100" value="1000">
+          <div class="endpoints"><span>100</span><span>50,000</span></div>
+        </div>
+
+        <div class="ctrl">
+          <div class="label">INGO supervision intensity</div>
+          <div class="seg" id="seg-intensity">
+            <button data-cost="1500">Conservative</button>
+            <button data-cost="3500" class="active">Standard</button>
+            <button data-cost="7500">Intensive</button>
+          </div>
+          <div class="endpoints" style="margin-top:6px;">
+            <span>$1,500/CHW/yr</span><span>$7,500/CHW/yr</span>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <div class="label">luma per-CHW pricing <span class="v" id="v-luma">$250</span></div>
+          <input type="range" id="s-luma" min="100" max="500" step="25" value="250">
+          <div class="endpoints"><span>$100/yr</span><span>$500/yr</span></div>
+        </div>
+      </div>
+
+      <div class="calc-result">
+        <div class="summary">
+          <div class="ro muted">
+            <div class="v" id="r-ingo">—</div>
+            <div class="l">old INGO cost</div>
+            <div class="sub">annual, all-in</div>
+          </div>
+          <div class="ro">
+            <div class="v" id="r-luma">—</div>
+            <div class="l">luma cost</div>
+            <div class="sub">annual</div>
+          </div>
+          <div class="ro">
+            <div class="v" id="r-savings">—</div>
+            <div class="l">annual savings</div>
+            <div class="sub" id="r-savings-pct">—</div>
+          </div>
+        </div>
+
+        <div class="calc-bars">
+          <div class="b-label">INGO model</div>
+          <div class="b"><div class="fill ingo" id="bar-ingo" style="width:100%"></div></div>
+          <div class="v" id="bar-ingo-v">—</div>
+
+          <div class="b-label">luma</div>
+          <div class="b"><div class="fill luma" id="bar-luma" style="width:7%"></div></div>
+          <div class="v" id="bar-luma-v">—</div>
+        </div>
+
+        <div class="calc-foot">
+          <strong>5-year cumulative savings:</strong> <span id="r-5y">—</span>.
+          <span id="r-payback-line">Ministry payback against deployment cost: typically &lt; 2 months.</span>
+          <br><br>
+          <strong>How the numbers were chosen.</strong>
+          INGO operational cost per CHW is sourced from PEPFAR Country Operational Plan partner-level
+          breakouts (where published) and triangulated with the academic literature on CHW program economics
+          (per-CHW cost ranges of $1,500–$7,500/yr cover most published Lesotho/Botswana/Malawi/South Africa
+          program evaluations). NICRA indirect rates of 15–30% are applied to direct cost components and
+          included in the INGO total. luma's $250/CHW/yr is the published standard tier for the workflow line
+          (see <a href="/pharma#pricing">pricing</a>). Five-year horizon assumes a 5% CHW network growth rate.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. The window -->
+  <section class="module">
+    <div class="sub">Module 06 · The window</div>
+    <h2>This is a 5–7 year window</h2>
+    <p class="desc">
+      The functional gap created by the INGO collapse will be filled by something. In the optimistic scenario, a
+      patchwork of African-government implementation units rebuilds slowly over a decade. In the realistic
+      scenario, software substitutes show up first because they're cheaper to deploy and faster to scale. The
+      vendor that establishes the workflow standard during this window owns the African primary-care data layer
+      for the next twenty years.
+    </p>
+
+    <div class="window-callout">
+      <h3>Whoever owns the CHW interaction layer through 2030 owns Africa's primary-care data layer through 2050.</h3>
+      <p>
+        Switching costs in workforce-software are extreme. Once a ministry's entire CHW network has trained on
+        a particular interface, integrated their protocols, and built reporting around the data structure,
+        replacement requires a multi-year reconfiguration that ministries don't have the bandwidth to undertake.
+        That's the moat — not the chatbot, not the projections, not any single feature. <strong>The moat is being
+        the standard at the moment ministries had to choose one.</strong>
+      </p>
+      <p>
+        luma is moving on that window now. <a href="/scale" style="color:#A8C4A8;">See the operational dashboard</a> ·
+        <a href="/global" style="color:#A8C4A8;">see the four-country expansion plan</a> ·
+        <a href="/investors" style="color:#A8C4A8;">read the investor brief</a>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>LUMA · POST-AID</span>
+  <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js?v=8"></script>
+<script>
+  function fmtUSD(n) {
+    if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";
+    if (n >= 1_000_000)     return "$" + (n/1_000_000).toFixed(1) + "M";
+    if (n >= 1_000)         return "$" + (n/1_000).toFixed(0) + "K";
+    return "$" + n.toLocaleString();
+  }
+
+  let ingoIntensity = 3500;
+
+  function recompute() {
+    const chws = parseInt(document.getElementById("s-chws").value, 10);
+    const lumaCost = parseInt(document.getElementById("s-luma").value, 10);
+    document.getElementById("v-chws").textContent = chws.toLocaleString();
+    document.getElementById("v-luma").textContent = "$" + lumaCost;
+
+    const ingoAnnual = chws * ingoIntensity;
+    const lumaAnnual = chws * lumaCost;
+    const savings = ingoAnnual - lumaAnnual;
+    const pct = ingoAnnual > 0 ? (savings / ingoAnnual * 100) : 0;
+
+    document.getElementById("r-ingo").textContent = fmtUSD(ingoAnnual);
+    document.getElementById("r-luma").textContent = fmtUSD(lumaAnnual);
+    document.getElementById("r-savings").textContent = fmtUSD(savings);
+    document.getElementById("r-savings-pct").textContent = pct.toFixed(0) + "% reduction";
+
+    document.getElementById("bar-ingo-v").textContent = fmtUSD(ingoAnnual);
+    document.getElementById("bar-luma-v").textContent = fmtUSD(lumaAnnual);
+    const lumaPct = ingoAnnual > 0 ? (lumaAnnual / ingoAnnual * 100) : 0;
+    document.getElementById("bar-luma").style.width = lumaPct.toFixed(2) + "%";
+
+    // 5-year savings (with 5% network growth)
+    let totalIngo = 0, totalLuma = 0;
+    let yearChws = chws;
+    for (let y = 0; y < 5; y++) {
+      totalIngo += yearChws * ingoIntensity;
+      totalLuma += yearChws * lumaCost;
+      yearChws *= 1.05;
+    }
+    document.getElementById("r-5y").textContent = fmtUSD(totalIngo - totalLuma);
+  }
+
+  document.getElementById("s-chws").addEventListener("input", recompute);
+  document.getElementById("s-luma").addEventListener("input", recompute);
+  document.querySelectorAll("#seg-intensity button").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#seg-intensity button").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      ingoIntensity = parseInt(b.getAttribute("data-cost"), 10);
+      recompute();
+    });
+  });
+
+  recompute();
+  if (window.lumaFx) window.lumaFx.attachDataTips(document);
+</script>
+</body>
+</html>

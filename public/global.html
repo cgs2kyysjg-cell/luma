@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — global expansion</title>
+<link rel="stylesheet" href="/assets/luma-fx.css?v=6">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  header { padding: 32px 48px 20px; border-bottom: 1px solid var(--ink); }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0;
+  }
+  h1 .accent { color: var(--green); }
+  .lede { margin-top: 14px; font-size: 14px; max-width: 70ch; color: rgba(26,26,26,0.85); }
+
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+
+  main { padding: 0 48px 80px; }
+  .module {
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    padding: 36px 0 28px;
+  }
+  .module h2 {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 6px; line-height: 1.0;
+  }
+  .module .sub {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 18px;
+  }
+  .module .desc {
+    font-size: 13px; color: rgba(26,26,26,0.78); max-width: 75ch;
+    margin: -8px 0 18px;
+  }
+
+  /* Country cards row */
+  .countries {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+  }
+  @media (max-width: 1100px) { .countries { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .countries { grid-template-columns: 1fr; } }
+  .ccard {
+    border: 1px solid rgba(26,26,26,0.25);
+    background: rgba(255,255,255,0.45);
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column;
+  }
+  .ccard.live {
+    border-left: 4px solid var(--green);
+    background: rgba(66,84,66,0.06);
+  }
+  .ccard .cname {
+    font-size: 18px; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+  .ccard .cstatus {
+    display: inline-block; font-size: 9px; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 12px;
+    padding: 2px 8px; border-radius: 2px;
+  }
+  .ccard.live .cstatus { background: var(--green); color: white; }
+  .ccard:not(.live) .cstatus { background: rgba(26,26,26,0.1); color: rgba(26,26,26,0.6); }
+  .ccard .cmeta {
+    font-size: 11px; color: rgba(26,26,26,0.7);
+    line-height: 1.4; margin-bottom: 14px;
+  }
+  .ccard .cposterior {
+    border-top: 1px dotted rgba(26,26,26,0.2);
+    padding-top: 12px;
+  }
+  .ccard .cposterior .label {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 8px;
+  }
+  .ccard .cbar-wrap {
+    position: relative; height: 32px; margin: 8px 0 4px;
+    background: rgba(26,26,26,0.04);
+  }
+  .ccard .cbar-prior {
+    position: absolute; height: 6px; background: var(--amber); opacity: 0.85;
+    border-radius: 0;
+    top: 6px;
+  }
+  .ccard .cbar-post {
+    position: absolute; height: 6px; background: var(--green);
+    top: 20px;
+  }
+  .ccard .cbar-tick {
+    position: absolute; width: 1px; top: 0; bottom: 0; background: rgba(26,26,26,0.15);
+  }
+  .ccard .cbar-x {
+    display: flex; justify-content: space-between;
+    font-size: 8px; color: rgba(26,26,26,0.45);
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+  }
+  .ccard .cbar-legend {
+    font-size: 9px; letter-spacing: 0.04em;
+    color: rgba(26,26,26,0.55);
+    display: flex; gap: 12px; margin-top: 4px;
+  }
+  .ccard .cbar-legend .sw {
+    display: inline-block; width: 9px; height: 4px; vertical-align: middle;
+    margin-right: 4px;
+  }
+  .ccard .cstats {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 12px;
+    margin-top: 12px;
+  }
+  .ccard .cstats .row {
+    display: flex; justify-content: space-between;
+    font-size: 11px;
+    border-bottom: 1px dotted rgba(26,26,26,0.12);
+    padding: 4px 0;
+  }
+  .ccard .cstats .row .l {
+    color: rgba(26,26,26,0.6); letter-spacing: 0.02em;
+    text-transform: uppercase; font-size: 9px;
+  }
+  .ccard .cstats .row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* Comparison table */
+  .ctable {
+    width: 100%; border-collapse: collapse; font-size: 12.5px;
+    margin-top: 10px;
+  }
+  .ctable th, .ctable td {
+    padding: 8px 10px; text-align: left;
+    border-bottom: 1px solid rgba(26,26,26,0.15);
+    vertical-align: top;
+  }
+  .ctable th {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7);
+    background: rgba(26,26,26,0.03);
+    font-weight: 700;
+  }
+  .ctable td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ctable td.country { font-weight: 700; }
+  .ctable .live-badge {
+    display: inline-block; margin-left: 6px;
+    background: var(--green); color: white;
+    font-size: 7px; letter-spacing: 0.16em;
+    padding: 1px 5px; border-radius: 2px;
+  }
+
+  /* Why this matters */
+  .why {
+    background: rgba(66,84,66,0.05);
+    border-left: 3px solid var(--green);
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+  .why p { margin: 0 0 8px; font-size: 13px; }
+  .why p:last-child { margin: 0; }
+
+  footer {
+    padding: 22px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  @media (max-width: 900px) {
+    header { padding: 26px 22px 16px; }
+    h1 { font-size: 30px !important; }
+    main { padding: 0 22px 56px; }
+    .module h2 { font-size: 18px; }
+    .ctable { font-size: 11px; }
+    .ctable th, .ctable td { padding: 6px 6px; }
+    footer { padding: 16px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/scale">AT SCALE</a>
+  <a href="/global" class="active">GLOBAL</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/try">TRY IT</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · GLOBAL EXPANSION</span>
+    <span>SUB-SAHARAN AFRICA</span>
+  </div>
+  <h1>SAME FRAMEWORK.<br/><span class="accent">FOUR COUNTRIES.</span></h1>
+  <p class="lede">
+    luma's framework — Bayesian projections over CHW-tagged WhatsApp interactions, grounded in published priors — generalises to every country with a stipended CHW network and WhatsApp penetration. Lesotho is live. Botswana, Eswatini, and Malawi are the obvious next three.
+  </p>
+</header>
+
+<main>
+
+  <!-- Country cards -->
+  <section class="module">
+    <div class="sub">Module 01 · Bayesian posterior comparison</div>
+    <h2>HIV prevalence — prior vs posterior, by country</h2>
+    <p class="desc">
+      Same Beta-Binomial machinery, four different priors. Lesotho's posterior reflects 4,700+ tagged CHW interactions; the others are prior-only — that's where deployment goes next.
+    </p>
+    <div class="countries" id="countries"></div>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="module">
+    <div class="sub">Module 02 · Comparable health-system metrics</div>
+    <h2>Why these four</h2>
+    <p class="desc">
+      All four have stipended CHW cadres, WhatsApp penetration, and a TB+HIV+MNCH burden that justifies the same protocol corpus. Sources cited per row.
+    </p>
+    <div style="overflow-x: auto;">
+      <table class="ctable" id="ctable"></table>
+    </div>
+  </section>
+
+  <!-- Operational reality -->
+  <section class="module">
+    <div class="sub">Module 03 · Operational reality</div>
+    <h2>Why each country comes next</h2>
+
+    <div class="why">
+      <p><strong>Lesotho (live).</strong> Pioneered SSA CHW institutionalisation — 11,000 Village Health Workers professionalised under the 2014 health reform. Highest TB-HIV co-infection rate. Government motivated, geography rural — perfect beachhead.</p>
+    </div>
+    <div class="why">
+      <p><strong>Botswana (next, ≤6 months).</strong> Wealthier health system, faster procurement. 95% ART coverage means treatment-cascade indicators dominate the conversation — precisely what luma's structured extraction surfaces. Setswana ASR shares phonetic structure with Sesotho — the voice pipeline retunes in days.</p>
+    </div>
+    <div class="why">
+      <p><strong>Eswatini (next, ≤9 months).</strong> Highest HIV prevalence on Earth (27%+). Maternal mortality crisis. Tiny, concentrated population (1.2M) means rapid coverage. Government enrolled in pan-African 2-million-CHW initiative — political will is already there. siSwati is mutually intelligible with isiZulu and Sesotho.</p>
+    </div>
+    <div class="why">
+      <p><strong>Malawi (moonshot, ≤18 months).</strong> 21.7M people, &lt;0.5 doctors per 1,000. The 11,000 Health Surveillance Assistants operate under severe supervision deficit — luma is a force-multiplier. Chichewa is a high-resource ASR target. The largest single growth lever in our 36-month plan.</p>
+    </div>
+  </section>
+
+  <!-- Math Note -->
+  <section class="module">
+    <div class="sub">Module 04 · The math, identical across countries</div>
+    <h2>Same framework, swap the prior</h2>
+    <p class="desc">
+      The Beta-Binomial conjugate update doesn't care which country it's in. The prior changes (UNAIDS 18.5% in Lesotho, 19.7% in Botswana, 27% in Eswatini, 7.1% in Malawi). The CHW-observed counts change. The posterior reflects whichever combination is in front of it. <a href="/methodology">Read the methodology →</a>
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <span>LUMA · SUB-SAHARAN AFRICA</span>
+  <span><a href="/methodology">METHODOLOGY</a> · <a href="/api/global/countries">/api/global/countries</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js?v=6"></script>
+<script>
+  function fmtNum(n) { return n == null ? "—" : n.toLocaleString(); }
+  function fmtPct(p, d = 1) { return (p == null) ? "—" : (p * 100).toFixed(d) + "%"; }
+  function fmtRate(r) { return r == null ? "—" : r.toLocaleString() + " /100k"; }
+
+  // Render scale: 0% to 35% on the prevalence x-axis
+  const X_MAX = 0.35;
+  function pctOf(v) { return (v / X_MAX) * 100; }
+
+  function renderCountry(name, c) {
+    const post = c.hiv_posterior;
+    const live = post.status === "data_dominated";
+    const priorMean = c.hiv_prevalence;
+    // Prior CI: assume ±3% as illustration (the underlying UNAIDS estimates carry their own published CIs)
+    const priorL = Math.max(0, priorMean - 0.03);
+    const priorU = Math.min(1, priorMean + 0.03);
+
+    return `
+      <div class="ccard ${live ? 'live' : ''}">
+        <div class="cname">${name}</div>
+        <div class="cstatus">${live ? 'live · luma deployed' : 'expansion target'}</div>
+        <div class="cmeta">
+          ${fmtNum(c.population)} people · ${c.chw_label}<br>
+          ${c.languages.join(' / ')}
+        </div>
+        <div class="cposterior">
+          <div class="label">HIV prevalence (15-49) · 95% CI</div>
+          <div class="cbar-wrap">
+            ${[0.05, 0.10, 0.15, 0.20, 0.25, 0.30].map(t =>
+              `<div class="cbar-tick" style="left:${pctOf(t)}%"></div>`
+            ).join('')}
+            <div class="cbar-prior" style="left:${pctOf(priorL)}%; width:${pctOf(priorU - priorL)}%;"></div>
+            <div class="cbar-post" style="left:${pctOf(post.lower_95ci)}%; width:${pctOf(post.upper_95ci - post.lower_95ci)}%;"></div>
+          </div>
+          <div class="cbar-x"><span>0%</span><span>10%</span><span>20%</span><span>30%</span></div>
+          <div class="cbar-legend">
+            <span><span class="sw" style="background:#C68B3F;opacity:0.85"></span>prior</span>
+            <span><span class="sw" style="background:#425442"></span>posterior</span>
+          </div>
+        </div>
+        <div class="cstats">
+          <div class="row"><span class="l">prevalence</span><span class="v">${c.hiv_prevalence_label}</span></div>
+          <div class="row"><span class="l">tb /100k</span><span class="v">${fmtNum(c.tb_incidence_per_100k)}</span></div>
+          <div class="row"><span class="l">mmr /100k</span><span class="v">${fmtNum(c.mmr_per_100k)}</span></div>
+          <div class="row"><span class="l">u5 /1000</span><span class="v">${fmtNum(c.u5_mortality_per_1000)}</span></div>
+          <div class="row"><span class="l">cpr</span><span class="v">${fmtPct(c.contraceptive_prevalence, 0)}</span></div>
+          <div class="row"><span class="l">chws</span><span class="v">${c.chws_in_network ? fmtNum(c.chws_in_network) : '—'}</span></div>
+          ${live ? `
+            <div class="row"><span class="l">tagged cases</span><span class="v">${fmtNum(post.observed_trials)}</span></div>
+            <div class="row"><span class="l">post. mean</span><span class="v">${fmtPct(post.mean)}</span></div>
+          ` : `
+            <div class="row"><span class="l">status</span><span class="v">prior only</span></div>
+            <div class="row"><span class="l">deploy</span><span class="v">planned</span></div>
+          `}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTable(countries) {
+    let html = `<thead><tr>
+      <th>Country</th>
+      <th class="num">Pop.</th>
+      <th class="num">HIV</th>
+      <th class="num">TB /100k</th>
+      <th class="num">MMR /100k</th>
+      <th class="num">U5 /1000</th>
+      <th class="num">CPR</th>
+      <th class="num">CHWs</th>
+      <th>Languages</th>
+    </tr></thead><tbody>`;
+    for (const [name, c] of Object.entries(countries)) {
+      const live = c.hiv_posterior.status === "data_dominated";
+      html += `<tr>
+        <td class="country">${name}${live ? '<span class="live-badge">live</span>' : ''}</td>
+        <td class="num">${fmtNum(c.population)}</td>
+        <td class="num">${c.hiv_prevalence_label}</td>
+        <td class="num">${fmtNum(c.tb_incidence_per_100k)}</td>
+        <td class="num">${fmtNum(c.mmr_per_100k)}</td>
+        <td class="num">${c.u5_mortality_per_1000}</td>
+        <td class="num">${fmtPct(c.contraceptive_prevalence, 0)}</td>
+        <td class="num">${c.chws_in_network ? fmtNum(c.chws_in_network) : '—'}</td>
+        <td>${c.languages.join(', ')}</td>
+      </tr>`;
+    }
+    html += `</tbody>`;
+    return html;
+  }
+
+  (async () => {
+    try {
+      const res = await fetch("/api/global/countries");
+      const d = await res.json();
+      const cnames = ["Lesotho", "Botswana", "Eswatini", "Malawi"];
+      document.getElementById("countries").innerHTML = cnames.map(n =>
+        renderCountry(n, d.countries[n])
+      ).join("");
+      document.getElementById("ctable").innerHTML = renderTable(d.countries);
+    } catch (err) {
+      console.error("Global page failed:", err);
+    }
+  })();
+</script>
+
+</body>
+</html>

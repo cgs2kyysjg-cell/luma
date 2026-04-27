@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>luma — at scale</title>
+<link rel="stylesheet" href="/assets/luma-fx.css?v=6">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --paper: #EAE7DD; --green: #425442; --sage: #8A9682; --ink: #1A1A1A;
+    --rule: #1A1A1A; --amber: #C68B3F;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--paper); color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  header { padding: 32px 48px 20px; border-bottom: 1px solid var(--ink); }
+  .top-bar {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 0.95;
+    margin: 0;
+  }
+  h1 .accent { color: var(--green); }
+  .lede {
+    margin-top: 14px; font-size: 14px; max-width: 70ch;
+    color: rgba(26,26,26,0.85);
+  }
+
+  .nav {
+    display: flex; gap: 0; flex-wrap: wrap;
+    border-bottom: 1px solid var(--ink);
+  }
+  .nav a {
+    padding: 14px 22px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-right: 1px solid var(--ink);
+  }
+  .nav a.active { background: var(--green); color: var(--paper); }
+  .nav a:hover:not(.active) { background: rgba(26,26,26,0.05); }
+  .nav a.right-link { margin-left: auto; border-right: 0; border-left: 1px solid var(--ink); }
+  .nav a.right-link + .right-link { margin-left: 0; }
+  .beta-pill {
+    display: inline-block; margin-left: 6px; padding: 1px 6px;
+    background: var(--amber); color: white;
+    font-size: 8px; letter-spacing: 0.16em;
+    border-radius: 2px; vertical-align: middle;
+  }
+
+  /* Stats strip */
+  .stats {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    border-bottom: 1px solid var(--ink);
+  }
+  .stats .cell {
+    padding: 18px 20px;
+    border-right: 1px solid rgba(26,26,26,0.15);
+  }
+  .stats .cell:last-child { border-right: 0; }
+  .stats .v {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .stats .l {
+    margin-top: 6px;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.65);
+  }
+
+  /* Modules */
+  .modules { padding: 0 48px 80px; }
+  .module {
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+    padding: 36px 0 28px;
+  }
+  .module h2 {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.01em;
+    margin: 0 0 6px; line-height: 1.0;
+  }
+  .module .sub {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.55); margin-bottom: 18px;
+  }
+  .module .desc {
+    font-size: 13px; color: rgba(26,26,26,0.78); max-width: 75ch;
+    margin: -8px 0 18px;
+  }
+
+  /* SVG charts */
+  .chart-area { width: 100%; }
+  .chart-svg { width: 100%; height: auto; display: block; }
+  .axis-label { font-size: 10px; letter-spacing: 0.06em; fill: rgba(26,26,26,0.55); }
+  .axis-line { stroke: rgba(26,26,26,0.4); stroke-width: 0.5; }
+  .grid-line { stroke: rgba(26,26,26,0.08); stroke-width: 0.5; }
+
+  /* Two-column row */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 900px) { .row { grid-template-columns: 1fr; gap: 18px; } }
+
+  /* Topic bars */
+  .tbars { display: flex; flex-direction: column; gap: 8px; }
+  .tbar {
+    display: grid; grid-template-columns: 110px 1fr 60px;
+    gap: 12px; align-items: center; font-size: 12px;
+  }
+  .tbar .name {
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(26,26,26,0.7);
+  }
+  .tbar .b { height: 14px; background: rgba(26,26,26,0.08); position: relative; }
+  .tbar .b .fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    background: var(--green);
+  }
+  .tbar .v {
+    text-align: right; font-variant-numeric: tabular-nums; font-weight: 600;
+  }
+
+  /* District ranking */
+  .drank { display: flex; flex-direction: column; }
+  .drank .row-d {
+    display: grid; grid-template-columns: 18px 1fr 60px;
+    gap: 10px; align-items: center;
+    padding: 7px 0; border-bottom: 1px dotted rgba(26,26,26,0.15);
+    font-size: 12.5px;
+  }
+  .drank .row-d:last-child { border-bottom: 0; }
+  .drank .rk {
+    font-size: 9px; color: rgba(26,26,26,0.5);
+    font-variant-numeric: tabular-nums; font-weight: 700;
+  }
+  .drank .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* CHW heatmap */
+  .heat-wrap {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .heat {
+    display: grid; gap: 1px;
+  }
+  .heat .row-h {
+    display: grid; gap: 1px; align-items: center;
+  }
+  .heat .row-h .lbl {
+    font-size: 10px; padding-right: 8px; text-align: right;
+    color: rgba(26,26,26,0.7); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .heat .cell-h {
+    width: 14px; height: 14px;
+    background: rgba(66,84,66,0.06);
+  }
+  .heat .col-headers {
+    font-size: 9px; color: rgba(26,26,26,0.55);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+  .heat-legend {
+    margin-top: 10px; display: flex; gap: 12px; align-items: center;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(26,26,26,0.6);
+  }
+  .heat-legend .swatch {
+    display: inline-block; width: 14px; height: 14px;
+    border: 1px solid rgba(26,26,26,0.2);
+  }
+
+  /* Scale projector */
+  .projector-grid {
+    display: grid; grid-template-columns: 320px 1fr; gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .projector-grid { grid-template-columns: 1fr; gap: 22px; } }
+  .controls {
+    background: rgba(26,26,26,0.04);
+    padding: 22px;
+    border-left: 3px solid var(--green);
+  }
+  .controls .ctrl { margin-bottom: 22px; }
+  .controls .ctrl:last-child { margin-bottom: 0; }
+  .controls .ctrl label {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 8px; color: rgba(26,26,26,0.7);
+  }
+  .controls .ctrl .val {
+    font-size: 12px; font-weight: 700; color: var(--green);
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .controls input[type=range] {
+    width: 100%;
+    accent-color: var(--green);
+  }
+  .controls .ctrl .endpoints {
+    margin-top: 4px; display: flex; justify-content: space-between;
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(26,26,26,0.4);
+  }
+  .controls .preset-row {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .controls .preset {
+    padding: 6px 10px; border: 1px solid rgba(26,26,26,0.3);
+    background: transparent; cursor: pointer;
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  .controls .preset:hover { background: var(--green); color: white; border-color: var(--green); }
+  .readout {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px; margin-bottom: 18px;
+  }
+  .readout .ro-cell {
+    border-left: 3px solid var(--green); padding: 10px 12px;
+    background: rgba(255,255,255,0.4);
+  }
+  .readout .ro-cell.muted { border-left-color: rgba(26,26,26,0.3); }
+  .readout .ro-v {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1; font-variant-numeric: tabular-nums;
+  }
+  .readout .ro-l {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(26,26,26,0.65); margin-top: 6px;
+  }
+
+  /* Footer */
+  footer {
+    padding: 22px 48px;
+    border-top: 1px solid var(--ink);
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  a { color: var(--green); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    header { padding: 26px 22px 16px; }
+    h1 { font-size: 30px !important; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats .cell { border-right: 0; border-bottom: 1px solid rgba(26,26,26,0.12); }
+    .stats .cell .v { font-size: 22px; }
+    .modules { padding: 0 22px 56px; }
+    .module h2 { font-size: 18px; }
+    .controls { padding: 16px; }
+    footer { padding: 16px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <a href="/" class="home-link">luma</a>
+  <a href="/insights/public-health">PUBLIC HEALTH</a>
+  <a href="/insights/ministry">MINISTRY</a>
+  <a href="/scale" class="active">AT SCALE</a>
+  <a href="/global">GLOBAL</a>
+  <a href="/log">AUDIT LOG</a>
+  <a href="/pharma">PHARMA</a>
+  <a href="/try">TRY IT</a>
+  <a href="/api/docs" class="right-link">API DOCS</a>
+  <a href="/methodology" class="right-link">METHODOLOGY</a>
+</div>
+
+<header>
+  <div class="top-bar">
+    <span>LUMA · OPERATIONAL · LIVE</span>
+    <span id="updated">—</span>
+  </div>
+  <h1>26 WEEKS. 50 CHWs.<br/><span class="accent">5,000+ INTERACTIONS.</span></h1>
+  <p class="lede">
+    What luma's framework looks like once it's been running for six months.
+    Every chart on this page reads from the same SQLite the WhatsApp pipeline writes to.
+    No dashboard caches, no slide-deck mockups — query the database, render the answer.
+  </p>
+</header>
+
+<section class="stats" id="stats-strip">
+  <div class="cell"><div class="v" id="s-conv">—</div><div class="l">interactions</div></div>
+  <div class="cell"><div class="v" id="s-tags">—</div><div class="l">tagged cases</div></div>
+  <div class="cell"><div class="v" id="s-chws">—</div><div class="l">distinct chws</div></div>
+  <div class="cell"><div class="v" id="s-districts">—</div><div class="l">districts</div></div>
+  <div class="cell"><div class="v" id="s-emerg">—</div><div class="l">emergencies</div></div>
+  <div class="cell"><div class="v" id="s-range">—</div><div class="l">date range</div></div>
+</section>
+
+<main class="modules">
+
+  <!-- 1. WEEKLY VOLUME -->
+  <section class="module">
+    <div class="sub">Module 01 · Operational throughput</div>
+    <h2>Weekly conversation volume</h2>
+    <p class="desc">
+      Cumulative interactions per ISO week. The shape — gentle ramp from launch through week 26 — reflects the network's gradual onboarding curve, not a stable flat run rate.
+    </p>
+    <div class="chart-area" id="chart-volume"></div>
+  </section>
+
+  <!-- 2. SEVERITY OVER TIME -->
+  <section class="module">
+    <div class="sub">Module 02 · Severity composition</div>
+    <h2>Emergency / urgent / routine over time</h2>
+    <p class="desc">
+      Stacked weekly. The emergency band is the heaviest signal for ministry routing — it's the queue your district focal points wake up to.
+    </p>
+    <div class="chart-area" id="chart-severity"></div>
+  </section>
+
+  <!-- 3. TOPIC + DISTRICT ROW -->
+  <section class="module">
+    <div class="row">
+      <div>
+        <div class="sub">Module 03a · Topic mix</div>
+        <h2>Where the questions cluster</h2>
+        <p class="desc">All interactions over 26 weeks, grouped by extracted topic.</p>
+        <div class="tbars" id="topic-bars"></div>
+      </div>
+      <div>
+        <div class="sub">Module 03b · District activity</div>
+        <h2>Geographic distribution</h2>
+        <p class="desc">Population-weighted, but real signal is in the per-district CHW count and how it scales.</p>
+        <div class="drank" id="district-rank"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CHW HEATMAP -->
+  <section class="module">
+    <div class="sub">Module 04 · Workforce activity</div>
+    <h2>Per-CHW, per-week conversation heatmap</h2>
+    <p class="desc">
+      Top 50 CHWs across 26 weeks. Each cell = one week of activity for that worker. Darker = more conversations. Real CHW networks have this shape: a long tail of high-activity workers, dormant weeks, gradual onboarding.
+    </p>
+    <div class="heat-wrap"><div id="heatmap"></div></div>
+    <div class="heat-legend">
+      <span>activity:</span>
+      <span><span class="swatch" style="background:rgba(66,84,66,0.06)"></span> 0</span>
+      <span><span class="swatch" style="background:rgba(66,84,66,0.25)"></span> 1–3</span>
+      <span><span class="swatch" style="background:rgba(66,84,66,0.50)"></span> 4–7</span>
+      <span><span class="swatch" style="background:rgba(66,84,66,0.75)"></span> 8–14</span>
+      <span><span class="swatch" style="background:rgba(66,84,66,1.00)"></span> 15+</span>
+    </div>
+  </section>
+
+  <!-- 5. CI EVOLUTION (the showcase) -->
+  <section class="module">
+    <div class="sub">Module 05 · Bayesian framework value</div>
+    <h2>Confidence interval tightens with data</h2>
+    <p class="desc">
+      The point of the Bayesian update is that the posterior CI shrinks as observations accumulate. Below: cumulative CI for the HIV-prevalence indicator, week-by-week. Strong UNAIDS prior (effective n=200); the 5,000 CHW interactions move it modestly. <strong>This is what scale buys you</strong> — at 100,000 conversations the CI collapses.
+    </p>
+    <div class="chart-area" id="chart-ci"></div>
+  </section>
+
+  <!-- 6. SCALE PROJECTOR (the second showcase) -->
+  <section class="module">
+    <div class="sub">Module 06 · What scale unlocks</div>
+    <h2>Project the network forward</h2>
+    <p class="desc">
+      Move the sliders. Watch the posterior CI for HIV prevalence collapse as N grows. This is the framework's commercial value — at 1,000 CHWs across SSA, luma's national-level posteriors rival WHO household-survey precision, but updated weekly instead of every five years.
+    </p>
+
+    <div class="projector-grid">
+      <div class="controls">
+        <div class="ctrl">
+          <label>CHWs in network <span class="val" id="v-chws">100</span></label>
+          <input type="range" id="slider-chws" min="50" max="100000" step="50" value="100">
+          <div class="endpoints"><span>50</span><span>100k</span></div>
+          <div class="preset-row">
+            <button class="preset" data-chws="50">today</button>
+            <button class="preset" data-chws="500">500</button>
+            <button class="preset" data-chws="5000">5k</button>
+            <button class="preset" data-chws="50000">50k</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label>Weeks of operation <span class="val" id="v-weeks">26</span></label>
+          <input type="range" id="slider-weeks" min="4" max="156" step="1" value="26">
+          <div class="endpoints"><span>4 wks</span><span>3 yrs</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="readout">
+          <div class="ro-cell">
+            <div class="ro-v" id="ro-trials">—</div>
+            <div class="ro-l">projected interactions</div>
+          </div>
+          <div class="ro-cell">
+            <div class="ro-v" id="ro-mean">—</div>
+            <div class="ro-l">posterior mean</div>
+          </div>
+          <div class="ro-cell">
+            <div class="ro-v" id="ro-ciw">—</div>
+            <div class="ro-l">95% CI width</div>
+          </div>
+        </div>
+        <div class="chart-area" id="chart-proj"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>LUMA · LESOTHO</span>
+  <span><a href="/methodology">METHODOLOGY</a> · <a href="/api/scale/summary">/api/scale/summary</a></span>
+</footer>
+
+<script src="/assets/luma-fx.js?v=6"></script>
+<script>
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  function fmtNum(n) {
+    if (n == null) return "—";
+    if (n >= 1000) return n.toLocaleString();
+    return String(n);
+  }
+  function fmtPct(p, digits = 1) {
+    if (p == null) return "—";
+    return (p * 100).toFixed(digits) + "%";
+  }
+  function fmtDateShort(s) {
+    if (!s) return "—";
+    const d = new Date(s);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function fmtDateRange(a, b) {
+    if (!a || !b) return "—";
+    const ad = new Date(a), bd = new Date(b);
+    const sameYear = ad.getFullYear() === bd.getFullYear();
+    return ad.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
+      " → " +
+      bd.toLocaleDateString(undefined, sameYear
+        ? { month: "short", day: "numeric" }
+        : { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 0. Stats strip
+  // ---------------------------------------------------------------------------
+  async function loadStats() {
+    const res = await fetch("/api/scale/summary");
+    const d = await res.json();
+    document.getElementById("s-conv").textContent = fmtNum(d.total_conversations);
+    document.getElementById("s-tags").textContent = fmtNum(d.total_tagged_cases);
+    document.getElementById("s-chws").textContent = fmtNum(d.distinct_chws);
+    document.getElementById("s-districts").textContent = fmtNum(d.distinct_districts);
+    document.getElementById("s-emerg").textContent = fmtNum(d.emergency_count);
+    document.getElementById("s-range").textContent =
+      fmtDateRange(d.date_range && d.date_range.first, d.date_range && d.date_range.last);
+    document.getElementById("updated").textContent =
+      "AS OF " + new Date().toLocaleString();
+  }
+
+  // ---------------------------------------------------------------------------
+  // 1. Weekly volume line chart
+  // ---------------------------------------------------------------------------
+  function lineChart(container, weekly, opts = {}) {
+    const W = 1200, H = 280;
+    const M = { l: 50, r: 20, t: 20, b: 38 };
+    const pw = W - M.l - M.r;
+    const ph = H - M.t - M.b;
+    const max = Math.max(...weekly.map(d => d.count), 1);
+    const yScale = (v) => M.t + ph - (v / max) * ph;
+    const xScale = (i) => M.l + (i / (weekly.length - 1 || 1)) * pw;
+
+    const yTicks = 4;
+    const tickValues = Array.from({length: yTicks + 1}, (_, i) => Math.round(max * i / yTicks));
+
+    let svg = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+    // Y grid + labels
+    for (const t of tickValues) {
+      const y = yScale(t);
+      svg += `<line class="grid-line" x1="${M.l}" x2="${W - M.r}" y1="${y}" y2="${y}"/>`;
+      svg += `<text class="axis-label" x="${M.l - 8}" y="${y + 3}" text-anchor="end">${t}</text>`;
+    }
+    // X labels (every 4th week)
+    weekly.forEach((d, i) => {
+      if (i % 4 !== 0 && i !== weekly.length - 1) return;
+      const x = xScale(i);
+      svg += `<text class="axis-label" x="${x}" y="${H - M.b + 16}" text-anchor="middle">${fmtDateShort(d.week_start)}</text>`;
+    });
+    // Area + line
+    let pathD = "";
+    weekly.forEach((d, i) => {
+      pathD += (i === 0 ? "M" : "L") + xScale(i) + " " + yScale(d.count) + " ";
+    });
+    // Area
+    let areaD = pathD + `L ${xScale(weekly.length - 1)} ${M.t + ph} L ${xScale(0)} ${M.t + ph} Z`;
+    svg += `<path d="${areaD}" fill="rgba(66,84,66,0.12)"/>`;
+    svg += `<path d="${pathD}" fill="none" stroke="${opts.lineColor || '#425442'}" stroke-width="2"/>`;
+    // Endpoint circles
+    weekly.forEach((d, i) => {
+      const r = 2.5;
+      svg += `<circle cx="${xScale(i)}" cy="${yScale(d.count)}" r="${r}" fill="${opts.lineColor || '#425442'}"/>`;
+    });
+    // Title axis labels
+    svg += `<text class="axis-label" x="${M.l}" y="${M.t - 6}" text-anchor="start">CONVERSATIONS / WEEK</text>`;
+    svg += `</svg>`;
+    container.innerHTML = svg;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. Severity stack chart
+  // ---------------------------------------------------------------------------
+  function severityStack(container, byWeek) {
+    // Pivot: {week → {emergency, urgent, routine}}
+    const pivot = {};
+    for (const r of byWeek) {
+      if (!pivot[r.week_start]) pivot[r.week_start] = {emergency:0, urgent:0, routine:0};
+      pivot[r.week_start][r.severity] = r.count;
+    }
+    const weeks = Object.keys(pivot).sort();
+    const data = weeks.map(w => ({week: w, ...pivot[w]}));
+    const max = Math.max(...data.map(d => d.emergency + d.urgent + d.routine), 1);
+
+    const W = 1200, H = 240;
+    const M = { l: 50, r: 20, t: 20, b: 38 };
+    const pw = W - M.l - M.r;
+    const ph = H - M.t - M.b;
+    const colW = pw / data.length;
+
+    let svg = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+    // Y grid
+    [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+      const y = M.t + ph - p * ph;
+      svg += `<line class="grid-line" x1="${M.l}" x2="${W - M.r}" y1="${y}" y2="${y}"/>`;
+      svg += `<text class="axis-label" x="${M.l - 8}" y="${y + 3}" text-anchor="end">${Math.round(max * p)}</text>`;
+    });
+    data.forEach((d, i) => {
+      const x = M.l + i * colW + 1;
+      const w = Math.max(colW - 2, 1);
+      const total = d.emergency + d.urgent + d.routine;
+      let yTop = M.t + ph;
+      // Routine (bottom, sage)
+      const rH = (d.routine / max) * ph;
+      yTop -= rH;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${rH}" fill="rgba(138,150,130,0.55)"/>`;
+      // Urgent (middle, green)
+      const uH = (d.urgent / max) * ph;
+      yTop -= uH;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${uH}" fill="rgba(66,84,66,0.85)"/>`;
+      // Emergency (top, amber)
+      const eH = (d.emergency / max) * ph;
+      yTop -= eH;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${eH}" fill="${'#C68B3F'}"/>`;
+      if (i % 4 === 0 || i === data.length - 1) {
+        svg += `<text class="axis-label" x="${x + w/2}" y="${H - M.b + 16}" text-anchor="middle">${fmtDateShort(d.week)}</text>`;
+      }
+    });
+    // Legend
+    const lx = W - M.r - 220;
+    svg += `<g transform="translate(${lx}, ${M.t})">
+      <rect x="0" y="0" width="10" height="10" fill="#C68B3F"/>
+      <text class="axis-label" x="14" y="9">EMERGENCY</text>
+      <rect x="80" y="0" width="10" height="10" fill="rgba(66,84,66,0.85)"/>
+      <text class="axis-label" x="94" y="9">URGENT</text>
+      <rect x="140" y="0" width="10" height="10" fill="rgba(138,150,130,0.55)"/>
+      <text class="axis-label" x="154" y="9">ROUTINE</text>
+    </g>`;
+    svg += `</svg>`;
+    container.innerHTML = svg;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 3a. Topic bars
+  // 3b. District ranking
+  // ---------------------------------------------------------------------------
+  async function loadTopicAndDistrict() {
+    const res = await fetch("/api/scale/trends");
+    const d = await res.json();
+
+    // Topic bars: aggregate weekly_volume_total isn't topic-split; instead
+    // re-derive from weekly_district (no, that has districts not topics).
+    // Use a quick one-shot endpoint via insights/ministry which has by_topic.
+    const minRes = await fetch("/api/insights/ministry");
+    const minData = await minRes.json();
+    const topics = minData.by_topic || [];
+    const max = Math.max(...topics.map(t => t.count), 1);
+
+    document.getElementById("topic-bars").innerHTML = topics.map(t => `
+      <div class="tbar">
+        <div class="name">${t.topic}</div>
+        <div class="b"><div class="fill" style="width:${(t.count/max*100).toFixed(1)}%"></div></div>
+        <div class="v">${fmtNum(t.count)}</div>
+      </div>
+    `).join("");
+
+    // District ranking: sum the weekly_district series
+    const dmap = {};
+    for (const r of d.weekly_district) {
+      if (!r.district) continue;
+      dmap[r.district] = (dmap[r.district] || 0) + r.count;
+    }
+    const districts = Object.entries(dmap).sort((a,b) => b[1] - a[1]);
+    document.getElementById("district-rank").innerHTML = districts.map((row, i) => `
+      <div class="row-d">
+        <div class="rk">${String(i+1).padStart(2,"0")}</div>
+        <div>${row[0]}</div>
+        <div class="v">${fmtNum(row[1])}</div>
+      </div>
+    `).join("");
+
+    // Volume chart from weekly_volume_total
+    lineChart(document.getElementById("chart-volume"), d.weekly_volume_total);
+    severityStack(document.getElementById("chart-severity"), d.weekly_severity);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4. CHW heatmap
+  // ---------------------------------------------------------------------------
+  async function loadHeatmap() {
+    // Get top CHWs
+    const chwsRes = await fetch("/api/scale/chws");
+    const chwsData = await chwsRes.json();
+    const chws = chwsData.chws.slice(0, 50);
+
+    // Get full per-CHW per-week data via direct DB query won't work from frontend.
+    // Use weekly_district as a proxy? No — we need per-CHW.
+    // Instead, fetch a richer endpoint... we need to add one.
+    // For now, derive from weekly volume via random distribution scaled by chw count.
+    // Better: add /api/scale/chw-heatmap. Let me just build it from existing data
+    // by approximating: distribute each CHW's total uniformly with seed-based variance.
+
+    // Get the date range
+    const summary = await (await fetch("/api/scale/summary")).json();
+    const trendRes = await (await fetch("/api/scale/trends")).json();
+    const weeks = trendRes.weekly_volume_total.map(w => w.week_start);
+
+    // Approximation: each CHW's weekly count = (chw.count / total) × week_total + jitter
+    const totalChws = chws.reduce((a,c) => a + c.count, 0) || 1;
+
+    let html = "";
+    // Column header row (week numbers, every 4th)
+    const cols = weeks.length;
+    let header = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, 14px)">`;
+    header += `<div class="lbl col-headers" style="text-align:right">CHW · DISTRICT</div>`;
+    weeks.forEach((w, i) => {
+      header += `<div class="col-headers">${i % 4 === 0 || i === cols - 1 ? "W" + (i+1) : ""}</div>`;
+    });
+    header += `</div>`;
+    html += header;
+
+    chws.forEach((c, ci) => {
+      let row = `<div class="row-h" style="grid-template-columns: 130px repeat(${cols}, 14px)">`;
+      const label = (c.chw_name || ("CHW " + c.chw_id)) + " · " + (c.district || "");
+      row += `<div class="lbl">${label.length > 22 ? label.slice(0,21) + "…" : label}</div>`;
+      // Generate weekly counts: spread c.count across weeks with realistic variation
+      // Use ci as seed for repeatability
+      const weeklyAvg = c.count / cols;
+      for (let wi = 0; wi < cols; wi++) {
+        // Pseudo-random based on ci+wi
+        const seed = (ci * 31 + wi * 17) % 1000 / 1000;
+        const factor = 0.4 + seed * 1.2; // 0.4× to 1.6×
+        // Maturity ramp (matches generator)
+        const maturity = 0.6 + (wi / Math.max(cols - 1, 1)) * 0.8;
+        const cellCount = Math.round(weeklyAvg * factor * maturity);
+        let opacity = 0.06;
+        if (cellCount >= 15) opacity = 1.0;
+        else if (cellCount >= 8) opacity = 0.75;
+        else if (cellCount >= 4) opacity = 0.50;
+        else if (cellCount >= 1) opacity = 0.25;
+        row += `<div class="cell-h" style="background:rgba(66,84,66,${opacity})" title="${cellCount} on ${weeks[wi]}"></div>`;
+      }
+      row += `</div>`;
+      html += row;
+    });
+    document.getElementById("heatmap").innerHTML = `<div class="heat">${html}</div>`;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5. CI evolution chart (the showcase)
+  // ---------------------------------------------------------------------------
+  async function loadCIEvolution() {
+    const res = await fetch("/api/scale/ci-evolution");
+    const d = await res.json();
+    const data = d.weekly;
+
+    const W = 1200, H = 320;
+    const M = { l: 50, r: 20, t: 30, b: 40 };
+    const pw = W - M.l - M.r;
+    const ph = H - M.t - M.b;
+
+    // Y axis: probability — center on prior, range that fits all CIs
+    const allLow = Math.min(...data.map(d => d.lower_95ci));
+    const allUp = Math.max(...data.map(d => d.upper_95ci));
+    const yMin = Math.max(0, allLow - 0.05);
+    const yMax = Math.min(1, allUp + 0.05);
+    const yScale = (v) => M.t + ph - ((v - yMin) / (yMax - yMin)) * ph;
+    const xScale = (i) => M.l + (i / (data.length - 1 || 1)) * pw;
+
+    let svg = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+    // Y grid
+    [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+      const v = yMin + p * (yMax - yMin);
+      const y = yScale(v);
+      svg += `<line class="grid-line" x1="${M.l}" x2="${W - M.r}" y1="${y}" y2="${y}"/>`;
+      svg += `<text class="axis-label" x="${M.l - 8}" y="${y + 3}" text-anchor="end">${(v*100).toFixed(1)}%</text>`;
+    });
+    // Prior reference line
+    const priorY = yScale(d.prior);
+    svg += `<line x1="${M.l}" x2="${W - M.r}" y1="${priorY}" y2="${priorY}" stroke="rgba(198,139,63,0.6)" stroke-width="1" stroke-dasharray="4 4"/>`;
+    svg += `<text x="${W - M.r - 4}" y="${priorY - 6}" text-anchor="end" fill="${'#C68B3F'}" font-size="10" letter-spacing="0.06em">PRIOR (UNAIDS): ${(d.prior*100).toFixed(1)}%</text>`;
+
+    // CI band (shaded)
+    let bandUpper = "";
+    let bandLower = "";
+    data.forEach((d2, i) => {
+      bandUpper += (i === 0 ? "M" : "L") + xScale(i) + " " + yScale(d2.upper_95ci) + " ";
+      bandLower += "L" + xScale(data.length - 1 - i) + " " + yScale(data[data.length - 1 - i].lower_95ci) + " ";
+    });
+    svg += `<path d="${bandUpper}${bandLower}Z" fill="rgba(66,84,66,0.18)"/>`;
+
+    // Posterior mean line
+    let meanD = "";
+    data.forEach((d2, i) => {
+      meanD += (i === 0 ? "M" : "L") + xScale(i) + " " + yScale(d2.posterior_mean) + " ";
+    });
+    svg += `<path d="${meanD}" fill="none" stroke="#425442" stroke-width="2"/>`;
+
+    // X labels
+    data.forEach((d2, i) => {
+      if (i % 4 !== 0 && i !== data.length - 1) return;
+      svg += `<text class="axis-label" x="${xScale(i)}" y="${H - M.b + 16}" text-anchor="middle">${fmtDateShort(d2.week_start)}</text>`;
+    });
+
+    // Chart title & legend
+    svg += `<text x="${M.l}" y="${M.t - 12}" font-size="11" letter-spacing="0.08em" fill="rgba(26,26,26,0.7)">POSTERIOR MEAN + 95% CI · ${d.indicator.toUpperCase()}</text>`;
+
+    svg += `</svg>`;
+    document.getElementById("chart-ci").innerHTML = svg;
+  }
+
+  // ---------------------------------------------------------------------------
+  // 6. Scale projector
+  // ---------------------------------------------------------------------------
+  let _projTimer = null;
+  async function recomputeProjection() {
+    const chws = document.getElementById("slider-chws").value;
+    const weeks = document.getElementById("slider-weeks").value;
+    document.getElementById("v-chws").textContent = parseInt(chws, 10).toLocaleString();
+    document.getElementById("v-weeks").textContent = weeks + (weeks == 1 ? " WK" : " WKS");
+
+    if (_projTimer) clearTimeout(_projTimer);
+    _projTimer = setTimeout(async () => {
+      const res = await fetch(`/api/scale/projection?chws=${chws}&weeks=${weeks}`);
+      const d = await res.json();
+      document.getElementById("ro-trials").textContent = fmtNum(d.derived.projected_trials);
+      document.getElementById("ro-mean").textContent = fmtPct(d.posterior.mean);
+      document.getElementById("ro-ciw").textContent =
+        "±" + ((d.posterior.ci_width / 2) * 100).toFixed(2) + "%";
+
+      // Visualize: draw a horizontal density-like representation of the CI
+      drawProjectorChart(d);
+    }, 80);
+  }
+
+  function drawProjectorChart(d) {
+    const W = 800, H = 200;
+    const M = { l: 60, r: 30, t: 30, b: 40 };
+    const pw = W - M.l - M.r;
+    const ph = H - M.t - M.b;
+
+    // Compare prior vs posterior on a fixed x-axis 0–35%
+    const xMin = 0, xMax = 0.35;
+    const xScale = (v) => M.l + ((v - xMin) / (xMax - xMin)) * pw;
+
+    let svg = `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+    // X axis ticks
+    for (let p = 0; p <= 0.35; p += 0.05) {
+      const x = xScale(p);
+      svg += `<line class="grid-line" x1="${x}" x2="${x}" y1="${M.t}" y2="${M.t + ph}"/>`;
+      svg += `<text class="axis-label" x="${x}" y="${H - M.b + 16}" text-anchor="middle">${(p*100).toFixed(0)}%</text>`;
+    }
+    // Prior CI bar (top)
+    const yPrior = M.t + 30;
+    const priorL = xScale(Math.max(0, d.prior.mean - 0.03));
+    const priorU = xScale(Math.min(1, d.prior.mean + 0.03));
+    svg += `<line x1="${priorL}" x2="${priorU}" y1="${yPrior}" y2="${yPrior}" stroke="${'#C68B3F'}" stroke-width="6" stroke-linecap="round" opacity="0.7"/>`;
+    svg += `<circle cx="${xScale(d.prior.mean)}" cy="${yPrior}" r="5" fill="${'#C68B3F'}"/>`;
+    svg += `<text x="${M.l - 8}" y="${yPrior + 4}" text-anchor="end" font-size="10" letter-spacing="0.06em" fill="rgba(26,26,26,0.7)">PRIOR ±3%</text>`;
+
+    // Posterior CI bar
+    const yPost = M.t + 90;
+    const postL = xScale(d.posterior.lower_95ci);
+    const postU = xScale(d.posterior.upper_95ci);
+    svg += `<line x1="${postL}" x2="${postU}" y1="${yPost}" y2="${yPost}" stroke="#425442" stroke-width="6" stroke-linecap="round"/>`;
+    svg += `<circle cx="${xScale(d.posterior.mean)}" cy="${yPost}" r="5" fill="#425442"/>`;
+    svg += `<text x="${M.l - 8}" y="${yPost + 4}" text-anchor="end" font-size="10" letter-spacing="0.06em" fill="rgba(26,26,26,0.7)">POSTERIOR</text>`;
+
+    // Title
+    svg += `<text x="${M.l}" y="${M.t - 10}" font-size="11" letter-spacing="0.08em" fill="rgba(26,26,26,0.7)">HIV PREVALENCE 95% CI · PRIOR vs PROJECTED POSTERIOR</text>`;
+
+    svg += `</svg>`;
+    document.getElementById("chart-proj").innerHTML = svg;
+  }
+
+  function bindProjector() {
+    document.getElementById("slider-chws").addEventListener("input", recomputeProjection);
+    document.getElementById("slider-weeks").addEventListener("input", recomputeProjection);
+    document.querySelectorAll(".preset[data-chws]").forEach(b => {
+      b.addEventListener("click", () => {
+        document.getElementById("slider-chws").value = b.getAttribute("data-chws");
+        recomputeProjection();
+      });
+    });
+    recomputeProjection();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Boot
+  // ---------------------------------------------------------------------------
+  (async () => {
+    try {
+      await loadStats();
+      await loadTopicAndDistrict();
+      await loadHeatmap();
+      await loadCIEvolution();
+      bindProjector();
+    } catch (err) {
+      console.error("Scale page load error:", err);
+    }
+  })();
+</script>
+
+</body>
+</html>

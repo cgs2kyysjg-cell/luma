@@ -795,6 +795,317 @@ function ministryView() {
   };
 }
 
+// ----------------------------------------------------------------------------
+// Historical / scale view helpers
+// (Powered by the seed_historical_data.py dataset — 26 weeks, 50 CHWs.)
+// ----------------------------------------------------------------------------
+
+/**
+ * Weekly conversation counts across the entire history, optionally filtered by topic.
+ * Returns: [{week_start: "YYYY-MM-DD", count}, ...]
+ */
+function weeklyVolume(topic = null) {
+  const params = [];
+  let topicClause = "";
+  if (topic && topic !== "all") {
+    topicClause = "AND topic = ?";
+    params.push(topic);
+  }
+  const rows = db()
+    .prepare(
+      `SELECT date(created_at, 'weekday 0', '-6 days') as week_start,
+              COUNT(*) as count
+         FROM case_tags
+        WHERE 1=1 ${topicClause}
+        GROUP BY week_start
+        ORDER BY week_start`,
+    )
+    .all(...params);
+  return rows;
+}
+
+/**
+ * Per-district per-week trend (for the heatmap and trend lines).
+ */
+function weeklyDistrictBreakdown() {
+  const rows = db()
+    .prepare(
+      `SELECT date(created_at, 'weekday 0', '-6 days') as week_start,
+              district,
+              COUNT(*) as count
+         FROM case_tags
+        WHERE district IS NOT NULL AND district != 'unknown'
+        GROUP BY week_start, district
+        ORDER BY week_start, district`,
+    )
+    .all();
+  return rows;
+}
+
+/**
+ * Weekly severity breakdown — emergency / urgent / routine over time.
+ */
+function weeklySeverityBreakdown() {
+  const rows = db()
+    .prepare(
+      `SELECT date(created_at, 'weekday 0', '-6 days') as week_start,
+              severity,
+              COUNT(*) as count
+         FROM case_tags
+        WHERE severity IS NOT NULL
+        GROUP BY week_start, severity
+        ORDER BY week_start, severity`,
+    )
+    .all();
+  return rows;
+}
+
+/**
+ * For each week, compute the cumulative HIV-prevalence Bayesian posterior
+ * up to the end of that week. Demonstrates how CI tightens with data.
+ *
+ * This is the most evocative single visualization for the "framework value
+ * grows with the network" pitch.
+ */
+function ciEvolutionByWeek({ priorMean, priorEffectiveN, topicForSuccess }) {
+  const weeks = db()
+    .prepare(
+      `SELECT DISTINCT date(created_at, 'weekday 0', '-6 days') as week_start
+         FROM case_tags
+        WHERE created_at IS NOT NULL
+        ORDER BY week_start`,
+    )
+    .all()
+    .map((r) => r.week_start);
+
+  const out = [];
+  for (const wk of weeks) {
+    // End of week = start + 6 days (inclusive)
+    const successes = db()
+      .prepare(
+        `SELECT COUNT(*) as n FROM case_tags
+          WHERE created_at <= date(?, '+6 days', '+1 day') AND topic = ?`,
+      )
+      .get(wk, topicForSuccess).n;
+    const trials = db()
+      .prepare(
+        `SELECT COUNT(*) as n FROM case_tags
+          WHERE created_at <= date(?, '+6 days', '+1 day')`,
+      )
+      .get(wk).n;
+    const post = bayesianProportionUpdate({
+      priorMean,
+      priorEffectiveN,
+      observedSuccesses: successes,
+      observedTrials: Math.max(trials, 1),
+    });
+    out.push({
+      week_start: wk,
+      cumulative_trials: trials,
+      cumulative_successes: successes,
+      posterior_mean: post.posteriorMean,
+      lower_95ci: post.lower,
+      upper_95ci: post.upper,
+      ci_width: post.upper - post.lower,
+    });
+  }
+  return out;
+}
+
+/**
+ * Top CHWs by conversation count (uses chw_id packed into raw_extraction).
+ * Useful for the activity heatmap.
+ */
+function topCHWs(limit = 50) {
+  const rows = db()
+    .prepare(
+      `SELECT json_extract(raw_extraction, '$.chw_id') as chw_id,
+              json_extract(raw_extraction, '$.chw_name') as chw_name,
+              json_extract(raw_extraction, '$.chw_specialty') as chw_specialty,
+              district,
+              COUNT(*) as count
+         FROM case_tags
+        WHERE json_extract(raw_extraction, '$.chw_id') IS NOT NULL
+        GROUP BY chw_id
+        ORDER BY count DESC
+        LIMIT ?`,
+    )
+    .all(limit);
+  return rows;
+}
+
+/**
+ * Conversations over the entire history that match a cohort filter.
+ * The cohort builder API passes the filter object; we return:
+ *   - matched_count
+ *   - per-district breakdown
+ *   - per-week trend (for charting)
+ *   - sample rows (anonymized)
+ *
+ * Filter fields supported (all optional, ANDed):
+ *   topic, condition_substr, severity, age_band, pregnancy, hiv_status,
+ *   district, treatment_status (json), viral_load_band (json),
+ *   min_months_on_treatment (json), max_months_on_treatment (json),
+ *   regimen (json), comorbidity (json — substring on comorbidities array),
+ *   adherence (json), tb_hiv_coinfected (json bool)
+ */
+function buildCohort(filter = {}) {
+  const where = [];
+  const params = [];
+
+  if (filter.topic) { where.push("topic = ?"); params.push(filter.topic); }
+  if (filter.condition_substr) {
+    where.push("LOWER(condition) LIKE LOWER(?)");
+    params.push("%" + filter.condition_substr + "%");
+  }
+  if (filter.severity) { where.push("severity = ?"); params.push(filter.severity); }
+  if (filter.age_band) { where.push("patient_age_band = ?"); params.push(filter.age_band); }
+  if (filter.pregnancy) { where.push("patient_pregnancy_status = ?"); params.push(filter.pregnancy); }
+  if (filter.hiv_status) { where.push("patient_hiv_status = ?"); params.push(filter.hiv_status); }
+  if (filter.district) { where.push("district = ?"); params.push(filter.district); }
+
+  if (filter.treatment_status) {
+    where.push("json_extract(raw_extraction, '$.treatment_status') = ?");
+    params.push(filter.treatment_status);
+  }
+  if (filter.viral_load_band) {
+    where.push("json_extract(raw_extraction, '$.viral_load_band') = ?");
+    params.push(filter.viral_load_band);
+  }
+  if (filter.regimen) {
+    where.push("json_extract(raw_extraction, '$.regimen') = ?");
+    params.push(filter.regimen);
+  }
+  if (filter.adherence) {
+    where.push("json_extract(raw_extraction, '$.adherence') = ?");
+    params.push(filter.adherence);
+  }
+  if (filter.tb_hiv_coinfected != null) {
+    where.push("json_extract(raw_extraction, '$.tb_hiv_coinfected') = ?");
+    params.push(filter.tb_hiv_coinfected ? 1 : 0);
+  }
+  if (filter.min_months_on_treatment != null) {
+    where.push("CAST(json_extract(raw_extraction, '$.months_on_treatment') AS INTEGER) >= ?");
+    params.push(filter.min_months_on_treatment);
+  }
+  if (filter.max_months_on_treatment != null) {
+    where.push("CAST(json_extract(raw_extraction, '$.months_on_treatment') AS INTEGER) <= ?");
+    params.push(filter.max_months_on_treatment);
+  }
+  if (filter.comorbidity) {
+    where.push("raw_extraction LIKE ?");
+    params.push("%" + filter.comorbidity + "%");
+  }
+
+  const whereSql = where.length ? "WHERE " + where.join(" AND ") : "";
+
+  const total = db()
+    .prepare(`SELECT COUNT(*) as n FROM case_tags ${whereSql}`)
+    .get(...params).n;
+
+  const byDistrict = db()
+    .prepare(
+      `SELECT district, COUNT(*) as count FROM case_tags
+        ${whereSql} ${whereSql ? "AND" : "WHERE"} district IS NOT NULL
+        GROUP BY district ORDER BY count DESC`,
+    )
+    .all(...params);
+
+  const weekly = db()
+    .prepare(
+      `SELECT date(created_at, 'weekday 0', '-6 days') as week_start, COUNT(*) as count
+         FROM case_tags ${whereSql}
+        GROUP BY week_start ORDER BY week_start`,
+    )
+    .all(...params);
+
+  // Sample rows (for the CSV preview)
+  const samples = db()
+    .prepare(
+      `SELECT ct.id, ct.created_at, ct.district, ct.topic, ct.condition,
+              ct.severity, ct.patient_age_band, ct.patient_pregnancy_status,
+              ct.patient_hiv_status, ct.raw_extraction,
+              c.from_number
+         FROM case_tags ct
+         LEFT JOIN conversations c ON c.id = ct.conversation_id
+         ${whereSql}
+        ORDER BY ct.created_at DESC
+        LIMIT 50`,
+    )
+    .all(...params);
+
+  // Anonymise: drop from_number, parse extraction
+  const anonSamples = samples.map((r) => {
+    let extra = {};
+    try { extra = JSON.parse(r.raw_extraction || "{}"); } catch (e) {}
+    return {
+      id: r.id,
+      created_at: r.created_at,
+      district: r.district,
+      topic: r.topic,
+      condition: r.condition,
+      severity: r.severity,
+      age_band: r.patient_age_band,
+      pregnancy: r.patient_pregnancy_status,
+      hiv_status: r.patient_hiv_status,
+      treatment_status: extra.treatment_status || null,
+      viral_load_band: extra.viral_load_band || null,
+      months_on_treatment: extra.months_on_treatment || null,
+      regimen: extra.regimen || null,
+      adherence: extra.adherence || null,
+      comorbidities: extra.comorbidities || null,
+      patient_id: "P-" + (r.id.toString().padStart(6, "0")),
+    };
+  });
+
+  return {
+    filter,
+    matched_count: total,
+    by_district: byDistrict,
+    weekly_trend: weekly,
+    samples: anonSamples,
+    methodology_note:
+      "Cohort matched against luma's structured CHW interaction log. " +
+      "Patient IDs are pseudonymised (P-NNNNNN). All cohort attributes " +
+      "(treatment status, viral load band, months on treatment, regimen, " +
+      "comorbidities, adherence) are derived from CHW-reported information " +
+      "and the structured extraction layer over WhatsApp interactions.",
+  };
+}
+
+/**
+ * Operational summary for the /scale page header.
+ */
+function operationalSummary() {
+  const totalConv = db().prepare(`SELECT COUNT(*) as n FROM conversations`).get().n;
+  const totalTags = db().prepare(`SELECT COUNT(*) as n FROM case_tags`).get().n;
+  const dateRange = db()
+    .prepare(`SELECT MIN(created_at) as first, MAX(created_at) as last FROM conversations`)
+    .get();
+  const distinctChws = db()
+    .prepare(
+      `SELECT COUNT(DISTINCT json_extract(raw_extraction, '$.chw_id')) as n FROM case_tags
+        WHERE json_extract(raw_extraction, '$.chw_id') IS NOT NULL`,
+    )
+    .get().n;
+  const distinctDistricts = db()
+    .prepare(
+      `SELECT COUNT(DISTINCT district) as n FROM case_tags WHERE district IS NOT NULL`,
+    )
+    .get().n;
+  const emergencies = db()
+    .prepare(`SELECT COUNT(*) as n FROM case_tags WHERE severity = 'emergency'`)
+    .get().n;
+  return {
+    total_conversations: totalConv,
+    total_tagged_cases: totalTags,
+    date_range: dateRange,
+    distinct_chws: distinctChws,
+    distinct_districts: distinctDistricts,
+    emergency_count: emergencies,
+  };
+}
+
 module.exports = {
   // Priors
   LESOTHO_PRIORS,
@@ -824,4 +1135,13 @@ module.exports = {
   pharmaView,
   whoView,
   ministryView,
+
+  // Historical / scale
+  weeklyVolume,
+  weeklyDistrictBreakdown,
+  weeklySeverityBreakdown,
+  ciEvolutionByWeek,
+  topCHWs,
+  buildCohort,
+  operationalSummary,
 };

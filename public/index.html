@@ -876,75 +876,103 @@
 
 </div>
 
-<!-- WHY NOW section — sits below the hero like the rest of the sections -->
+<!-- WHY NOW section — full-width, tactile -->
 <section class="why-section">
-  <div class="why-eyebrow">
-    <span class="why-dot"></span> WHY NOW · 2025
+  <div class="why-section-text-top">
+    <div class="why-eyebrow">
+      <span class="why-dot"></span> WHY NOW · 2025
+    </div>
+    <h2>US bilateral health aid was halved in 2025. The half that's still flowing has no one left to spend it through.</h2>
+    <h3>The official line: <span class="hl-paper">cut 50%, route the rest direct to host governments,</span> bypass the INGO middleman. The reality leaves <span class="hl-paper">two real gaps</span>.</h3>
   </div>
-  <h2>USAID used to fund 100% of African primary-care infrastructure.</h2>
-  <h3>Today, <span class="hl-paper">50% comes back</span> — and the <span class="hl-paper">30% that ran through INGOs</span> doesn't.</h3>
+</section>
 
-  <div class="why-bar" aria-hidden="true">
-    <div class="why-seg why-seg-returned" style="flex: 50;">
+<!-- Full-bleed bar, breaks out of section padding edge-to-edge -->
+<div class="why-bar-fullbleed">
+  <div class="why-bar" aria-hidden="false">
+    <div class="why-seg why-seg-restored"
+         style="flex: 50;"
+         data-tip-title="50% — Restored, direct-to-government"
+         data-tip="Channel::no INGO intermediary||Policy::'America First Global Health Strategy'||Goes to::existing host-gov programs||Reality::partial flow as of 2026">
       <div class="why-seg-pct">50%</div>
-      <div class="why-seg-l">RETURNED</div>
-      <div class="why-seg-s">direct to ministries — but with no implementation partner</div>
+      <div class="why-seg-l">RESTORED</div>
+      <div class="why-seg-s">direct disbursement to ministries · no implementation partner</div>
+      <div class="why-seg-hover">Hover for detail →</div>
     </div>
-    <div class="why-seg why-seg-unfunded" style="flex: 20;">
+    <div class="why-seg why-seg-defunded"
+         style="flex: 20;"
+         data-tip-title="20% — Defunded, pure shortfall"
+         data-tip="Status::just gone||SSA shortfall::$12.7B (2024 baseline)||Programs cancelled::~83% of USAID portfolio Q1 2025||Restoration::partial via UN + Congress 2026, not pre-cut levels">
       <div class="why-seg-pct">20%</div>
-      <div class="why-seg-l">UNFUNDED</div>
-      <div class="why-seg-s">just gone</div>
+      <div class="why-seg-l">DEFUNDED</div>
+      <div class="why-seg-s">pure shortfall — restoration partial, not pre-cut levels</div>
+      <div class="why-seg-hover">Hover for detail →</div>
     </div>
-    <div class="why-seg why-seg-ingo" style="flex: 30;">
+    <div class="why-seg why-seg-ingo"
+         style="flex: 30;"
+         data-tip-title="30% — INGO operational layer, gone"
+         data-tip="What INGOs delivered::training, supervision, M&E, TA, supply chain||Jhpiego::1,975 staff cut · 44 countries||FHI 360::483 US + 700+ international staff cut||Function gap::cannot be replaced by direct-to-gov reroute alone">
       <div class="why-seg-pct">30%</div>
-      <div class="why-seg-l">INGO LAYER</div>
-      <div class="why-seg-s">funds gone, OR money still flows but the operational capacity to spend it vanished</div>
+      <div class="why-seg-l">INGO LAYER · GONE</div>
+      <div class="why-seg-s">the trainers, supervisors, M&amp;E officers — gone whether or not money flows</div>
+      <div class="why-seg-hover">Hover for detail →</div>
     </div>
   </div>
   <div class="why-bar-foot">
-    <span><strong>— old USAID spend, by where it went —</strong></span>
-    <span class="why-bar-total">100% baseline</span>
+    <span><strong>— Pre-2025 US bilateral health aid in SSA, by what's left of it —</strong></span>
+    <span class="why-bar-total">100% baseline · USAID + PEPFAR · 2024</span>
   </div>
+</div>
 
+<section class="why-section">
   <p class="why-paragraph">
-    Two gaps need filling: the unfunded 20%, and the operational layer the surviving 30% used to be spent through.
-    The trainers, supervisors, M&amp;E officers, and clinical mentors that converted aid into trained, supervised health workers
-    are gone. Ministries inherited the function and need a software substitute.
-    <strong>luma is the software-native replacement for both.</strong>
+    Two gaps need to be filled, not one.
+    The <strong>20%</strong> is a pure funding shortfall — ministries either economize or lose service delivery.
+    The <strong>30%</strong> is harder: even if every dollar were restored direct-to-government tomorrow, the INGOs that did the actual work
+    (trainings, supervisory visits, M&amp;E, technical assistance) are dismantled. Ministries got the responsibility without the implementation muscle.
+    <strong>luma is the software-native replacement for that operational layer</strong> — at 5–15% of what the INGO partnership cost.
   </p>
 
   <a href="/why-now" class="why-cta">READ THE FULL THESIS →</a>
 </section>
 
 <style>
-  .why-section {
-    /* Inherits the existing site `section` styling (padding, border-top) */
+  /* Override the default home `section` styling for the WHY NOW pair */
+  section.why-section {
     background: var(--paper);
+    border-top: 1px solid var(--ink);
+    padding: 56px 56px 32px;
   }
-  .why-section h2 {
-    /* The home page section h2s are the small uppercase eyebrow style.
-     * Override here for a real hero-style headline. */
-    font-size: 32px !important;
+  /* When the SECOND why-section follows the bar, no extra top border (visual continuity) */
+  .why-bar-fullbleed + section.why-section {
+    border-top: 0;
+    padding-top: 18px;
+  }
+  /* No bottom border on the first why section (it leads directly into the bar) */
+  section.why-section + .why-bar-fullbleed { /* visual hint */ }
+
+  section.why-section h2 {
+    font-size: 36px !important;
     letter-spacing: -0.018em !important;
     text-transform: none !important;
     font-weight: 800 !important;
     color: var(--ink) !important;
-    margin: 0 0 6px !important;
-    max-width: 32ch;
-    line-height: 1.1 !important;
+    margin: 0 0 12px !important;
+    max-width: 28ch;
+    line-height: 1.05 !important;
   }
-  .why-section h3 {
-    font-size: 21px;
-    line-height: 1.3;
-    font-weight: 500;
-    color: rgba(26,26,26,0.85);
-    margin: 0 0 24px;
-    max-width: 60ch;
+  section.why-section h3 {
+    font-size: 19px;
+    line-height: 1.35;
+    font-weight: 400;
+    color: rgba(26,26,26,0.82);
+    margin: 0 0 12px;
+    max-width: 70ch;
   }
-  .why-section h3 .hl-paper {
+  section.why-section h3 .hl-paper {
     background: rgba(66,84,66,0.18);
     padding: 1px 6px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ink);
   }
 
@@ -963,45 +991,73 @@
     animation: lumaPulse 2.4s cubic-bezier(0.22,1,0.36,1) infinite;
   }
 
+  /* Full-bleed bar — escapes any parent padding edge-to-edge */
+  .why-bar-fullbleed {
+    background: var(--paper);
+    padding: 28px 0 16px;
+    border-bottom: 1px solid rgba(26,26,26,0.18);
+  }
   .why-bar {
     display: flex;
-    height: 110px;
-    border: 1px solid var(--ink);
+    height: 140px;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
     overflow: hidden;
-    margin-top: 10px;
-    max-width: 1100px;
+    width: 100%;
   }
   .why-seg {
-    padding: 16px 16px 14px;
+    padding: 18px 22px;
     display: flex; flex-direction: column; justify-content: center;
     color: var(--ink);
     border-right: 1px solid rgba(26,26,26,0.18);
     overflow: hidden;
-    transition: filter 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    transition: filter 0.22s ease, padding 0.22s ease;
     min-width: 0;
   }
   .why-seg:last-child { border-right: 0; }
-  .why-seg-returned { background: rgba(66,84,66,0.20); }
-  .why-seg-unfunded { background: rgba(198,139,63,0.32); }
+  .why-seg-restored { background: rgba(66,84,66,0.18); }
+  .why-seg-defunded { background: rgba(198,139,63,0.30); }
   .why-seg-ingo     { background: var(--ink); color: var(--paper); }
+
+  .why-seg:hover { filter: brightness(1.06); }
+  .why-seg::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 0; background: var(--green);
+    transition: height 0.22s var(--ease-out-quart, cubic-bezier(0.22,1,0.36,1));
+  }
+  .why-seg-ingo::after { background: var(--paper); }
+  .why-seg:hover::after { height: 4px; }
+
   .why-seg-pct {
-    font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+    font-size: 36px; font-weight: 800; letter-spacing: -0.02em;
     line-height: 1; font-variant-numeric: tabular-nums;
   }
   .why-seg-ingo .why-seg-pct { color: white; }
   .why-seg-l {
-    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
-    margin-top: 6px; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin-top: 8px; font-weight: 700;
   }
   .why-seg-s {
-    font-size: 11px; line-height: 1.4;
-    margin-top: 5px;
+    font-size: 12px; line-height: 1.45;
+    margin-top: 6px;
     color: rgba(26,26,26,0.75);
+    max-width: 32ch;
   }
   .why-seg-ingo .why-seg-s { color: rgba(234,231,221,0.78); }
+  .why-seg-hover {
+    position: absolute; bottom: 8px; right: 14px;
+    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(26,26,26,0.45); font-weight: 700;
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+  .why-seg-ingo .why-seg-hover { color: rgba(234,231,221,0.5); }
+  .why-seg:hover .why-seg-hover { opacity: 1; }
+
   .why-bar-foot {
     display: flex; justify-content: space-between;
-    margin-top: 8px; max-width: 1100px;
+    margin-top: 10px; padding: 0 56px;
     font-size: 10px; letter-spacing: 0.06em;
     color: rgba(26,26,26,0.6);
   }
@@ -1012,17 +1068,17 @@
   }
 
   .why-paragraph {
-    margin: 28px 0 22px;
-    font-size: 15px;
+    margin: 0 0 22px;
+    font-size: 15.5px;
     line-height: 1.65;
-    max-width: 80ch;
+    max-width: 78ch;
     color: rgba(26,26,26,0.85);
   }
   .why-paragraph strong { font-weight: 700; color: var(--ink); }
 
   .why-cta {
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 12px 20px;
+    padding: 13px 22px;
     background: var(--green); color: var(--paper);
     text-decoration: none;
     font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
@@ -1035,17 +1091,21 @@
     transform: translateY(-2px);
   }
 
-  @media (max-width: 800px) {
-    .why-section h2 { font-size: 24px !important; }
-    .why-section h3 { font-size: 16px; }
-    .why-bar { height: 100px; }
-    .why-seg-pct { font-size: 22px; }
-    .why-seg-s { font-size: 10px; }
+  @media (max-width: 900px) {
+    section.why-section { padding: 40px 24px 24px; }
+    section.why-section h2 { font-size: 26px !important; }
+    section.why-section h3 { font-size: 15.5px; }
+    .why-bar { height: 120px; }
+    .why-seg-pct { font-size: 26px; }
+    .why-seg-s { font-size: 11px; }
+    .why-bar-foot { padding: 0 24px; flex-wrap: wrap; gap: 6px; }
   }
-  @media (max-width: 500px) {
+  @media (max-width: 600px) {
+    .why-bar { height: 110px; }
+    .why-seg { padding: 12px 10px; }
+    .why-seg-l { font-size: 9px; letter-spacing: 0.12em; }
     .why-seg-s { display: none; }
-    .why-seg { padding: 12px 8px; }
-    .why-seg-l { font-size: 8.5px; letter-spacing: 0.12em; }
+    .why-seg-hover { display: none; }
   }
 </style>
 

@@ -491,7 +491,8 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
   display: none;
   flex-direction: column;
   justify-content: space-between;
-  width: 24px; height: 18px;
+  align-self: center;            /* center vertically inside the nav row */
+  width: 22px; height: 12px;     /* tighter — lines closer together */
   margin-left: auto;
   margin-right: 22px;
   background: transparent;
@@ -544,15 +545,15 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
   }
   .nav.is-open a:last-child { border-bottom: 0; }
 
-  /* Animate hamburger lines into an X */
+  /* Animate hamburger lines into an X (gap is ~5px now) */
   .nav.is-open .nav-mobile-btn span:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
+    transform: translateY(5px) rotate(45deg);
   }
   .nav.is-open .nav-mobile-btn span:nth-child(2) {
     opacity: 0;
   }
   .nav.is-open .nav-mobile-btn span:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
+    transform: translateY(-5px) rotate(-45deg);
   }
 
   /* Tighten the home button on mobile so the hamburger has room */

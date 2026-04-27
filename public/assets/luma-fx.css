@@ -591,6 +591,108 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
 }
 
 /* ============================================================
+ * Hover-lift on cards / panels everywhere. Subtle lift + shadow.
+ * Applied automatically to known card classes; opt-in via .tactile-card.
+ * ============================================================ */
+.ccard,
+.role-card,
+.pmodel .ptier,
+.tamssm .level,
+.risk,
+.cb-result-card,
+.proj-card,
+.endpoint,
+.tactile-card,
+.scale-tactile {
+  transition:
+    transform 0.22s var(--ease-out-quart),
+    box-shadow 0.22s var(--ease-out-quart),
+    border-color 0.22s var(--ease-out-quart);
+}
+.ccard:hover,
+.role-card:hover,
+.pmodel .ptier:hover,
+.risk:hover,
+.cb-result-card:hover,
+.proj-card:hover,
+.endpoint:hover,
+.tactile-card:hover,
+.scale-tactile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(26, 26, 26, 0.10);
+  border-color: rgba(66, 84, 66, 0.45);
+}
+
+/* SVG chart hover affordances — circles/rects with [data-tip] */
+svg [data-tip] {
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s var(--ease-out-quart);
+  transform-box: fill-box; transform-origin: center;
+}
+svg circle[data-tip]:hover { transform: scale(1.6); }
+svg rect[data-tip]:hover   { opacity: 0.75; }
+svg path[data-tip]:hover   { opacity: 0.75; }
+
+/* HTML chart hover affordances — bars + heatmap cells */
+[data-tip].tip-bar,
+[data-tip].cell-h,
+[data-tip].tbar,
+[data-tip].row-d {
+  cursor: pointer;
+  transition: filter 0.12s ease, transform 0.12s ease, background 0.15s ease;
+}
+[data-tip].tip-bar:hover { filter: brightness(1.08); }
+[data-tip].cell-h:hover  { outline: 1.5px solid var(--ink, #1A1A1A); outline-offset: -1px; z-index: 2; position: relative; }
+[data-tip].tbar:hover    { background: rgba(66,84,66,0.04); }
+[data-tip].row-d:hover   { background: rgba(66,84,66,0.06); }
+
+/* Country card CI bars on /global */
+.ccard .cbar-prior[data-tip],
+.ccard .cbar-post[data-tip] {
+  cursor: pointer;
+  transition: transform 0.15s var(--ease-out-quart), filter 0.15s ease;
+  transform-origin: left center;
+}
+.ccard .cbar-prior[data-tip]:hover,
+.ccard .cbar-post[data-tip]:hover {
+  transform: scaleY(1.6);
+  filter: brightness(1.1);
+}
+
+/* Stats / readout cells on /scale also lift */
+.scale-tactile,
+.stats .cell,
+.readout .ro-cell {
+  transition:
+    transform 0.22s var(--ease-out-quart),
+    box-shadow 0.22s var(--ease-out-quart),
+    background 0.22s var(--ease-out-quart);
+}
+.stats .cell:hover,
+.readout .ro-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(26, 26, 26, 0.06);
+  background: rgba(66, 84, 66, 0.04);
+}
+
+/* Country comparison table row hover */
+.ctable tbody tr {
+  transition: background 0.15s ease;
+  cursor: default;
+}
+.ctable tbody tr:hover { background: rgba(66, 84, 66, 0.06); }
+
+@media (hover: none) {
+  /* Touch devices: skip lift effects (they look broken without :hover) */
+  .ccard:hover, .role-card:hover, .pmodel .ptier:hover, .risk:hover,
+  .cb-result-card:hover, .proj-card:hover, .endpoint:hover,
+  .tactile-card:hover, .scale-tactile:hover,
+  .stats .cell:hover, .readout .ro-cell:hover {
+    transform: none; box-shadow: none;
+  }
+}
+
+/* ============================================================
  * Tactile nav tabs (.tactile) — for the new live-data tabs
  * (AT SCALE, GLOBAL). Subtle green tint + pulsing status dot +
  * animated underline on hover. Don't override the .active state.

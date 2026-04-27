@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — global expansion</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=7">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -289,7 +289,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/api/global/countries">/api/global/countries</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=7"></script>
+<script src="/assets/luma-fx.js?v=8"></script>
 <script>
   function fmtNum(n) { return n == null ? "—" : n.toLocaleString(); }
   function fmtPct(p, d = 1) { return (p == null) ? "—" : (p * 100).toFixed(d) + "%"; }
@@ -321,8 +321,14 @@
             ${[0.05, 0.10, 0.15, 0.20, 0.25, 0.30].map(t =>
               `<div class="cbar-tick" style="left:${pctOf(t)}%"></div>`
             ).join('')}
-            <div class="cbar-prior" style="left:${pctOf(priorL)}%; width:${pctOf(priorU - priorL)}%;"></div>
-            <div class="cbar-post" style="left:${pctOf(post.lower_95ci)}%; width:${pctOf(post.upper_95ci - post.lower_95ci)}%;"></div>
+            <div class="cbar-prior"
+                 style="left:${pctOf(priorL)}%; width:${pctOf(priorU - priorL)}%;"
+                 data-tip-title="${name} · prior"
+                 data-tip="Mean::${(priorMean*100).toFixed(1)}%||95% CI::${(priorL*100).toFixed(1)}% – ${(priorU*100).toFixed(1)}%||Source::${c.sources.hiv}"></div>
+            <div class="cbar-post"
+                 style="left:${pctOf(post.lower_95ci)}%; width:${pctOf(post.upper_95ci - post.lower_95ci)}%;"
+                 data-tip-title="${name} · posterior${live ? ' · LIVE' : ' · prior-only'}"
+                 data-tip="Mean::${(post.mean*100).toFixed(2)}%||95% CI lower::${(post.lower_95ci*100).toFixed(2)}%||95% CI upper::${(post.upper_95ci*100).toFixed(2)}%||Observed trials::${post.observed_trials.toLocaleString()}||HIV cases::${post.observed_successes.toLocaleString()}"></div>
           </div>
           <div class="cbar-x"><span>0%</span><span>10%</span><span>20%</span><span>30%</span></div>
           <div class="cbar-legend">
@@ -388,6 +394,7 @@
         renderCountry(n, d.countries[n])
       ).join("");
       document.getElementById("ctable").innerHTML = renderTable(d.countries);
+      if (window.lumaFx) window.lumaFx.attachDataTips(document);
     } catch (err) {
       console.error("Global page failed:", err);
     }

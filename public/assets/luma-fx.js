@@ -250,6 +250,48 @@
   }
 
   // -----------------------------------------------------------
+  // Generic data-tip tooltip handler. Any element with [data-tip]
+  // gets a hover tooltip showing that text. Multi-line via <br>.
+  // Optional [data-tip-title] for a bold header line.
+  // Call attachDataTips(root) after rendering new content.
+  // -----------------------------------------------------------
+  function attachDataTips(root) {
+    const r = root || document;
+    r.querySelectorAll("[data-tip]").forEach((el) => {
+      if (el.dataset.tipBound) return;
+      el.dataset.tipBound = "1";
+      el.addEventListener("mouseenter", (e) => {
+        const t = ensureTooltip();
+        const title = el.getAttribute("data-tip-title");
+        const body = el.getAttribute("data-tip");
+        let html = "";
+        if (title) html += `<div class="t-name">${escapeAttr(title)}</div>`;
+        // Body supports newline-style: lines split on `||`, key:value split on `::`
+        const lines = body.split("||");
+        for (const ln of lines) {
+          const kv = ln.split("::");
+          if (kv.length === 2) {
+            html += `<div class="t-row"><span class="t-k">${escapeAttr(kv[0].trim())}</span><span><strong>${escapeAttr(kv[1].trim())}</strong></span></div>`;
+          } else {
+            html += `<div class="t-row"><span>${escapeAttr(ln.trim())}</span></div>`;
+          }
+        }
+        t.innerHTML = html;
+        positionTooltip(t, e);
+        t.classList.add("visible");
+      });
+      el.addEventListener("mousemove", (e) => {
+        if (tooltipEl && tooltipEl.classList.contains("visible")) {
+          positionTooltip(tooltipEl, e);
+        }
+      });
+      el.addEventListener("mouseleave", () => {
+        if (tooltipEl) tooltipEl.classList.remove("visible");
+      });
+    });
+  }
+
+  // -----------------------------------------------------------
   // Map pan / zoom + drill panel + live activity pulses
   // Call: window.lumaFx.makeMapInteractive(mapWrapEl, opts?)
   // opts: { zoom: true, drag: true, drill: true, pulses: true, controls: true, hint: true }
@@ -635,6 +677,7 @@
       animateAllCounters(root);
       animateBars(root);
       attachMapTooltips(root);
+      attachDataTips(root);
     },
     markSync,
     animateCountUp,
@@ -642,5 +685,6 @@
     makeMapInteractive,
     attachBayesSliders,
     initParallax,
+    attachDataTips,
   };
 })();

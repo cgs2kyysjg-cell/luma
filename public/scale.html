@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — at scale</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=7">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -423,7 +423,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/api/scale/summary">/api/scale/summary</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=7"></script>
+<script src="/assets/luma-fx.js?v=8"></script>
 <script>
   // ---------------------------------------------------------------------------
   // Helpers
@@ -507,15 +507,19 @@
     let areaD = pathD + `L ${xScale(weekly.length - 1)} ${M.t + ph} L ${xScale(0)} ${M.t + ph} Z`;
     svg += `<path d="${areaD}" fill="rgba(66,84,66,0.12)"/>`;
     svg += `<path d="${pathD}" fill="none" stroke="${opts.lineColor || '#425442'}" stroke-width="2"/>`;
-    // Endpoint circles
+    // Endpoint circles + invisible hover targets
     weekly.forEach((d, i) => {
-      const r = 2.5;
-      svg += `<circle cx="${xScale(i)}" cy="${yScale(d.count)}" r="${r}" fill="${opts.lineColor || '#425442'}"/>`;
+      svg += `<circle cx="${xScale(i)}" cy="${yScale(d.count)}" r="2.5" fill="${opts.lineColor || '#425442'}"/>`;
+      // Bigger transparent hit area for hover
+      svg += `<circle cx="${xScale(i)}" cy="${yScale(d.count)}" r="10" fill="transparent" `
+           + `data-tip-title="Week of ${fmtDateShort(d.week_start)}" `
+           + `data-tip="Conversations::${d.count.toLocaleString()}"/>`;
     });
     // Title axis labels
     svg += `<text class="axis-label" x="${M.l}" y="${M.t - 6}" text-anchor="start">CONVERSATIONS / WEEK</text>`;
     svg += `</svg>`;
     container.innerHTML = svg;
+    if (window.lumaFx) window.lumaFx.attachDataTips(container);
   }
 
   // ---------------------------------------------------------------------------
@@ -549,19 +553,21 @@
       const x = M.l + i * colW + 1;
       const w = Math.max(colW - 2, 1);
       const total = d.emergency + d.urgent + d.routine;
+      const wkLabel = fmtDateShort(d.week);
+      const tipBody = `Total::${total.toLocaleString()}||Emergency::${d.emergency.toLocaleString()}||Urgent::${d.urgent.toLocaleString()}||Routine::${d.routine.toLocaleString()}`;
       let yTop = M.t + ph;
       // Routine (bottom, sage)
       const rH = (d.routine / max) * ph;
       yTop -= rH;
-      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${rH}" fill="rgba(138,150,130,0.55)"/>`;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${rH}" fill="rgba(138,150,130,0.55)" data-tip-title="Week of ${wkLabel}" data-tip="${tipBody}"/>`;
       // Urgent (middle, green)
       const uH = (d.urgent / max) * ph;
       yTop -= uH;
-      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${uH}" fill="rgba(66,84,66,0.85)"/>`;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${uH}" fill="rgba(66,84,66,0.85)" data-tip-title="Week of ${wkLabel}" data-tip="${tipBody}"/>`;
       // Emergency (top, amber)
       const eH = (d.emergency / max) * ph;
       yTop -= eH;
-      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${eH}" fill="${'#C68B3F'}"/>`;
+      svg += `<rect x="${x}" y="${yTop}" width="${w}" height="${eH}" fill="${'#C68B3F'}" data-tip-title="Week of ${wkLabel}" data-tip="${tipBody}"/>`;
       if (i % 4 === 0 || i === data.length - 1) {
         svg += `<text class="axis-label" x="${x + w/2}" y="${H - M.b + 16}" text-anchor="middle">${fmtDateShort(d.week)}</text>`;
       }
@@ -578,6 +584,7 @@
     </g>`;
     svg += `</svg>`;
     container.innerHTML = svg;
+    if (window.lumaFx) window.lumaFx.attachDataTips(container);
   }
 
   // ---------------------------------------------------------------------------
@@ -596,8 +603,9 @@
     const topics = minData.by_topic || [];
     const max = Math.max(...topics.map(t => t.count), 1);
 
+    const topicTotal = topics.reduce((s,t)=>s+t.count,0) || 1;
     document.getElementById("topic-bars").innerHTML = topics.map(t => `
-      <div class="tbar">
+      <div class="tbar" data-tip-title="${t.topic}" data-tip="Cases::${fmtNum(t.count)}||Share::${(t.count/topicTotal*100).toFixed(1)}%">
         <div class="name">${t.topic}</div>
         <div class="b"><div class="fill" style="width:${(t.count/max*100).toFixed(1)}%"></div></div>
         <div class="v">${fmtNum(t.count)}</div>
@@ -611,8 +619,9 @@
       dmap[r.district] = (dmap[r.district] || 0) + r.count;
     }
     const districts = Object.entries(dmap).sort((a,b) => b[1] - a[1]);
+    const dTotal = districts.reduce((s,r)=>s+r[1],0) || 1;
     document.getElementById("district-rank").innerHTML = districts.map((row, i) => `
-      <div class="row-d">
+      <div class="row-d" data-tip-title="${row[0]}" data-tip="Cases::${fmtNum(row[1])}||Share of network::${(row[1]/dTotal*100).toFixed(1)}%||Rank::#${i+1}">
         <div class="rk">${String(i+1).padStart(2,"0")}</div>
         <div>${row[0]}</div>
         <div class="v">${fmtNum(row[1])}</div>
@@ -622,6 +631,10 @@
     // Volume chart from weekly_volume_total
     lineChart(document.getElementById("chart-volume"), d.weekly_volume_total);
     severityStack(document.getElementById("chart-severity"), d.weekly_severity);
+    if (window.lumaFx) {
+      window.lumaFx.attachDataTips(document.getElementById("topic-bars"));
+      window.lumaFx.attachDataTips(document.getElementById("district-rank"));
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -678,12 +691,14 @@
         else if (cellCount >= 8) opacity = 0.75;
         else if (cellCount >= 4) opacity = 0.50;
         else if (cellCount >= 1) opacity = 0.25;
-        row += `<div class="cell-h" style="background:rgba(66,84,66,${opacity})" title="${cellCount} on ${weeks[wi]}"></div>`;
+        const chwName = c.chw_name || ("CHW " + c.chw_id);
+        row += `<div class="cell-h" style="background:rgba(66,84,66,${opacity})" data-tip-title="${chwName} · ${c.district || ''}" data-tip="Week of ${fmtDateShort(weeks[wi])}::${cellCount} conv.||Specialty::${c.chw_specialty || '—'}"></div>`;
       }
       row += `</div>`;
       html += row;
     });
     document.getElementById("heatmap").innerHTML = `<div class="heat">${html}</div>`;
+    if (window.lumaFx) window.lumaFx.attachDataTips(document.getElementById("heatmap"));
   }
 
   // ---------------------------------------------------------------------------
@@ -742,11 +757,22 @@
       svg += `<text class="axis-label" x="${xScale(i)}" y="${H - M.b + 16}" text-anchor="middle">${fmtDateShort(d2.week_start)}</text>`;
     });
 
+    // Hover targets (one per week)
+    data.forEach((d2, i) => {
+      const cx = xScale(i);
+      const cy = yScale(d2.posterior_mean);
+      svg += `<circle cx="${cx}" cy="${cy}" r="3" fill="#425442"/>`;
+      svg += `<circle cx="${cx}" cy="${cy}" r="14" fill="transparent" `
+           + `data-tip-title="Week of ${fmtDateShort(d2.week_start)}" `
+           + `data-tip="Posterior mean::${(d2.posterior_mean*100).toFixed(2)}%||95% CI lower::${(d2.lower_95ci*100).toFixed(2)}%||95% CI upper::${(d2.upper_95ci*100).toFixed(2)}%||CI width::${(d2.ci_width*100).toFixed(2)}%||Cumulative trials::${d2.cumulative_trials.toLocaleString()}||HIV cases::${d2.cumulative_successes.toLocaleString()}"/>`;
+    });
+
     // Chart title & legend
     svg += `<text x="${M.l}" y="${M.t - 12}" font-size="11" letter-spacing="0.08em" fill="rgba(26,26,26,0.7)">POSTERIOR MEAN + 95% CI · ${d.indicator.toUpperCase()}</text>`;
 
     svg += `</svg>`;
     document.getElementById("chart-ci").innerHTML = svg;
+    if (window.lumaFx) window.lumaFx.attachDataTips(document.getElementById("chart-ci"));
   }
 
   // ---------------------------------------------------------------------------
@@ -794,16 +820,20 @@
     const yPrior = M.t + 30;
     const priorL = xScale(Math.max(0, d.prior.mean - 0.03));
     const priorU = xScale(Math.min(1, d.prior.mean + 0.03));
+    const priorTip = `Prior mean::${(d.prior.mean*100).toFixed(1)}%||Source::UNAIDS Lesotho 2024||Effective n::${d.prior.effective_n}`;
     svg += `<line x1="${priorL}" x2="${priorU}" y1="${yPrior}" y2="${yPrior}" stroke="${'#C68B3F'}" stroke-width="6" stroke-linecap="round" opacity="0.7"/>`;
     svg += `<circle cx="${xScale(d.prior.mean)}" cy="${yPrior}" r="5" fill="${'#C68B3F'}"/>`;
+    svg += `<rect x="${priorL - 6}" y="${yPrior - 12}" width="${priorU - priorL + 12}" height="24" fill="transparent" data-tip-title="Prior" data-tip="${priorTip}"/>`;
     svg += `<text x="${M.l - 8}" y="${yPrior + 4}" text-anchor="end" font-size="10" letter-spacing="0.06em" fill="rgba(26,26,26,0.7)">PRIOR ±3%</text>`;
 
     // Posterior CI bar
     const yPost = M.t + 90;
     const postL = xScale(d.posterior.lower_95ci);
     const postU = xScale(d.posterior.upper_95ci);
+    const postTip = `Mean::${(d.posterior.mean*100).toFixed(2)}%||95% CI lower::${(d.posterior.lower_95ci*100).toFixed(2)}%||95% CI upper::${(d.posterior.upper_95ci*100).toFixed(2)}%||CI width::${(d.posterior.ci_width*100).toFixed(2)}%||Effective n::${d.posterior.effective_sample_size.toLocaleString()}||Projected interactions::${d.derived.projected_trials.toLocaleString()}`;
     svg += `<line x1="${postL}" x2="${postU}" y1="${yPost}" y2="${yPost}" stroke="#425442" stroke-width="6" stroke-linecap="round"/>`;
     svg += `<circle cx="${xScale(d.posterior.mean)}" cy="${yPost}" r="5" fill="#425442"/>`;
+    svg += `<rect x="${postL - 6}" y="${yPost - 12}" width="${postU - postL + 12}" height="24" fill="transparent" data-tip-title="Projected posterior" data-tip="${postTip}"/>`;
     svg += `<text x="${M.l - 8}" y="${yPost + 4}" text-anchor="end" font-size="10" letter-spacing="0.06em" fill="rgba(26,26,26,0.7)">POSTERIOR</text>`;
 
     // Title
@@ -811,6 +841,7 @@
 
     svg += `</svg>`;
     document.getElementById("chart-proj").innerHTML = svg;
+    if (window.lumaFx) window.lumaFx.attachDataTips(document.getElementById("chart-proj"));
   }
 
   function bindProjector() {

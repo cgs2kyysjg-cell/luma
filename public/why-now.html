@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>luma — why now · after USAID</title>
-<link rel="stylesheet" href="/assets/luma-fx.css?v=11">
+<link rel="stylesheet" href="/assets/luma-fx.css?v=12">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
@@ -34,102 +34,124 @@
     line-height: 1.55;
   }
 
-  /* Hero — 2-col w/ news ticker */
+  /* Hero — 2-col w/ news feed */
   .hero-grid {
-    display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;
-    align-items: start;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    align-items: stretch;
   }
-  @media (max-width: 1100px) { .hero-grid { grid-template-columns: 1fr; gap: 24px; } }
+  @media (max-width: 1100px) { .hero-grid { grid-template-columns: 1fr; gap: 24px; align-items: start; } }
   .hero-text { min-width: 0; }
+  .hero-text .lede { margin-bottom: 0; }
 
-  /* Aid-cut news feed (live ticker) */
+  /* Aid-cut news feed — editorial, paper-toned */
   .aid-feed {
-    background: var(--ink); color: var(--paper);
+    background: #FFFFFF;
+    color: var(--ink);
+    border: 1px solid var(--ink);
     display: flex; flex-direction: column;
-    height: 348px;
     overflow: hidden; position: relative;
-    box-shadow: 0 1px 0 rgba(26,26,26,0.4), 0 16px 32px -18px rgba(26,26,26,0.4);
+    height: 100%; min-height: 380px;
   }
+  @media (max-width: 1100px) { .aid-feed { height: 320px; min-height: 0; } }
+
   .aid-feed-head {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 11px 14px;
-    border-bottom: 1px solid rgba(234,231,221,0.18);
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--ink);
     font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
-    background: rgba(255,255,255,0.04);
+    background: var(--paper);
     font-weight: 700;
   }
   .aid-feed-head .live {
     display: inline-flex; align-items: center; gap: 7px;
-    color: var(--amber);
+    color: var(--green);
   }
   .aid-feed-head .live::before {
     content: ''; width: 7px; height: 7px; border-radius: 50%;
-    background: var(--amber);
-    box-shadow: 0 0 0 0 rgba(198,139,63,0.6);
-    animation: aidPulse 1.6s ease-out infinite;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(66,84,66,0.55);
+    animation: aidPulse 1.7s ease-out infinite;
   }
   @keyframes aidPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(198,139,63,0.6); }
-    100% { box-shadow: 0 0 0 9px rgba(198,139,63,0); }
+    0%   { box-shadow: 0 0 0 0 rgba(66,84,66,0.55); }
+    100% { box-shadow: 0 0 0 9px rgba(66,84,66,0); }
   }
-  .aid-feed-head .count { color: rgba(234,231,221,0.55); font-weight: 600; }
+  .aid-feed-head .count {
+    color: rgba(26,26,26,0.55); font-weight: 600;
+    font-family: "SF Mono", "Menlo", "Consolas", monospace;
+    letter-spacing: 0.1em;
+  }
+
   .aid-feed-scroll {
     flex: 1; overflow-y: auto;
     scroll-behavior: auto;
   }
-  .aid-feed-scroll::-webkit-scrollbar { width: 5px; }
+  .aid-feed-scroll::-webkit-scrollbar { width: 4px; }
   .aid-feed-scroll::-webkit-scrollbar-track { background: transparent; }
-  .aid-feed-scroll::-webkit-scrollbar-thumb { background: rgba(234,231,221,0.18); }
+  .aid-feed-scroll::-webkit-scrollbar-thumb { background: rgba(26,26,26,0.15); }
+
   .aid-item {
-    display: block; padding: 12px 14px;
-    border-bottom: 1px solid rgba(234,231,221,0.07);
-    color: var(--paper); text-decoration: none;
-    transition: background 0.16s ease;
-    cursor: pointer;
+    display: block; padding: 12px 16px 13px;
+    border-bottom: 1px solid rgba(26,26,26,0.08);
+    color: var(--ink); text-decoration: none;
+    position: relative;
+    transition: background 0.16s ease, padding 0.16s ease;
   }
-  .aid-item:hover { background: rgba(234,231,221,0.05); }
+  .aid-item::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0; background: var(--green);
+    transition: width 0.16s ease;
+  }
+  .aid-item:hover { background: rgba(66,84,66,0.05); }
+  .aid-item:hover::before { width: 3px; }
+
   .aid-item .meta {
     display: flex; gap: 9px; align-items: center;
     font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(234,231,221,0.55);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     font-family: "SF Mono", "Menlo", "Consolas", monospace;
   }
-  .aid-item .meta .date { color: rgba(234,231,221,0.78); font-weight: 700; }
-  .aid-item .meta .src { color: var(--sage); }
+  .aid-item .meta .date { color: var(--green); font-weight: 700; }
+  .aid-item .meta .src { color: rgba(26,26,26,0.55); font-weight: 600; }
   .aid-item .meta .tag {
     margin-left: auto;
-    background: rgba(234,231,221,0.08);
-    color: rgba(234,231,221,0.7);
-    padding: 1px 6px; font-weight: 700; font-size: 8.5px;
+    padding: 1px 7px; font-weight: 700; font-size: 8.5px;
+    border: 1px solid;
   }
-  .aid-item.tag-cut    .meta .tag,
+  .aid-item.tag-cut .meta .tag,
   .aid-item.tag-closure .meta .tag,
-  .aid-item.tag-layoff .meta .tag { background: rgba(198,139,63,0.18); color: var(--amber); }
+  .aid-item.tag-layoff .meta .tag {
+    background: rgba(198,139,63,0.10); color: var(--amber); border-color: rgba(198,139,63,0.32);
+  }
   .aid-item.tag-policy .meta .tag,
-  .aid-item.tag-gap    .meta .tag { background: rgba(138,150,130,0.18); color: var(--sage); }
+  .aid-item.tag-gap .meta .tag,
+  .aid-item.tag-structural .meta .tag,
+  .aid-item.tag-staff .meta .tag,
+  .aid-item.tag-order .meta .tag,
+  .aid-item.tag-chw .meta .tag {
+    background: rgba(138,150,130,0.14); color: var(--green); border-color: rgba(66,84,66,0.28);
+  }
   .aid-item .head {
     font-size: 12.5px; line-height: 1.45;
-    color: rgba(234,231,221,0.94);
+    color: var(--ink);
     font-weight: 500;
   }
-  .aid-item.is-latest .meta .date { color: var(--amber); }
+
   .aid-feed-foot {
-    padding: 8px 14px;
-    border-top: 1px solid rgba(234,231,221,0.18);
+    padding: 8px 16px;
+    border-top: 1px solid var(--ink);
     font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(234,231,221,0.5);
-    background: rgba(0,0,0,0.28);
+    color: rgba(26,26,26,0.55);
+    background: var(--paper);
     display: flex; justify-content: space-between; align-items: center;
   }
   .aid-feed-foot .pause-btn {
-    color: var(--sage); cursor: pointer; user-select: none;
+    color: var(--green); cursor: pointer; user-select: none;
     background: none; border: 0; font: inherit; padding: 0;
-    letter-spacing: 0.16em; text-transform: uppercase;
+    letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700;
     transition: color 0.15s;
   }
-  .aid-feed-foot .pause-btn:hover { color: var(--paper); }
-  @media (max-width: 1100px) { .aid-feed { height: 280px; } }
+  .aid-feed-foot .pause-btn:hover { color: var(--ink); }
 
   .nav {
     display: flex; gap: 0; flex-wrap: wrap;
@@ -465,7 +487,6 @@
     <div class="hero-text">
       <div class="top-bar">
         <span>LUMA · WHY NOW · 2025</span>
-        <span>POST-AID PRIMARY CARE</span>
       </div>
       <h1>THE CUTS WERE ABRUPT.<br/><span class="accent">THE OFF-RAMP<br/>WAS OVERDUE.</span></h1>
       <p class="lede">
@@ -826,7 +847,7 @@
   <span><a href="/methodology">METHODOLOGY</a> · <a href="/investors">INVESTORS</a></span>
 </footer>
 
-<script src="/assets/luma-fx.js?v=11"></script>
+<script src="/assets/luma-fx.js?v=12"></script>
 <script>
   function fmtUSD(n) {
     if (n >= 1_000_000_000) return "$" + (n/1_000_000_000).toFixed(1) + "B";
@@ -885,21 +906,33 @@
 </script>
 
 <script>
-  /* ---- Aid-cuts live ticker ---- */
-  // Ordered most-recent first. Sources are public-record reporting; URLs link to the source domain.
+  /* ---- Aid-cuts live feed ---- */
+  // Each event links to the verified source article. Most-recent first.
   const aidEvents = [
-    { date:"2026 · Q1", src:"Devex",       tag:"Policy",   head:"Congressional FY26 foreign-aid bill stalls — global health line items still uncertain.", url:"https://www.devex.com" },
-    { date:"2025 · Dec", src:"UN OCHA",    tag:"Gap",      head:"UN appeals for $47B in 2026 humanitarian funding amid record bilateral aid contraction.", url:"https://www.unocha.org" },
-    { date:"2025 · Oct", src:"Bhekisisa",  tag:"CHW",      head:"South Africa: 8,000+ healthcare workers laid off as PEPFAR transition hits provinces.", url:"https://bhekisisa.org" },
-    { date:"2025 · Jul", src:"AP / KFF",   tag:"Closure",  head:"USAID officially shut down — remaining programs absorbed into State Department.", url:"https://www.kff.org" },
-    { date:"2025 · May", src:"Devex",      tag:"Closure",  head:"Save the Children winds down Somalia field operations after USAID terminations.", url:"https://www.devex.com" },
-    { date:"2025 · Mar", src:"NPR",        tag:"Layoff",   head:"FHI 360 announces mass layoffs — global-health programs cut first.", url:"https://www.npr.org" },
-    { date:"2025 · Mar", src:"Devex",      tag:"Layoff",   head:"Jhpiego confirms 1,975 layoffs after stop-work orders on USAID-funded portfolio.", url:"https://www.devex.com" },
-    { date:"2025 · Mar", src:"KFF",        tag:"Cut",      head:"83% of USAID programs cancelled in 90-day administrative review.", url:"https://www.kff.org" },
-    { date:"2025 · Feb", src:"Reuters",    tag:"Staff",    head:"~1,600 USAID staff placed on administrative leave; remainder begin RIF process.", url:"https://www.reuters.com" },
-    { date:"2025 · Feb", src:"Wash. Post", tag:"Order",    head:"Stop-work orders issued to all USAID-funded health implementers worldwide.", url:"https://www.washingtonpost.com" },
-    { date:"2025 · Jan", src:"Hopkins Hub",tag:"Structural",head:"USAID effectively dismantled, folded into State Department.", url:"https://hub.jhu.edu" },
-    { date:"2025 · Jan", src:"CGD",        tag:"Policy",   head:"Foreign-aid restructuring announced; 90-day pause + review of all programs.", url:"https://www.cgdev.org" }
+    { date:"2026 · Jan", src:"Devex",         tag:"Policy",     head:"The $50B US aid budget — what's in it for global development.",
+      url:"https://www.devex.com/news/the-50b-us-aid-budget-what-s-in-it-for-development-111751" },
+    { date:"2025 · Dec", src:"UN OCHA",       tag:"Gap",        head:"UN launches $33B aid appeal — \"a life-for-life\" call for global solidarity.",
+      url:"https://www.unocha.org/news/life-life-un-launches-us33-billion-aid-appeal-urgent-call-global-solidarity" },
+    { date:"2025 · Jul", src:"NPR",           tag:"Closure",    head:"USAID officially shuts down, merges remaining operations with State Department.",
+      url:"https://www.npr.org/2025/07/01/nx-s1-5451372/usaid-officially-shuts-down-and-merges-remaining-operations-with-state-department" },
+    { date:"2025 · May", src:"Boston Globe",  tag:"Closure",    head:"USAID Somalia: hungry children, money disappearing — Save the Children winds down.",
+      url:"https://www.bostonglobe.com/2025/05/27/world/usaid-somalia-hungry-children-money-disappearing/" },
+    { date:"2025 · Mar", src:"Axios Raleigh", tag:"Layoff",     head:"FHI 360 USAID cuts trigger mass furloughs across Triangle global-health programs.",
+      url:"https://www.axios.com/local/raleigh/2025/03/11/usaid-cuts-lead-to-more-furloughs-in-raleigh-durham-triangle" },
+    { date:"2025 · Mar", src:"Balt. Banner",  tag:"Layoff",     head:"Jhpiego confirms ~1,975 layoffs after USAID stop-work orders.",
+      url:"https://www.thebanner.com/community/public-health/jhpiego-layoffs-ZPM45MJOFZESXBPZDS6BK4CGM4/" },
+    { date:"2025 · Mar", src:"NPR",           tag:"Cut",        head:"Rubio announces 83% of USAID contracts will be canceled.",
+      url:"https://www.npr.org/sections/goats-and-soda/2025/03/10/g-s1-52964/rubio-announces-that-83-of-usaid-contracts-will-be-canceled" },
+    { date:"2025 · Feb", src:"NPR",           tag:"Staff",      head:"~1,600 USAID employees placed on administrative leave.",
+      url:"https://www.npr.org/sections/goats-and-soda/2025/02/23/g-s1-50398/usaid-employees-leave" },
+    { date:"2025 · Feb", src:"Bhekisisa",     tag:"CHW",        head:"How South Africa's health department will deal with PEPFAR's near-collapse.",
+      url:"https://bhekisisa.org/health-news-south-africa/2025-02-18-how-the-health-department-will-deal-with-pepfars-near-collapse/" },
+    { date:"2025 · Jan", src:"NPR",           tag:"Order",      head:"USAID contract employees facing layoffs as stop-work orders cascade.",
+      url:"https://www.npr.org/sections/goats-and-soda/2025/01/28/g-s1-45132/usaid-contract-employees-layoffs-trump" },
+    { date:"2025 · Jan", src:"KFF",           tag:"Structural", head:"US foreign-aid freeze and dissolution of USAID — timeline of events.",
+      url:"https://www.kff.org/global-health-policy/u-s-foreign-aid-freeze-dissolution-of-usaid-timeline-of-events/" },
+    { date:"2025 · Jan", src:"CGD",           tag:"Policy",     head:"The high cost of pausing life-saving aid.",
+      url:"https://www.cgdev.org/blog/high-cost-pausing-life-saving-aid" }
   ];
 
   (function initAidFeed() {

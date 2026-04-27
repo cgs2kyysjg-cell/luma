@@ -58,6 +58,50 @@
     header { grid-template-columns: 1fr; gap: 28px; }
     header .header-side { max-width: 480px; }
   }
+  @media (max-width: 800px) {
+    header {
+      padding: 24px 22px 28px !important;
+      gap: 22px;
+    }
+    h1 { font-size: 32px !important; }
+    .lede { font-size: 13.5px !important; }
+    .wa-suggest { gap: 5px; }
+    .wa-suggest button { font-size: 10.5px; padding: 6px 10px; }
+    .wa-suggest .label { font-size: 8.5px; }
+    .wa-phone {
+      position: static !important;
+      border-radius: 22px;
+      padding: 10px 8px;
+      box-shadow: 0 14px 40px rgba(26,26,26,0.18);
+    }
+    .wa-phone .wa-status-bar { padding: 4px 12px 6px; font-size: 9px; }
+    .wa-header { padding: 10px 12px; }
+    .wa-avatar { width: 32px; height: 32px; }
+    .wa-id .name { font-size: 13px; }
+    .wa-id .status { font-size: 10px; }
+    .wa-meta-row { padding: 5px 12px; font-size: 9px; }
+    .wa-meta-row .num { font-size: 9px; }
+    .wa-body {
+      min-height: 380px;
+      max-height: calc(100vh - 380px);
+      padding: 12px 10px;
+    }
+    .wa-msg { font-size: 13px; padding: 6px 9px; max-width: 88%; }
+    .wa-input-bar { padding: 8px 12px; }
+    .wa-input-bar input { font-size: 14px; }   /* iOS won't auto-zoom on focus at 14px+ */
+    .wa-send-btn { width: 40px; height: 40px; }
+    main { padding: 24px 22px 56px !important; }
+    .info-panel h3 { font-size: 20px; max-width: 100%; }
+    .info-panel p { font-size: 13.5px; }
+    .info-row {
+      grid-template-columns: 1fr;
+      gap: 6px; padding: 14px 0;
+    }
+    .info-row .label { font-size: 8.5px; }
+    .info-row .body { font-size: 12.5px; }
+    .happened { padding: 12px 14px; }
+    .happened ol { font-size: 12.5px; }
+  }
   .header-content { min-width: 0; }
   .top-bar {
     display: flex; justify-content: space-between;

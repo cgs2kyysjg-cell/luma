@@ -506,6 +506,48 @@
     .word { font-size: 72px; }
     section { padding: 40px 28px; }
   }
+  @media (max-width: 800px) {
+    .hero { min-height: auto; }
+    .hero .left { padding: 28px 22px 36px; min-height: 80vh; }
+    .hero .right {
+      padding: 28px 22px 32px;
+      position: static;            /* drop absolute pinning of try-cta */
+    }
+    .word { font-size: 56px; }
+    .live-counter-row {
+      flex-direction: column; align-items: flex-start;
+      gap: 6px; font-size: 10px;
+    }
+    .live-counter-row .lc-stat .v.big { font-size: 14px; }
+    .hero-tagline { font-size: 15px; max-width: 100%; }
+    .hero-marquee { margin-top: 24px; padding-top: 12px; }
+    .phone {
+      width: 100%; max-width: 360px;
+      padding: 12px 10px;
+      box-shadow: 0 12px 30px rgba(26,26,26,0.18);
+    }
+    .phone .body { min-height: 360px; padding: 14px 12px; }
+    .msg { font-size: 13px; max-width: 90%; }
+    .phone-glow { width: 320px; height: 320px; }
+    /* Try-CTA goes back into normal flow on mobile (no longer absolute) */
+    .try-cta {
+      position: static !important;
+      transform: none !important;
+      width: 100% !important;
+      max-width: 360px !important;
+      margin: 18px auto 0 !important;
+    }
+    .try-cta:hover { transform: translateY(-2px) !important; }
+    .try-cta:active { transform: translateY(0) !important; }
+    /* EXPLORE tiles already collapse via existing media query */
+    section h3 { font-size: 26px; }
+    .explore-tile { min-height: 240px; }
+    .ex-preview { height: 140px; }
+  }
+  /* Force single-column for explore-grid on phones (already at 600px, but be safe) */
+  @media (max-width: 800px) {
+    .explore-grid { grid-template-columns: 1fr !important; }
+  }
 
   /* ============================================================
    * HERO — pop-off layer (entrance, lesotho bg, marquee, events)
@@ -743,7 +785,6 @@
 
   <div class="left">
     <div class="hero-map-bg" id="hero-map-bg" aria-hidden="true"></div>
-    <div class="hero-map-pulses" id="hero-map-pulses" aria-hidden="true"></div>
 
     <div class="top">LESOTHO · ACTIVE PILOT</div>
     <div>
@@ -1123,40 +1164,6 @@
         ).join("");
         exMap.innerHTML = `<svg viewBox="${geo.viewBox}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">${mapPaths}${pulses}</svg>`;
       }
-
-      // Live pulse spawner — convert SVG centroid to pixel coords each time
-      const pulseLayer = document.getElementById("hero-map-pulses");
-      const svg = bg.querySelector("svg");
-      const districts = Array.from(bg.querySelectorAll("path"));
-
-      function spawnPulse() {
-        if (document.hidden) return;
-        if (!districts.length) return;
-        const p = districts[Math.floor(Math.random() * districts.length)];
-        const cx = parseFloat(p.dataset.cx);
-        const cy = parseFloat(p.dataset.cy);
-        const ctm = svg.getCTM();
-        const rect = bg.getBoundingClientRect();
-        // Map SVG userspace → screen pixels relative to bg
-        const pt = svg.createSVGPoint();
-        pt.x = cx; pt.y = cy;
-        const sp = pt.matrixTransform(svg.getScreenCTM());
-        const x = sp.x - rect.left;
-        const y = sp.y - rect.top;
-
-        const el = document.createElement("div");
-        el.className = "hero-map-pulse";
-        el.style.left = x + "px";
-        el.style.top = y + "px";
-        pulseLayer.appendChild(el);
-        setTimeout(() => el.remove(), 2500);
-      }
-
-      function loop() {
-        const wait = 1200 + Math.random() * 2200;
-        setTimeout(() => { spawnPulse(); loop(); }, wait);
-      }
-      setTimeout(loop, 1400);
     } catch (e) { /* silent — map is decorative */ }
   })();
 

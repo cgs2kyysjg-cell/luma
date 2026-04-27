@@ -13,7 +13,41 @@
     initFadeIn();
     initLiveIndicator();
     initButtonPress();
+    initMobileNav();
   });
+
+  // -----------------------------------------------------------
+  // Mobile nav — auto-injects a hamburger button on every page
+  // so we don't have to edit each .html file. Activated by
+  // CSS media query (max-width: 800px) — see luma-fx.css.
+  // -----------------------------------------------------------
+  function initMobileNav() {
+    const nav = document.querySelector(".nav");
+    if (!nav) return;
+    const home = nav.querySelector(".home-link");
+    if (!home) return;
+    if (nav.querySelector(".nav-mobile-btn")) return; // idempotent
+
+    const btn = document.createElement("button");
+    btn.className = "nav-mobile-btn";
+    btn.setAttribute("aria-label", "Toggle navigation");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = '<span></span><span></span><span></span>';
+    home.insertAdjacentElement("afterend", btn);
+
+    btn.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+
+    // Close menu when a nav link is tapped (so it doesn't stay open after navigating)
+    nav.addEventListener("click", (e) => {
+      if (e.target.tagName === "A" && e.target !== home) {
+        nav.classList.remove("is-open");
+        btn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
 
   // -----------------------------------------------------------
   // Section fade-in on scroll

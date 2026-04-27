@@ -484,6 +484,107 @@ body.fx-page-loaded { animation: pageIn 0.5s var(--ease-out-quart); }
 .fx-parallax { will-change: transform; }
 
 /* ============================================================
+ * MOBILE NAV — hamburger button is auto-injected by luma-fx.js
+ * Hidden by default; visible only at viewport <= 800px.
+ * ============================================================ */
+.nav-mobile-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px; height: 18px;
+  margin-left: auto;
+  margin-right: 22px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+.nav-mobile-btn span {
+  display: block;
+  width: 100%; height: 2px;
+  background: var(--ink, #1A1A1A);
+  border-radius: 2px;
+  transition: transform 0.25s var(--ease-out-quart),
+              opacity 0.18s ease;
+  transform-origin: center;
+}
+
+@media (max-width: 800px) {
+  /* Show the hamburger button */
+  .nav-mobile-btn { display: flex; }
+
+  /* The nav becomes wrap-friendly so closed-state shows just home + hamburger,
+     and open-state stacks the rest underneath. */
+  .nav {
+    flex-wrap: wrap !important;
+    align-items: center;
+  }
+
+  /* Hide all tabs except the home link by default */
+  .nav a:not(.home-link) {
+    display: none !important;
+  }
+
+  /* When toggled open, show every tab as a full-width row */
+  .nav.is-open a:not(.home-link) {
+    display: block !important;
+    flex-basis: 100%;
+    width: 100%;
+    padding: 16px 22px;
+    border-right: 0 !important;
+    border-left: 0 !important;
+    border-bottom: 1px solid rgba(26,26,26,0.10);
+    margin-left: 0 !important;
+    box-sizing: border-box;
+  }
+  .nav.is-open a.right-link {
+    margin-left: 0 !important;
+    border-left: 0 !important;
+  }
+  .nav.is-open a:last-child { border-bottom: 0; }
+
+  /* Animate hamburger lines into an X */
+  .nav.is-open .nav-mobile-btn span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+  .nav.is-open .nav-mobile-btn span:nth-child(2) {
+    opacity: 0;
+  }
+  .nav.is-open .nav-mobile-btn span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+
+  /* Tighten the home button on mobile so the hamburger has room */
+  .nav .home-link {
+    padding: 12px 18px 12px 16px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* Universal mobile improvements (touch targets, base font scaling) */
+@media (max-width: 800px) {
+  /* Ensure tap-friendly button heights everywhere */
+  button, .btn, .tss-submit, .wa-send-btn, a.try-cta {
+    min-height: 44px;
+  }
+  /* Slightly reduce the dense header padding */
+  header {
+    padding: 24px 22px 18px !important;
+  }
+  /* Reduce footer padding */
+  footer {
+    padding: 14px 22px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Smaller hero h1 */
+  h1 { font-size: 32px !important; }
+  /* Generous body line height */
+  .lede, p { line-height: 1.55 !important; }
+}
+
+/* ============================================================
  * Reduced-motion users — keep things readable, kill the show.
  * ============================================================ */
 @media (prefers-reduced-motion: reduce) {

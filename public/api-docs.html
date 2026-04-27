@@ -128,6 +128,20 @@
     display: flex; justify-content: space-between;
   }
   a { color: var(--green); }
+
+  @media (max-width: 800px) {
+    main { padding: 22px 22px 56px !important; }
+    h1 { font-size: 26px !important; }
+    .lede { font-size: 13px; }
+    h2 { font-size: 16px; margin: 24px 0 8px; }
+    .endpoint { padding: 14px; font-size: 13px; }
+    .endpoint-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .endpoint pre, pre { font-size: 10.5px; padding: 10px; overflow-x: auto; }
+    code { font-size: 11px; }
+    .quick-grid { grid-template-columns: 1fr !important; gap: 12px; }
+    table { font-size: 12px; }
+    th, td { padding: 6px 8px; }
+  }
 </style>
 </head>
 <body>

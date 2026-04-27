@@ -155,6 +155,35 @@
     justify-content: space-between;
   }
   a { color: var(--green); }
+
+  @media (max-width: 800px) {
+    header { padding: 24px 22px 16px; }
+    h1 { font-size: 26px !important; }
+    .lede { font-size: 13px; }
+    .summary {
+      padding: 14px 22px;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .summary .stat .num { font-size: 22px; }
+    main { padding: 22px 22px 56px; }
+    /* Stack the convo grid */
+    .convo {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 16px 0;
+    }
+    .convo .meta {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      font-size: 10.5px;
+    }
+    .convo .meta .ts,
+    .convo .meta .from,
+    .convo .meta .type { display: inline; margin: 0; }
+    .convo .body .q { font-size: 13.5px; }
+    .convo .body .a { font-size: 13px; }
+    .convo .right { text-align: left; }
+  }
 </style>
 </head>
 <body>

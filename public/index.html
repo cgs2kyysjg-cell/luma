@@ -41,9 +41,11 @@
     border-radius: 2px; vertical-align: middle;
   }
 
-  /* Hero with live demo */
+  /* Hero with live demo
+   * Green panel width = sum of left-side nav tabs (LUMA + PUBLIC HEALTH + MINISTRY + AUDIT LOG + PHARMA + TRY IT)
+   * so its right edge lines up with the TRY IT tab's right border. ~720px at default font sizes. */
   .hero {
-    display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;
+    display: grid; grid-template-columns: 720px 1fr; min-height: 80vh;
   }
   .hero .left {
     background: var(--green); color: white;
@@ -496,7 +498,7 @@
     display: flex; justify-content: space-between;
   }
 
-  @media (max-width: 800px) {
+  @media (max-width: 1100px) {
     .hero { grid-template-columns: 1fr; }
     .hero .left { padding: 40px 28px; }
     .hero .right { padding: 40px 28px; }

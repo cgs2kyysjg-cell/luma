@@ -1,9 +1,8 @@
 # luma — prototype
 
-> **Ministry-owned workflow infrastructure for the off-ramp from foreign aid.**
-> Software that helps health ministries do more with what they have, replacing
-> the operational layer INGOs used to deliver — at 5–15% of the cost.
-> Pharma RWE on the same data subsidises the ministry license.
+> **AI-native services company replacing the INGO operational layer for community health in sub-Saharan Africa.**
+> Governments contract the service. Pharma F100 buys the data. We do what
+> 1,500-person implementation organizations used to do — at 5–15% of the cost.
 > A YC application prototype. Decision support, not clinical advice.
 > Grounded in published Lesotho Ministry of Health protocols.
 
@@ -225,7 +224,7 @@ The methodology page (`/methodology`) documents:
 - What the prototype CAN claim and what it CANNOT (yet)
 - How this scales to district-level posteriors with meaningful CIs in production
 
-This is luma's commercial wedge: ministry-licensed primary data, combined with public priors, exposed as a programmatic API that pharma RWE teams pay for.
+This is luma's commercial wedge: government-contracted primary data, combined with public priors, exposed as a programmatic API that pharma F100 RWE teams pay for.
 
 ---
 
@@ -285,4 +284,4 @@ Private — luma application materials. Do not redistribute without permission.
 
 ---
 
-*Built April 2026, by Seb Buck, with [Claude in Cowork mode](https://claude.com).*
+*Built April 2026, by Sebastian Buck and Vrinda Sood, with [Claude in Cowork mode](https://claude.com).*

@@ -1,7 +1,7 @@
 {
   "name": "luma",
   "version": "0.1.0",
-  "description": "luma — Ministry-owned workflow infrastructure for the off-ramp from foreign aid. Pharma RWE on the same data subsidises the ministry license.",
+  "description": "luma — AI-native services company replacing the INGO operational layer for community health in sub-Saharan Africa. Governments contract the service. Pharma F100 buys the data.",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
